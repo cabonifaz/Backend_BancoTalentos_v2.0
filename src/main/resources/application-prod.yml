@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    prod:
+      url: jdbc:sqlserver://161.132.217.169:1433;database=bdt_staging;encrypt=true;trustServerCertificate=true
+      username: sa
+      password: Fractal$952
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    database-platform: org.hibernate.dialect.SQLServerDialect
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        boot:
+          allow_jdbc_metadata_access: false

@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: BancoTalentosBackend
+  jpa:
+    database-platform: org.hibernate.dialect.SQLServerDialect
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        boot:
+          allow_jdbc_metadata_access: false
+  profiles:
+    active: dev
+jwt:
+  expiration: 28800000 # 8 hours in milliseconds
+  secret: JMvkOzKGhZF4jN71iEJBpNWTTyz7NLakjQ0A7VhaV4ogcz03MrDUwRtz6VA9itk5fTyN/NhbPNSAJHN8d5AByQ==
+
+# Configuración de logging
+logging:
+  level:
+    root: info
+    org.springframework.web: debug
+    com.iotdml.configsrf: debug
+  file:
+    name: logs/app-logs.log
+    path: logs
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
