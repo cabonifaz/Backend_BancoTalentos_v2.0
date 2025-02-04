@@ -89,9 +89,9 @@ public class TalentsRepository {
             talentResponse.setBaseResponse(baseResponse);
 
             if (idTipoMensaje == 2) {
-                List<Map<String, Object>> talentsSet = (List<Map<String, Object>>) result.get("#result-set-2");
-                if (talentsSet != null && !talentsSet.isEmpty()) {
-                    Map<String, Object> talentRow = talentsSet.get(0);
+                List<Map<String, Object>> talentSet = (List<Map<String, Object>>) result.get("#result-set-2");
+                if (talentSet != null && !talentSet.isEmpty()) {
+                    Map<String, Object> talentRow = talentSet.get(0);
 
                     // Talent detail
                     talentResponse.setEmail((String) talentRow.get("EMAIL"));
@@ -100,6 +100,7 @@ public class TalentsRepository {
                     talentResponse.setGithub((String) talentRow.get("LINK_GITHUB"));
                     talentResponse.setDescripcion((String) talentRow.get("DESCRIPCION"));
                     talentResponse.setDisponibilidad((String) talentRow.get("DISPONIBILIDAD"));
+                    talentResponse.setIdColeccion((Integer) talentRow.get("ID_COLECCION"));
                     talentResponse.setCv(TalentsUtils.getTalentCv(result));
                     talentResponse.setHabilidadesTecnicas(TalentsUtils.getTechAbilities(result));
                     talentResponse.setHabilidadesBlandas(TalentsUtils.getSoftAbilities(result));

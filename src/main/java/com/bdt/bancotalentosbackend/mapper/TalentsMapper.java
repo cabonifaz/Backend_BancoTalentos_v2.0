@@ -76,7 +76,8 @@ public class TalentsMapper {
                 (Double) talentRow.get("MONTO_INICIAL_RXH"),
                 (Double) talentRow.get("MONTO_FINAL_RXH"),
                 (String) talentRow.get("MONEDA"),
-                (Integer) talentRow.get("ESTRELLAS")
+                (Integer) talentRow.get("ESTRELLAS"),
+                (Integer) talentRow.get("ES_FAVORITO")
         );
     }
 }
