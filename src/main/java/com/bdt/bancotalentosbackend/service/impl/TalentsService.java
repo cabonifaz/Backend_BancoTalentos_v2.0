@@ -1,10 +1,7 @@
 package com.bdt.bancotalentosbackend.service.impl;
 
 import com.bdt.bancotalentosbackend.model.dto.UserDTO;
-import com.bdt.bancotalentosbackend.model.request.AddTalentToFavRequest;
-import com.bdt.bancotalentosbackend.model.request.BaseRequest;
-import com.bdt.bancotalentosbackend.model.request.SearchRequest;
-import com.bdt.bancotalentosbackend.model.request.TalentUpdateRequest;
+import com.bdt.bancotalentosbackend.model.request.*;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
@@ -48,5 +45,19 @@ public class TalentsService implements ITalentsService {
         UserDTO user = jwt.decodeToken(token);
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
         return talentsRepository.addTalentToFavourite(baseRequest, favRequest);
+    }
+
+    @Override
+    public BaseResponse addTalentTechAbility(String token, AddTalentTechAbilityRequest techAbilityRequest) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.addTalentTechAbility(baseRequest, techAbilityRequest);
+    }
+
+    @Override
+    public BaseResponse addTalentSoftAbility(String token, AddTalentSoftAbilityRequest techAbilityRequest) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.addTalentSoftAbility(baseRequest, techAbilityRequest);
     }
 }

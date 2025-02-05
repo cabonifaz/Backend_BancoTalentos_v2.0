@@ -1,8 +1,6 @@
 package com.bdt.bancotalentosbackend.service;
 
-import com.bdt.bancotalentosbackend.model.request.AddTalentToFavRequest;
-import com.bdt.bancotalentosbackend.model.request.SearchRequest;
-import com.bdt.bancotalentosbackend.model.request.TalentUpdateRequest;
+import com.bdt.bancotalentosbackend.model.request.*;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
@@ -12,4 +10,6 @@ public interface ITalentsService {
     TalentResponse getTalentById(String token, Integer talentId);
     BaseResponse updateTalent(String token, TalentUpdateRequest updateRequest);
     BaseResponse addTalentToFavourite(String token, AddTalentToFavRequest favRequest);
+    BaseResponse addTalentTechAbility(String token, AddTalentTechAbilityRequest techAbilityRequest);
+    BaseResponse addTalentSoftAbility(String token, AddTalentSoftAbilityRequest techAbilityRequest);
 }

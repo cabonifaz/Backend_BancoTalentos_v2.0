@@ -2,10 +2,7 @@ package com.bdt.bancotalentosbackend.repository;
 
 import com.bdt.bancotalentosbackend.mapper.TalentsMapper;
 import com.bdt.bancotalentosbackend.model.dto.*;
-import com.bdt.bancotalentosbackend.model.request.AddTalentToFavRequest;
-import com.bdt.bancotalentosbackend.model.request.BaseRequest;
-import com.bdt.bancotalentosbackend.model.request.SearchRequest;
-import com.bdt.bancotalentosbackend.model.request.TalentUpdateRequest;
+import com.bdt.bancotalentosbackend.model.request.*;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
@@ -19,6 +16,8 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static com.bdt.bancotalentosbackend.util.Common.getBaseResponse;
 import static com.bdt.bancotalentosbackend.util.Common.simpleSPCall;
 
 @Repository
@@ -46,15 +45,12 @@ public class TalentsRepository {
 
         if (resultSet != null && !resultSet.isEmpty()) {
             Map<String, Object> row = resultSet.get(0);
-            Integer idTipoMensaje = (Integer) row.get("ID_TIPO_MENSAJE");
-            String mensaje = (String) row.get("MENSAJE");
             Integer totalTalents = (Integer) row.get("TOTAL_LISTA");
 
-            BaseResponse baseResponse = new BaseResponse(idTipoMensaje, mensaje);
-            talentsListResponse.setBaseResponse(baseResponse);
+            talentsListResponse.setBaseResponse(getBaseResponse(resultSet));
             talentsListResponse.setTotal(totalTalents);
 
-            if (idTipoMensaje == 2) {
+            if (talentsListResponse.getBaseResponse().getIdMensaje() == 2) {
                 List<Map<String, Object>> talentsSet = (List<Map<String, Object>>) result.get("#result-set-2");
                 if (talentsSet != null && !talentsSet.isEmpty()) {
                     List<TalentListDTO> talents = new ArrayList<>();
@@ -83,14 +79,9 @@ public class TalentsRepository {
         List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
 
         if (resultSet != null && !resultSet.isEmpty()) {
-            Map<String, Object> row = resultSet.get(0);
-            Integer idTipoMensaje = (Integer) row.get("ID_TIPO_MENSAJE");
-            String mensaje = (String) row.get("MENSAJE");
+            talentResponse.setBaseResponse(getBaseResponse(resultSet));
 
-            BaseResponse baseResponse = new BaseResponse(idTipoMensaje, mensaje);
-            talentResponse.setBaseResponse(baseResponse);
-
-            if (idTipoMensaje == 2) {
+            if (talentResponse.getBaseResponse().getIdMensaje() == 2) {
                 List<Map<String, Object>> talentSet = (List<Map<String, Object>>) result.get("#result-set-2");
                 if (talentSet != null && !talentSet.isEmpty()) {
                     Map<String, Object> talentRow = talentSet.get(0);
@@ -155,6 +146,37 @@ public class TalentsRepository {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ID_USUARIO_FAVORITOS", favRequest.getIdColeccion())
                 .addValue("ID_TALENTO", favRequest.getIdTalento())
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("USERNAME", baseRequest.getUsername());
+
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+    }
+
+    public BaseResponse addTalentTechAbility(BaseRequest baseRequest, AddTalentTechAbilityRequest techAbilityRequest) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_HABILIDAD_TECNICA_INS");
+        BaseResponse baseResponse = new BaseResponse();
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_TALENTO", techAbilityRequest.getIdTalento())
+                .addValue("ID_HABILIDAD", techAbilityRequest.getIdHabilidad())
+                .addValue("ANIOS", techAbilityRequest.getAnios())
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("USERNAME", baseRequest.getUsername());
+
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+    }
+
+    public BaseResponse addTalentSoftAbility(BaseRequest baseRequest, AddTalentSoftAbilityRequest techAbilityRequest) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_HABILIDAD_BLANDA_INS");
+        BaseResponse baseResponse = new BaseResponse();
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_TALENTO", techAbilityRequest.getIdTalento())
+                .addValue("ID_HABILIDAD", techAbilityRequest.getIdHabilidad())
                 .addValue("ID_ROL", baseRequest.getIdRol())
                 .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
                 .addValue("ID_USUARIO", baseRequest.getIdUsuario())

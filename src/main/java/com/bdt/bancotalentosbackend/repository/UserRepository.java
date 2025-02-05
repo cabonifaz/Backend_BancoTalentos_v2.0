@@ -14,6 +14,8 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static com.bdt.bancotalentosbackend.util.Common.getBaseResponse;
 import static com.bdt.bancotalentosbackend.util.Common.simpleSPCall;
 
 @Repository
@@ -46,23 +48,18 @@ public class UserRepository {
         List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
 
         if (resultSet != null && !resultSet.isEmpty()) {
-            Map<String, Object> row = resultSet.get(0);
-            Integer idTipoMensaje = (Integer) row.get("ID_TIPO_MENSAJE");
-            String mensaje = (String) row.get("MENSAJE");
+            userFavListResponse.setBaseResponse(getBaseResponse(resultSet));
 
-            BaseResponse baseResponse = new BaseResponse(idTipoMensaje, mensaje);
-            userFavListResponse.setBaseResponse(baseResponse);
-
-            if (idTipoMensaje == 2) {
+            if (userFavListResponse.getBaseResponse().getIdMensaje() == 2) {
                 List<Map<String, Object>> favSet = (List<Map<String, Object>>) result.get("#result-set-2");
                 if (favSet != null && !favSet.isEmpty()) {
                     List<UserFavDTO> favourites = new ArrayList<>();
-                    UserFavDTO userFavDTO = new UserFavDTO();
 
                     for(Map<String, Object> favRow : favSet) {
-                        userFavDTO.setIdColeccion((Integer) favRow.get("ID_USUARIO_FAVORITOS"));
-                        userFavDTO.setNombreColeccion( (String) favRow.get("NOMBRE_FAVORITOS"));
-                        favourites.add(userFavDTO);
+                        favourites.add(new UserFavDTO(
+                                (Integer) favRow.get("ID_USUARIO_FAVORITOS"),
+                                (String) favRow.get("NOMBRE_FAVORITOS"))
+                        );
                     }
 
                     userFavListResponse.setUserFavList(favourites);

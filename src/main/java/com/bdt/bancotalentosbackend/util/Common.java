@@ -41,4 +41,9 @@ public class Common {
 
         return baseResponse;
     }
+
+    public static BaseResponse getBaseResponse(List<Map<String, Object>> resultSet) {
+        Map<String, Object> row = resultSet.get(0);
+        return new BaseResponse((Integer) row.get("ID_TIPO_MENSAJE"), (String) row.get("MENSAJE"));
+    }
 }
