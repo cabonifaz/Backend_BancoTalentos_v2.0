@@ -1,6 +1,7 @@
 package com.bdt.bancotalentosbackend.service.impl;
 
 import com.bdt.bancotalentosbackend.model.dto.UserDTO;
+import com.bdt.bancotalentosbackend.model.request.AddTalentToFavRequest;
 import com.bdt.bancotalentosbackend.model.request.BaseRequest;
 import com.bdt.bancotalentosbackend.model.request.SearchRequest;
 import com.bdt.bancotalentosbackend.model.request.TalentUpdateRequest;
@@ -40,5 +41,12 @@ public class TalentsService implements ITalentsService {
         UserDTO user = jwt.decodeToken(token);
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
         return talentsRepository.updateTalent(baseRequest, updateRequest);
+    }
+
+    @Override
+    public BaseResponse addTalentToFavourite(String token, AddTalentToFavRequest favRequest) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.addTalentToFavourite(baseRequest, favRequest);
     }
 }

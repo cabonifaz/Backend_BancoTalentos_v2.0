@@ -1,5 +1,6 @@
 package com.bdt.bancotalentosbackend.controller;
 
+import com.bdt.bancotalentosbackend.model.request.AddTalentToFavRequest;
 import com.bdt.bancotalentosbackend.model.request.SearchRequest;
 import com.bdt.bancotalentosbackend.model.request.TalentUpdateRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
@@ -69,6 +70,24 @@ public class TalentsController {
         try {
             String token = JWTHelper.extractToken(httpServletRequest);
             response = talentsService.updateTalent(token, updateRequest);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.setIdMensaje(3);
+            response.setMensaje(e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/addToFavourite")
+    public ResponseEntity<BaseResponse> addToFavourite(
+            @RequestBody AddTalentToFavRequest addTalentToFavRequest,
+            HttpServletRequest httpServletRequest
+    ) {
+        BaseResponse response = new BaseResponse();
+
+        try {
+            String token = JWTHelper.extractToken(httpServletRequest);
+            response = talentsService.addTalentToFavourite(token, addTalentToFavRequest);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.setIdMensaje(3);

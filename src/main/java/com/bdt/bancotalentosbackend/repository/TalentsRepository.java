@@ -2,6 +2,7 @@ package com.bdt.bancotalentosbackend.repository;
 
 import com.bdt.bancotalentosbackend.mapper.TalentsMapper;
 import com.bdt.bancotalentosbackend.model.dto.*;
+import com.bdt.bancotalentosbackend.model.request.AddTalentToFavRequest;
 import com.bdt.bancotalentosbackend.model.request.BaseRequest;
 import com.bdt.bancotalentosbackend.model.request.SearchRequest;
 import com.bdt.bancotalentosbackend.model.request.TalentUpdateRequest;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import static com.bdt.bancotalentosbackend.util.Common.simpleSPCall;
 
 @Repository
 @RequiredArgsConstructor
@@ -143,18 +145,21 @@ public class TalentsRepository {
                 .addValue("ID_USUARIO", baseRequest.getIdUsuario())
                 .addValue("USERNAME", baseRequest.getUsername());
 
-        Map<String, Object> result = simpleJdbcCall.execute(params);
-        List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+    }
 
-        if (resultSet != null && !resultSet.isEmpty()) {
-            Map<String, Object> row = resultSet.get(0);
-            Integer idTipoMensaje = (Integer) row.get("ID_TIPO_MENSAJE");
-            String mensaje = (String) row.get("MENSAJE");
+    public BaseResponse addTalentToFavourite(BaseRequest baseRequest, AddTalentToFavRequest favRequest) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_UPD");
+        BaseResponse baseResponse = new BaseResponse();
 
-            baseResponse.setIdMensaje(idTipoMensaje);
-            baseResponse.setMensaje(mensaje);
-        }
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_USUARIO_FAVORITOS", favRequest.getIdColeccion())
+                .addValue("ID_TALENTO", favRequest.getIdTalento())
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("USERNAME", baseRequest.getUsername());
 
-        return baseResponse;
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
 }
