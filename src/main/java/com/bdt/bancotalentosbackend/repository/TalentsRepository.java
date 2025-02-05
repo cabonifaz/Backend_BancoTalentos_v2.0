@@ -149,7 +149,7 @@ public class TalentsRepository {
     }
 
     public BaseResponse addTalentToFavourite(BaseRequest baseRequest, AddTalentToFavRequest favRequest) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_UPD");
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_USUARIO_FAVORITOS_TALENTO_INS");
         BaseResponse baseResponse = new BaseResponse();
 
         SqlParameterSource params = new MapSqlParameterSource()

@@ -4,6 +4,7 @@ import com.bdt.bancotalentosbackend.model.dto.UserDTO;
 import com.bdt.bancotalentosbackend.model.request.AddFavCollectionRequest;
 import com.bdt.bancotalentosbackend.model.request.BaseRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
+import com.bdt.bancotalentosbackend.model.response.UserFavListResponse;
 import com.bdt.bancotalentosbackend.repository.UserRepository;
 import com.bdt.bancotalentosbackend.service.IUserService;
 import com.bdt.bancotalentosbackend.util.Common;
@@ -24,5 +25,13 @@ public class UserService implements IUserService {
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
 
         return userRepository.addFavouriteCollection(baseRequest, addFavCollectionRequest);
+    }
+
+    @Override
+    public UserFavListResponse getFavourites(String token) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+
+        return userRepository.getFavourites(baseRequest);
     }
 }
