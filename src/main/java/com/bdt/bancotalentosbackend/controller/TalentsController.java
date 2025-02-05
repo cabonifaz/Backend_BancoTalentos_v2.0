@@ -96,7 +96,7 @@ public class TalentsController {
 
     @PostMapping("/addTechAbility")
     public ResponseEntity<BaseResponse> addTechAbility(
-            @RequestBody AddTalentTechAbilityRequest techAbilityRequest,
+            @RequestBody AddTechAbilityRequest techAbilityRequest,
             HttpServletRequest httpServletRequest
     ) {
         BaseResponse response = new BaseResponse();
@@ -114,7 +114,7 @@ public class TalentsController {
 
     @PostMapping("/addSoftAbility")
     public ResponseEntity<BaseResponse> addSoftAbility(
-            @RequestBody AddTalentSoftAbilityRequest softAbilityRequest,
+            @RequestBody AddSoftAbilityRequest softAbilityRequest,
             HttpServletRequest httpServletRequest
     ) {
         BaseResponse response = new BaseResponse();

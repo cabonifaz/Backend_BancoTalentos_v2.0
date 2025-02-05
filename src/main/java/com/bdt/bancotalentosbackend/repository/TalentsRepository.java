@@ -154,7 +154,7 @@ public class TalentsRepository {
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
 
-    public BaseResponse addTalentTechAbility(BaseRequest baseRequest, AddTalentTechAbilityRequest techAbilityRequest) {
+    public BaseResponse addTalentTechAbility(BaseRequest baseRequest, AddTechAbilityRequest techAbilityRequest) {
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_HABILIDAD_TECNICA_INS");
         BaseResponse baseResponse = new BaseResponse();
 
@@ -170,13 +170,13 @@ public class TalentsRepository {
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
 
-    public BaseResponse addTalentSoftAbility(BaseRequest baseRequest, AddTalentSoftAbilityRequest techAbilityRequest) {
+    public BaseResponse addTalentSoftAbility(BaseRequest baseRequest, AddSoftAbilityRequest softAbilityRequest) {
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_HABILIDAD_BLANDA_INS");
         BaseResponse baseResponse = new BaseResponse();
 
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("ID_TALENTO", techAbilityRequest.getIdTalento())
-                .addValue("ID_HABILIDAD", techAbilityRequest.getIdHabilidad())
+                .addValue("ID_TALENTO", softAbilityRequest.getIdTalento())
+                .addValue("ID_HABILIDAD", softAbilityRequest.getIdHabilidad())
                 .addValue("ID_ROL", baseRequest.getIdRol())
                 .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
                 .addValue("ID_USUARIO", baseRequest.getIdUsuario())

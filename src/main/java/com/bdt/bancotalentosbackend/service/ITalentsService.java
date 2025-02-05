@@ -10,6 +10,6 @@ public interface ITalentsService {
     TalentResponse getTalentById(String token, Integer talentId);
     BaseResponse updateTalent(String token, TalentUpdateRequest updateRequest);
     BaseResponse addTalentToFavourite(String token, AddTalentToFavRequest favRequest);
-    BaseResponse addTalentTechAbility(String token, AddTalentTechAbilityRequest techAbilityRequest);
-    BaseResponse addTalentSoftAbility(String token, AddTalentSoftAbilityRequest techAbilityRequest);
+    BaseResponse addTalentTechAbility(String token, AddTechAbilityRequest techAbilityRequest);
+    BaseResponse addTalentSoftAbility(String token, AddSoftAbilityRequest techAbilityRequest);
 }

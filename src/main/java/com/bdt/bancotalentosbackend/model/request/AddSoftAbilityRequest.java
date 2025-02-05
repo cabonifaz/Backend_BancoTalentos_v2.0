@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AddTalentSoftAbilityRequest {
+public class AddSoftAbilityRequest {
     private Integer idTalento;
     private Integer idHabilidad;
 }

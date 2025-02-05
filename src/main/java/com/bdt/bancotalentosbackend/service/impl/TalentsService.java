@@ -48,14 +48,14 @@ public class TalentsService implements ITalentsService {
     }
 
     @Override
-    public BaseResponse addTalentTechAbility(String token, AddTalentTechAbilityRequest techAbilityRequest) {
+    public BaseResponse addTalentTechAbility(String token, AddTechAbilityRequest techAbilityRequest) {
         UserDTO user = jwt.decodeToken(token);
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
         return talentsRepository.addTalentTechAbility(baseRequest, techAbilityRequest);
     }
 
     @Override
-    public BaseResponse addTalentSoftAbility(String token, AddTalentSoftAbilityRequest techAbilityRequest) {
+    public BaseResponse addTalentSoftAbility(String token, AddSoftAbilityRequest techAbilityRequest) {
         UserDTO user = jwt.decodeToken(token);
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
         return talentsRepository.addTalentSoftAbility(baseRequest, techAbilityRequest);
