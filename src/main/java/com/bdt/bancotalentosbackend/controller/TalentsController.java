@@ -1,6 +1,7 @@
 package com.bdt.bancotalentosbackend.controller;
 
 import com.bdt.bancotalentosbackend.model.request.SearchRequest;
+import com.bdt.bancotalentosbackend.model.request.TalentUpdateRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
@@ -42,7 +43,10 @@ public class TalentsController {
     }
 
     @GetMapping("/data")
-    public ResponseEntity<TalentResponse> getTalent(@RequestParam Integer talentId, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<TalentResponse> getTalent(
+            @RequestParam Integer talentId,
+            HttpServletRequest httpServletRequest
+    ) {
         TalentResponse response = new TalentResponse();
 
         try {
@@ -51,6 +55,25 @@ public class TalentsController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.setBaseResponse(new BaseResponse(1, e.getMessage()));
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/update")
+    public ResponseEntity<BaseResponse> updateTalent(
+            @RequestBody TalentUpdateRequest updateRequest,
+            HttpServletRequest httpServletRequest
+    ) {
+        BaseResponse response = new BaseResponse();
+
+        try {
+            String token = JWTHelper.extractToken(httpServletRequest);
+            response = talentsService.updateTalent(token, updateRequest);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            assert response != null;
+            response.setIdMensaje(3);
+            response.setMensaje(e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
