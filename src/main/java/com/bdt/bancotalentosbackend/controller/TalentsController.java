@@ -71,7 +71,6 @@ public class TalentsController {
             response = talentsService.updateTalent(token, updateRequest);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            assert response != null;
             response.setIdMensaje(3);
             response.setMensaje(e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);

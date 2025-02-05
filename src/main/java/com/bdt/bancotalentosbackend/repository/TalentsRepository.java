@@ -75,7 +75,6 @@ public class TalentsRepository {
                 .addValue("ID_ROL", baseRequest.getIdRol())
                 .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
                 .addValue("ID_USUARIO", baseRequest.getIdUsuario())
-                .addValue("ID_EMPRESA", baseRequest.getIdEmpresa())
                 .addValue("ID_TALENTO", talentId);
 
         Map<String, Object> result = simpleJdbcCall.execute(params);
