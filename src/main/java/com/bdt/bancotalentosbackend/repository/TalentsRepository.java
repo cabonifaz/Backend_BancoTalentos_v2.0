@@ -184,4 +184,58 @@ public class TalentsRepository {
 
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
+
+    public BaseResponse addTalentExperience(BaseRequest baseRequest, AddExperienceRequest addExperienceRequest) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_EXPERIENCIA_INS");
+        BaseResponse baseResponse = new BaseResponse();
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_TALENTO", addExperienceRequest.getIdTalento())
+                .addValue("EMPRESA", addExperienceRequest.getEmpresa())
+                .addValue("PUESTO", addExperienceRequest.getEmpresa())
+                .addValue("FCH_INICIO", addExperienceRequest.getEmpresa())
+                .addValue("FCH_FIN", addExperienceRequest.getEmpresa())
+                .addValue("FL_ACTUALIDAD", addExperienceRequest.getEmpresa())
+                .addValue("FUNCIONES", addExperienceRequest.getEmpresa())
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("USERNAME", baseRequest.getUsername());
+
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+    }
+
+    public BaseResponse updateTalentExperience(BaseRequest baseRequest, UpdateExperienceRequest updateExperienceRequest) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_EXPERIENCIA_UPD");
+        BaseResponse baseResponse = new BaseResponse();
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_EXPERIENCIA", updateExperienceRequest.getIdExperiencia())
+                .addValue("EMPRESA", updateExperienceRequest.getEmpresa())
+                .addValue("PUESTO", updateExperienceRequest.getEmpresa())
+                .addValue("FCH_INICIO", updateExperienceRequest.getEmpresa())
+                .addValue("FCH_FIN", updateExperienceRequest.getEmpresa())
+                .addValue("FL_ACTUALIDAD", updateExperienceRequest.getEmpresa())
+                .addValue("FUNCIONES", updateExperienceRequest.getEmpresa())
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("USERNAME", baseRequest.getUsername());
+
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+    }
+
+    public BaseResponse deleteTalentExperience(BaseRequest baseRequest, Integer idExperiencia) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_EXPERIENCIA_DEL");
+        BaseResponse baseResponse = new BaseResponse();
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_EXPERIENCIA", idExperiencia)
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("USERNAME", baseRequest.getUsername());
+
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+    }
 }

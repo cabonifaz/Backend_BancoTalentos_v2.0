@@ -12,4 +12,7 @@ public interface ITalentsService {
     BaseResponse addTalentToFavourite(String token, AddTalentToFavRequest favRequest);
     BaseResponse addTalentTechAbility(String token, AddTechAbilityRequest techAbilityRequest);
     BaseResponse addTalentSoftAbility(String token, AddSoftAbilityRequest techAbilityRequest);
+    BaseResponse addTalentExperience(String token, AddExperienceRequest experienceRequest);
+    BaseResponse updateTalentExperience(String token, UpdateExperienceRequest experienceRequest);
+    BaseResponse deleteTalentExperience(String token, Integer experienceId);
 }

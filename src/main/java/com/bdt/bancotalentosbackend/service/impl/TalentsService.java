@@ -60,4 +60,25 @@ public class TalentsService implements ITalentsService {
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
         return talentsRepository.addTalentSoftAbility(baseRequest, techAbilityRequest);
     }
+
+    @Override
+    public BaseResponse addTalentExperience(String token, AddExperienceRequest experienceRequest) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.addTalentExperience(baseRequest, experienceRequest);
+    }
+
+    @Override
+    public BaseResponse updateTalentExperience(String token, UpdateExperienceRequest experienceRequest) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.updateTalentExperience(baseRequest, experienceRequest);
+    }
+
+    @Override
+    public BaseResponse deleteTalentExperience(String token, Integer experienceId) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.deleteTalentExperience(baseRequest, experienceId);
+    }
 }

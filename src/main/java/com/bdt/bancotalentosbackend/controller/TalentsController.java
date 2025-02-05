@@ -129,4 +129,58 @@ public class TalentsController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    @PostMapping("/addExperience")
+    public ResponseEntity<BaseResponse> addExperience(
+            @RequestBody AddExperienceRequest addExperienceRequest,
+            HttpServletRequest httpServletRequest
+    ) {
+        BaseResponse response = new BaseResponse();
+
+        try {
+            String token = JWTHelper.extractToken(httpServletRequest);
+            response = talentsService.addTalentExperience(token, addExperienceRequest);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.setIdMensaje(3);
+            response.setMensaje(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @PostMapping("/updateExperience")
+    public ResponseEntity<BaseResponse> updateExperience(
+            @RequestBody UpdateExperienceRequest updateExperienceRequest,
+            HttpServletRequest httpServletRequest
+    ) {
+        BaseResponse response = new BaseResponse();
+
+        try {
+            String token = JWTHelper.extractToken(httpServletRequest);
+            response = talentsService.updateTalentExperience(token, updateExperienceRequest);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.setIdMensaje(3);
+            response.setMensaje(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @PostMapping("/deleteExperience")
+    public ResponseEntity<BaseResponse> deleteExperience(
+            @RequestBody Integer idExperiencia,
+            HttpServletRequest httpServletRequest
+    ) {
+        BaseResponse response = new BaseResponse();
+
+        try {
+            String token = JWTHelper.extractToken(httpServletRequest);
+            response = talentsService.deleteTalentExperience(token, idExperiencia);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.setIdMensaje(3);
+            response.setMensaje(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 }
