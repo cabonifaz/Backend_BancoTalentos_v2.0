@@ -140,7 +140,7 @@ public class TalentsRepository {
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
 
-    public BaseResponse addTalentToFavourite(BaseRequest baseRequest, AddTalentToFavRequest favRequest) {
+    public BaseResponse addTalentToFavourite(BaseRequest baseRequest, TalentToFavRequest favRequest) {
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_USUARIO_FAVORITOS_TALENTO_INS");
         BaseResponse baseResponse = new BaseResponse();
 
@@ -155,7 +155,7 @@ public class TalentsRepository {
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
 
-    public BaseResponse addTalentTechAbility(BaseRequest baseRequest, AddTechAbilityRequest techAbilityRequest) {
+    public BaseResponse addTalentTechAbility(BaseRequest baseRequest, TechAbilityRequest techAbilityRequest) {
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_HABILIDAD_TECNICA_INS");
         BaseResponse baseResponse = new BaseResponse();
 
@@ -171,7 +171,7 @@ public class TalentsRepository {
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
 
-    public BaseResponse addTalentSoftAbility(BaseRequest baseRequest, AddSoftAbilityRequest softAbilityRequest) {
+    public BaseResponse addTalentSoftAbility(BaseRequest baseRequest, SoftAbilityRequest softAbilityRequest) {
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_HABILIDAD_BLANDA_INS");
         BaseResponse baseResponse = new BaseResponse();
 

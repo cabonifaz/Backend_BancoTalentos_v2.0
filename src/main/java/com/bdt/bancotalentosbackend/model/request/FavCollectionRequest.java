@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AddFavCollectionRequest {
+public class FavCollectionRequest {
     private String collectionName;
 }

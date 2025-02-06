@@ -1,7 +1,7 @@
 package com.bdt.bancotalentosbackend.repository;
 
 import com.bdt.bancotalentosbackend.model.dto.UserFavDTO;
-import com.bdt.bancotalentosbackend.model.request.AddFavCollectionRequest;
+import com.bdt.bancotalentosbackend.model.request.FavCollectionRequest;
 import com.bdt.bancotalentosbackend.model.request.BaseRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.UserFavListResponse;
@@ -23,12 +23,12 @@ import static com.bdt.bancotalentosbackend.util.Common.simpleSPCall;
 public class UserRepository {
     private final JdbcTemplate jdbcTemplate;
 
-    public BaseResponse addFavouriteCollection(BaseRequest baseRequest, AddFavCollectionRequest addFavCollectionRequest) {
+    public BaseResponse addFavouriteCollection(BaseRequest baseRequest, FavCollectionRequest favCollectionRequest) {
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_USUARIO_FAVORITOS_INS");
         BaseResponse baseResponse = new BaseResponse();
 
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("NOMBRE_FAVORITOS", addFavCollectionRequest.getCollectionName())
+                .addValue("NOMBRE_FAVORITOS", favCollectionRequest.getCollectionName())
                 .addValue("ID_ROL", baseRequest.getIdRol())
                 .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
                 .addValue("ID_USUARIO", baseRequest.getIdUsuario())

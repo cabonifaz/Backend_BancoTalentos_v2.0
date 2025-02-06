@@ -9,9 +9,9 @@ public interface ITalentsService {
     TalentsListResponse getTalents(String token, SearchRequest searchRequest);
     TalentResponse getTalentById(String token, Integer talentId);
     BaseResponse updateTalent(String token, TalentUpdateRequest updateRequest);
-    BaseResponse addTalentToFavourite(String token, AddTalentToFavRequest favRequest);
-    BaseResponse addTalentTechAbility(String token, AddTechAbilityRequest techAbilityRequest);
-    BaseResponse addTalentSoftAbility(String token, AddSoftAbilityRequest techAbilityRequest);
+    BaseResponse addTalentToFavourite(String token, TalentToFavRequest favRequest);
+    BaseResponse addTalentTechAbility(String token, TechAbilityRequest techAbilityRequest);
+    BaseResponse addTalentSoftAbility(String token, SoftAbilityRequest techAbilityRequest);
     BaseResponse addOrUpdateTalentExperience(String token, ExperienceRequest experienceRequest);
     BaseResponse deleteTalentExperience(String token, Integer experienceId);
     BaseResponse addOrUpdateTalentEducation(String token, EducationRequest educationRequest);

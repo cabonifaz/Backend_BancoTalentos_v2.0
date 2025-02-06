@@ -78,14 +78,14 @@ public class TalentsController {
 
     @PostMapping("/addToFavourite")
     public ResponseEntity<BaseResponse> addToFavourite(
-            @RequestBody AddTalentToFavRequest addTalentToFavRequest,
+            @RequestBody TalentToFavRequest talentToFavRequest,
             HttpServletRequest httpServletRequest
     ) {
         BaseResponse response = new BaseResponse();
 
         try {
             String token = JWTHelper.extractToken(httpServletRequest);
-            response = talentsService.addTalentToFavourite(token, addTalentToFavRequest);
+            response = talentsService.addTalentToFavourite(token, talentToFavRequest);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.setIdMensaje(3);
@@ -96,7 +96,7 @@ public class TalentsController {
 
     @PostMapping("/addTechAbility")
     public ResponseEntity<BaseResponse> addTechAbility(
-            @RequestBody AddTechAbilityRequest techAbilityRequest,
+            @RequestBody TechAbilityRequest techAbilityRequest,
             HttpServletRequest httpServletRequest
     ) {
         BaseResponse response = new BaseResponse();
@@ -114,7 +114,7 @@ public class TalentsController {
 
     @PostMapping("/addSoftAbility")
     public ResponseEntity<BaseResponse> addSoftAbility(
-            @RequestBody AddSoftAbilityRequest softAbilityRequest,
+            @RequestBody SoftAbilityRequest softAbilityRequest,
             HttpServletRequest httpServletRequest
     ) {
         BaseResponse response = new BaseResponse();

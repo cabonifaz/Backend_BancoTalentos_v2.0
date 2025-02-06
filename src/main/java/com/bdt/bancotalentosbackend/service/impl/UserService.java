@@ -1,7 +1,7 @@
 package com.bdt.bancotalentosbackend.service.impl;
 
 import com.bdt.bancotalentosbackend.model.dto.UserDTO;
-import com.bdt.bancotalentosbackend.model.request.AddFavCollectionRequest;
+import com.bdt.bancotalentosbackend.model.request.FavCollectionRequest;
 import com.bdt.bancotalentosbackend.model.request.BaseRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.UserFavListResponse;
@@ -20,11 +20,11 @@ public class UserService implements IUserService {
     private final JWTHelper jwt;
 
     @Override
-    public BaseResponse addFavouriteCollection(String token, AddFavCollectionRequest addFavCollectionRequest) {
+    public BaseResponse addFavouriteCollection(String token, FavCollectionRequest favCollectionRequest) {
         UserDTO user = jwt.decodeToken(token);
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
 
-        return userRepository.addFavouriteCollection(baseRequest, addFavCollectionRequest);
+        return userRepository.addFavouriteCollection(baseRequest, favCollectionRequest);
     }
 
     @Override

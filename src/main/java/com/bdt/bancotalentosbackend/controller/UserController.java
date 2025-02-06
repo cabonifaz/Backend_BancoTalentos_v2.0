@@ -1,6 +1,6 @@
 package com.bdt.bancotalentosbackend.controller;
 
-import com.bdt.bancotalentosbackend.model.request.AddFavCollectionRequest;
+import com.bdt.bancotalentosbackend.model.request.FavCollectionRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.UserFavListResponse;
 import com.bdt.bancotalentosbackend.service.impl.UserService;
@@ -19,14 +19,14 @@ public class UserController {
 
     @PostMapping("/addFavourite")
     public ResponseEntity<BaseResponse> addFavouriteCollection(
-            @RequestBody AddFavCollectionRequest addFavCollectionRequest,
+            @RequestBody FavCollectionRequest favCollectionRequest,
             HttpServletRequest httpServletRequest
     ){
         BaseResponse response = new BaseResponse();
 
         try {
             String token = JWTHelper.extractToken(httpServletRequest);
-            response = userService.addFavouriteCollection(token, addFavCollectionRequest);
+            response = userService.addFavouriteCollection(token, favCollectionRequest);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.setIdMensaje(3);

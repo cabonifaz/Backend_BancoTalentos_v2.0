@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateLanguageRequest {
-    private Integer idTalentoIdioma;
-    private Integer idIdioma;
-    private Integer idNivel;
-    private Integer estrellas;
+public class SoftAbilityRequest {
+    private Integer idTalento;
+    private Integer idHabilidad;
 }

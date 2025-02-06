@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AddSoftAbilityRequest {
+public class TalentToFavRequest {
+    private Integer idColeccion;
     private Integer idTalento;
-    private Integer idHabilidad;
 }
