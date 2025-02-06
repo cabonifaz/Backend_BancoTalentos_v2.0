@@ -109,7 +109,7 @@ public class TalentsRepository {
     }
 
     public BaseResponse addOrUpdateTalent(BaseRequest baseRequest, TalentRequest talentRequest) {
-        boolean isUpdate = talentRequest.getIdTalento() != null;
+        boolean isUpdate = talentRequest.getIdTalento() != null && talentRequest.getIdTalento() > 0;
         String procedureName = isUpdate ? "SP_BT_TALENTO_UPD" : "SP_BT_TALENTO_INS";
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
         BaseResponse baseResponse = new BaseResponse();
@@ -192,7 +192,7 @@ public class TalentsRepository {
     }
 
     public BaseResponse addOrUpdateTalentExperience(BaseRequest baseRequest, ExperienceRequest experienceRequest) {
-        boolean isUpdate = experienceRequest.getIdExperiencia() != null;
+        boolean isUpdate = experienceRequest.getIdExperiencia() != null && experienceRequest.getIdTalento() > 0;
         String procedureName = isUpdate ? "SP_BT_TALENTO_EXPERIENCIA_UPD" : "SP_BT_TALENTO_EXPERIENCIA_INS";
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
         BaseResponse baseResponse = new BaseResponse();
@@ -236,7 +236,7 @@ public class TalentsRepository {
     }
 
     public BaseResponse addOrUpdateTalentEducation(BaseRequest baseRequest, EducationRequest educationRequest) {
-        boolean isUpdate = educationRequest.getIdTalentoEducacion() != null;
+        boolean isUpdate = educationRequest.getIdTalentoEducacion() != null && educationRequest.getIdTalento() > 0;
         String procedureName = isUpdate ? "SP_BT_TALENTO_EDUCACION_UPD" : "SP_BT_TALENTO_EDUCACION_INS";
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
         BaseResponse baseResponse = new BaseResponse();
