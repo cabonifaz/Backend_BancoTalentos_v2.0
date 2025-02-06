@@ -247,4 +247,158 @@ public class TalentsRepository {
 
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
+
+    public BaseResponse addTalentEducation(BaseRequest baseRequest, AddEducationRequest educationRequest) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_EDUCACION_INS");
+        BaseResponse baseResponse = new BaseResponse();
+
+        LocalDate dateInit = Common.formatDate(educationRequest.getFechaInicio());
+        LocalDate dateEnd = Common.formatDate(educationRequest.getFechaFin());
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_TALENTO", educationRequest.getIdTalento())
+                .addValue("INSTITUCION_EDUCATIVA", educationRequest.getInstitucion())
+                .addValue("CARRERA", educationRequest.getCarrera())
+                .addValue("GRADO", educationRequest.getGrado())
+                .addValue("FCH_INICIO", dateInit)
+                .addValue("FCH_FIN", dateEnd)
+                .addValue("FL_ACTUALIDAD", educationRequest.getFlActualidad())
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("USERNAME", baseRequest.getUsername());
+
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+    }
+
+    public BaseResponse updateTalentEducation(BaseRequest baseRequest, UpdateEducationRequest updateEducationRequest) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_EDUCACION_UPD");
+        BaseResponse baseResponse = new BaseResponse();
+
+        LocalDate dateInit = Common.formatDate(updateEducationRequest.getFechaInicio());
+        LocalDate dateEnd = Common.formatDate(updateEducationRequest.getFechaFin());
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_TALENTO_EDUCACION", updateEducationRequest.getIdTalentoEducacion())
+                .addValue("INSTITUCION_EDUCATIVA", updateEducationRequest.getInstitucion())
+                .addValue("CARRERA", updateEducationRequest.getCarrera())
+                .addValue("GRADO", updateEducationRequest.getGrado())
+                .addValue("FCH_INICIO", dateInit)
+                .addValue("FCH_FIN", dateEnd)
+                .addValue("FL_ACTUALIDAD", updateEducationRequest.getFlActualidad())
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("USERNAME", baseRequest.getUsername());
+
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+    }
+
+    public BaseResponse deleteTalentEducation(BaseRequest baseRequest, Integer idEducacion) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_EDUCACION_DEL");
+        BaseResponse baseResponse = new BaseResponse();
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_TALENTO_EDUCACION", idEducacion)
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("USERNAME", baseRequest.getUsername());
+
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+    }
+
+    public BaseResponse addTalentLanguage(BaseRequest baseRequest, AddLanguageRequest languageRequest) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_IDIOMA_INS");
+        BaseResponse baseResponse = new BaseResponse();
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_TALENTO", languageRequest.getIdTalento())
+                .addValue("ID_IDIOMA", languageRequest.getIdIdioma())
+                .addValue("ID_NIVEL", languageRequest.getIdNivel())
+                .addValue("ESTRELLAS", languageRequest.getEstrellas())
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("USERNAME", baseRequest.getUsername());
+
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+    }
+
+    public BaseResponse updateTalentLanguage(BaseRequest baseRequest, UpdateLanguageRequest updateLanguageRequest) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_IDIOMA_UPD");
+        BaseResponse baseResponse = new BaseResponse();
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_TALENTO_IDIOMA", updateLanguageRequest.getIdTalentoIdioma())
+                .addValue("ID_IDIOMA", updateLanguageRequest.getIdIdioma())
+                .addValue("ID_NIVEL", updateLanguageRequest.getIdNivel())
+                .addValue("ESTRELLAS", updateLanguageRequest.getEstrellas())
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("USERNAME", baseRequest.getUsername());
+
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+    }
+
+    public BaseResponse deleteTalentLanguage(BaseRequest baseRequest, Integer idLanguage) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_IDIOMA_DEL");
+        BaseResponse baseResponse = new BaseResponse();
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_TALENTO_IDIOMA", idLanguage)
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("USERNAME", baseRequest.getUsername());
+
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+    }
+
+    public BaseResponse addTalentFeedback(BaseRequest baseRequest, AddFeedbackRequest feedbackRequest) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_IDIOMA_DEL");
+        BaseResponse baseResponse = new BaseResponse();
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_TALENTO", feedbackRequest.getIdTalento())
+                .addValue("ESTRELLAS", feedbackRequest.getEstrellas())
+                .addValue("DESCRIPCION", feedbackRequest.getFeedback())
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("USERNAME", baseRequest.getUsername());
+
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+    }
+
+    public BaseResponse updateTalentFeedback(BaseRequest baseRequest, UpdateFeedbackRequest updateFeedbackRequest) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_FEEDBACK_UPD");
+        BaseResponse baseResponse = new BaseResponse();
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_FEEDBACK", updateFeedbackRequest.getIdFeedback())
+                .addValue("ESTRELLAS", updateFeedbackRequest.getEstrellas())
+                .addValue("DESCRIPCION", updateFeedbackRequest.getFeedback())
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("USERNAME", baseRequest.getUsername());
+
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+    }
+
+    public BaseResponse deleteTalentFeedback(BaseRequest baseRequest, Integer idFeedback) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_FEEDBACK_DEL");
+        BaseResponse baseResponse = new BaseResponse();
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_FEEDBACK", idFeedback)
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("USERNAME", baseRequest.getUsername());
+
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+    }
 }

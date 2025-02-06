@@ -15,4 +15,13 @@ public interface ITalentsService {
     BaseResponse addTalentExperience(String token, AddExperienceRequest experienceRequest);
     BaseResponse updateTalentExperience(String token, UpdateExperienceRequest experienceRequest);
     BaseResponse deleteTalentExperience(String token, Integer experienceId);
+    BaseResponse addTalentEducation(String token, AddEducationRequest educationRequest);
+    BaseResponse updateTalentEducation(String token, UpdateEducationRequest educationRequest);
+    BaseResponse deleteTalentEducation(String token, Integer educationId);
+    BaseResponse addTalentLanguage(String token, AddLanguageRequest languageRequest);
+    BaseResponse updateTalentLanguage(String token, UpdateLanguageRequest languageRequest);
+    BaseResponse deleteTalentLanguage(String token, Integer languageId);
+    BaseResponse addTalentFeedback(String token, AddFeedbackRequest feedbackRequest);
+    BaseResponse updateTalentFeedback(String token, UpdateFeedbackRequest feedbackRequest);
+    BaseResponse deleteTalentFeedback(String token, Integer feedbackId);
 }

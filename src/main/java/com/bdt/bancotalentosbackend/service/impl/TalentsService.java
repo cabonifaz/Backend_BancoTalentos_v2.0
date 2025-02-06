@@ -81,4 +81,67 @@ public class TalentsService implements ITalentsService {
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
         return talentsRepository.deleteTalentExperience(baseRequest, experienceId);
     }
+
+    @Override
+    public BaseResponse addTalentEducation(String token, AddEducationRequest educationRequest) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.addTalentEducation(baseRequest, educationRequest);
+    }
+
+    @Override
+    public BaseResponse updateTalentEducation(String token, UpdateEducationRequest educationRequest) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.updateTalentEducation(baseRequest, educationRequest);
+    }
+
+    @Override
+    public BaseResponse deleteTalentEducation(String token, Integer educationId) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.deleteTalentEducation(baseRequest, educationId);
+    }
+
+    @Override
+    public BaseResponse addTalentLanguage(String token, AddLanguageRequest languageRequest) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.addTalentLanguage(baseRequest, languageRequest);
+    }
+
+    @Override
+    public BaseResponse updateTalentLanguage(String token, UpdateLanguageRequest languageRequest) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.updateTalentLanguage(baseRequest, languageRequest);
+    }
+
+    @Override
+    public BaseResponse deleteTalentLanguage(String token, Integer languageId) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.deleteTalentLanguage(baseRequest, languageId);
+    }
+
+    @Override
+    public BaseResponse addTalentFeedback(String token, AddFeedbackRequest feedbackRequest) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.addTalentFeedback(baseRequest, feedbackRequest);
+    }
+
+    @Override
+    public BaseResponse updateTalentFeedback(String token, UpdateFeedbackRequest feedbackRequest) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.updateTalentFeedback(baseRequest, feedbackRequest);
+    }
+
+    @Override
+    public BaseResponse deleteTalentFeedback(String token, Integer feedbackId) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.deleteTalentFeedback(baseRequest, feedbackId);
+    }
 }
