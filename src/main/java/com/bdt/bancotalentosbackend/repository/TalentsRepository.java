@@ -14,12 +14,10 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import static com.bdt.bancotalentosbackend.util.Common.getBaseResponse;
 import static com.bdt.bancotalentosbackend.util.Common.simpleSPCall;
 
@@ -188,48 +186,32 @@ public class TalentsRepository {
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
 
-    public BaseResponse addTalentExperience(BaseRequest baseRequest, AddExperienceRequest addExperienceRequest) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_EXPERIENCIA_INS");
+    public BaseResponse addOrUpdateTalentExperience(BaseRequest baseRequest, ExperienceRequest experienceRequest) {
+        boolean isUpdate = experienceRequest.getIdExperiencia() != null;
+        String procedureName = isUpdate ? "SP_BT_TALENTO_EXPERIENCIA_UPD" : "SP_BT_TALENTO_EXPERIENCIA_INS";
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
         BaseResponse baseResponse = new BaseResponse();
 
-        LocalDate dateInit = Common.formatDate(addExperienceRequest.getFechaInicio());
-        LocalDate dateEnd = Common.formatDate(addExperienceRequest.getFechaFin());
+        LocalDate dateInit = Common.formatDate(experienceRequest.getFechaInicio());
+        LocalDate dateEnd = Common.formatDate(experienceRequest.getFechaFin());
 
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("ID_TALENTO", addExperienceRequest.getIdTalento())
-                .addValue("EMPRESA", addExperienceRequest.getEmpresa())
-                .addValue("PUESTO", addExperienceRequest.getEmpresa())
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("EMPRESA", experienceRequest.getEmpresa())
+                .addValue("PUESTO", experienceRequest.getPuesto())
                 .addValue("FCH_INICIO", dateInit)
                 .addValue("FCH_FIN", dateEnd)
-                .addValue("FL_ACTUALIDAD", addExperienceRequest.getEmpresa())
-                .addValue("FUNCIONES", addExperienceRequest.getEmpresa())
+                .addValue("FL_ACTUALIDAD", experienceRequest.getFlActualidad())
+                .addValue("FUNCIONES", experienceRequest.getFunciones())
                 .addValue("ID_ROL", baseRequest.getIdRol())
                 .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
                 .addValue("ID_USUARIO", baseRequest.getIdUsuario())
                 .addValue("USERNAME", baseRequest.getUsername());
 
-        return simpleSPCall(simpleJdbcCall, baseResponse, params);
-    }
-
-    public BaseResponse updateTalentExperience(BaseRequest baseRequest, UpdateExperienceRequest updateExperienceRequest) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_EXPERIENCIA_UPD");
-        BaseResponse baseResponse = new BaseResponse();
-
-        LocalDate dateInit = Common.formatDate(updateExperienceRequest.getFechaInicio());
-        LocalDate dateEnd = Common.formatDate(updateExperienceRequest.getFechaFin());
-
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("ID_EXPERIENCIA", updateExperienceRequest.getIdExperiencia())
-                .addValue("EMPRESA", updateExperienceRequest.getEmpresa())
-                .addValue("PUESTO", updateExperienceRequest.getEmpresa())
-                .addValue("FCH_INICIO", dateInit)
-                .addValue("FCH_FIN", dateEnd)
-                .addValue("FL_ACTUALIDAD", updateExperienceRequest.getEmpresa())
-                .addValue("FUNCIONES", updateExperienceRequest.getEmpresa())
-                .addValue("ID_ROL", baseRequest.getIdRol())
-                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
-                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
-                .addValue("USERNAME", baseRequest.getUsername());
+        if (isUpdate) {
+            params.addValue("ID_EXPERIENCIA", experienceRequest.getIdExperiencia());
+        } else {
+            params.addValue("ID_TALENTO", experienceRequest.getIdTalento());
+        }
 
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
@@ -248,15 +230,16 @@ public class TalentsRepository {
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
 
-    public BaseResponse addTalentEducation(BaseRequest baseRequest, AddEducationRequest educationRequest) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_EDUCACION_INS");
+    public BaseResponse addOrUpdateTalentEducation(BaseRequest baseRequest, EducationRequest educationRequest) {
+        boolean isUpdate = educationRequest.getIdTalentoEducacion() != null;
+        String procedureName = isUpdate ? "SP_BT_TALENTO_EDUCACION_UPD" : "SP_BT_TALENTO_EDUCACION_INS";
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
         BaseResponse baseResponse = new BaseResponse();
 
         LocalDate dateInit = Common.formatDate(educationRequest.getFechaInicio());
         LocalDate dateEnd = Common.formatDate(educationRequest.getFechaFin());
 
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("ID_TALENTO", educationRequest.getIdTalento())
+        MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("INSTITUCION_EDUCATIVA", educationRequest.getInstitucion())
                 .addValue("CARRERA", educationRequest.getCarrera())
                 .addValue("GRADO", educationRequest.getGrado())
@@ -268,28 +251,11 @@ public class TalentsRepository {
                 .addValue("ID_USUARIO", baseRequest.getIdUsuario())
                 .addValue("USERNAME", baseRequest.getUsername());
 
-        return simpleSPCall(simpleJdbcCall, baseResponse, params);
-    }
-
-    public BaseResponse updateTalentEducation(BaseRequest baseRequest, UpdateEducationRequest updateEducationRequest) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_EDUCACION_UPD");
-        BaseResponse baseResponse = new BaseResponse();
-
-        LocalDate dateInit = Common.formatDate(updateEducationRequest.getFechaInicio());
-        LocalDate dateEnd = Common.formatDate(updateEducationRequest.getFechaFin());
-
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("ID_TALENTO_EDUCACION", updateEducationRequest.getIdTalentoEducacion())
-                .addValue("INSTITUCION_EDUCATIVA", updateEducationRequest.getInstitucion())
-                .addValue("CARRERA", updateEducationRequest.getCarrera())
-                .addValue("GRADO", updateEducationRequest.getGrado())
-                .addValue("FCH_INICIO", dateInit)
-                .addValue("FCH_FIN", dateEnd)
-                .addValue("FL_ACTUALIDAD", updateEducationRequest.getFlActualidad())
-                .addValue("ID_ROL", baseRequest.getIdRol())
-                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
-                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
-                .addValue("USERNAME", baseRequest.getUsername());
+        if (isUpdate) {
+            params.addValue("ID_TALENTO_EDUCACION", educationRequest.getIdTalentoEducacion());
+        } else {
+            params.addValue("ID_TALENTO", educationRequest.getIdTalento());
+        }
 
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
@@ -308,12 +274,13 @@ public class TalentsRepository {
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
 
-    public BaseResponse addTalentLanguage(BaseRequest baseRequest, AddLanguageRequest languageRequest) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_IDIOMA_INS");
+    public BaseResponse addOrUpdateTalentLanguage(BaseRequest baseRequest, LanguageRequest languageRequest) {
+        boolean isUpdate = languageRequest.getIdTalentoIdioma() != null && languageRequest.getIdTalentoIdioma() > 0;
+        String procedureName = isUpdate ? "SP_BT_TALENTO_IDIOMA_UPD" : "SP_BT_TALENTO_IDIOMA_INS";
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
         BaseResponse baseResponse = new BaseResponse();
 
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("ID_TALENTO", languageRequest.getIdTalento())
+        MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ID_IDIOMA", languageRequest.getIdIdioma())
                 .addValue("ID_NIVEL", languageRequest.getIdNivel())
                 .addValue("ESTRELLAS", languageRequest.getEstrellas())
@@ -322,22 +289,11 @@ public class TalentsRepository {
                 .addValue("ID_USUARIO", baseRequest.getIdUsuario())
                 .addValue("USERNAME", baseRequest.getUsername());
 
-        return simpleSPCall(simpleJdbcCall, baseResponse, params);
-    }
-
-    public BaseResponse updateTalentLanguage(BaseRequest baseRequest, UpdateLanguageRequest updateLanguageRequest) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_IDIOMA_UPD");
-        BaseResponse baseResponse = new BaseResponse();
-
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("ID_TALENTO_IDIOMA", updateLanguageRequest.getIdTalentoIdioma())
-                .addValue("ID_IDIOMA", updateLanguageRequest.getIdIdioma())
-                .addValue("ID_NIVEL", updateLanguageRequest.getIdNivel())
-                .addValue("ESTRELLAS", updateLanguageRequest.getEstrellas())
-                .addValue("ID_ROL", baseRequest.getIdRol())
-                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
-                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
-                .addValue("USERNAME", baseRequest.getUsername());
+        if (isUpdate) {
+            params.addValue("ID_TALENTO_IDIOMA", languageRequest.getIdTalentoIdioma());
+        } else {
+            params.addValue("ID_TALENTO", languageRequest.getIdTalento());
+        }
 
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
@@ -356,12 +312,13 @@ public class TalentsRepository {
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
 
-    public BaseResponse addTalentFeedback(BaseRequest baseRequest, AddFeedbackRequest feedbackRequest) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_IDIOMA_DEL");
+    public BaseResponse addOrUpdateTalentFeedback(BaseRequest baseRequest, FeedbackRequest feedbackRequest) {
+        boolean isUpdate = feedbackRequest.getIdFeedback() != null && feedbackRequest.getIdFeedback() > 0;
+        String procedureName = isUpdate ? "SP_BT_TALENTO_FEEDBACK_UPD" : "SP_BT_TALENTO_FEEDBACK_INS";
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
         BaseResponse baseResponse = new BaseResponse();
 
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("ID_TALENTO", feedbackRequest.getIdTalento())
+        MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ESTRELLAS", feedbackRequest.getEstrellas())
                 .addValue("DESCRIPCION", feedbackRequest.getFeedback())
                 .addValue("ID_ROL", baseRequest.getIdRol())
@@ -369,21 +326,11 @@ public class TalentsRepository {
                 .addValue("ID_USUARIO", baseRequest.getIdUsuario())
                 .addValue("USERNAME", baseRequest.getUsername());
 
-        return simpleSPCall(simpleJdbcCall, baseResponse, params);
-    }
-
-    public BaseResponse updateTalentFeedback(BaseRequest baseRequest, UpdateFeedbackRequest updateFeedbackRequest) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_FEEDBACK_UPD");
-        BaseResponse baseResponse = new BaseResponse();
-
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("ID_FEEDBACK", updateFeedbackRequest.getIdFeedback())
-                .addValue("ESTRELLAS", updateFeedbackRequest.getEstrellas())
-                .addValue("DESCRIPCION", updateFeedbackRequest.getFeedback())
-                .addValue("ID_ROL", baseRequest.getIdRol())
-                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
-                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
-                .addValue("USERNAME", baseRequest.getUsername());
+        if (isUpdate) {
+            params.addValue("ID_FEEDBACK", feedbackRequest.getIdFeedback());
+        } else {
+            params.addValue("ID_TALENTO", feedbackRequest.getIdTalento());
+        }
 
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }

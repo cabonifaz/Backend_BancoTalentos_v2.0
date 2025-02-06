@@ -1,5 +1,6 @@
 package com.bdt.bancotalentosbackend.model.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,12 +8,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AddEducationRequest {
+public class FeedbackRequest {
+    @JsonProperty()
     private Integer idTalento;
-    private String institucion;
-    private String carrera;
-    private String grado;
-    private String fechaInicio;
-    private String fechaFin;
-    private Integer flActualidad;
+    @JsonProperty()
+    private Integer idFeedback;
+    private Integer estrellas;
+    private String feedback;
 }

@@ -62,17 +62,10 @@ public class TalentsService implements ITalentsService {
     }
 
     @Override
-    public BaseResponse addTalentExperience(String token, AddExperienceRequest experienceRequest) {
+    public BaseResponse addOrUpdateTalentExperience(String token, ExperienceRequest experienceRequest) {
         UserDTO user = jwt.decodeToken(token);
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
-        return talentsRepository.addTalentExperience(baseRequest, experienceRequest);
-    }
-
-    @Override
-    public BaseResponse updateTalentExperience(String token, UpdateExperienceRequest experienceRequest) {
-        UserDTO user = jwt.decodeToken(token);
-        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
-        return talentsRepository.updateTalentExperience(baseRequest, experienceRequest);
+        return talentsRepository.addOrUpdateTalentExperience(baseRequest, experienceRequest);
     }
 
     @Override
@@ -83,17 +76,10 @@ public class TalentsService implements ITalentsService {
     }
 
     @Override
-    public BaseResponse addTalentEducation(String token, AddEducationRequest educationRequest) {
+    public BaseResponse addOrUpdateTalentEducation(String token, EducationRequest educationRequest) {
         UserDTO user = jwt.decodeToken(token);
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
-        return talentsRepository.addTalentEducation(baseRequest, educationRequest);
-    }
-
-    @Override
-    public BaseResponse updateTalentEducation(String token, UpdateEducationRequest educationRequest) {
-        UserDTO user = jwt.decodeToken(token);
-        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
-        return talentsRepository.updateTalentEducation(baseRequest, educationRequest);
+        return talentsRepository.addOrUpdateTalentEducation(baseRequest, educationRequest);
     }
 
     @Override
@@ -104,17 +90,10 @@ public class TalentsService implements ITalentsService {
     }
 
     @Override
-    public BaseResponse addTalentLanguage(String token, AddLanguageRequest languageRequest) {
+    public BaseResponse addOrUpdateTalentLanguage(String token, LanguageRequest languageRequest) {
         UserDTO user = jwt.decodeToken(token);
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
-        return talentsRepository.addTalentLanguage(baseRequest, languageRequest);
-    }
-
-    @Override
-    public BaseResponse updateTalentLanguage(String token, UpdateLanguageRequest languageRequest) {
-        UserDTO user = jwt.decodeToken(token);
-        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
-        return talentsRepository.updateTalentLanguage(baseRequest, languageRequest);
+        return talentsRepository.addOrUpdateTalentLanguage(baseRequest, languageRequest);
     }
 
     @Override
@@ -125,17 +104,10 @@ public class TalentsService implements ITalentsService {
     }
 
     @Override
-    public BaseResponse addTalentFeedback(String token, AddFeedbackRequest feedbackRequest) {
+    public BaseResponse addOrUpdateTalentFeedback(String token, FeedbackRequest feedbackRequest) {
         UserDTO user = jwt.decodeToken(token);
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
-        return talentsRepository.addTalentFeedback(baseRequest, feedbackRequest);
-    }
-
-    @Override
-    public BaseResponse updateTalentFeedback(String token, UpdateFeedbackRequest feedbackRequest) {
-        UserDTO user = jwt.decodeToken(token);
-        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
-        return talentsRepository.updateTalentFeedback(baseRequest, feedbackRequest);
+        return talentsRepository.addOrUpdateTalentFeedback(baseRequest, feedbackRequest);
     }
 
     @Override

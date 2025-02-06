@@ -130,34 +130,16 @@ public class TalentsController {
         }
     }
 
-    @PostMapping("/addExperience")
-    public ResponseEntity<BaseResponse> addExperience(
-            @RequestBody AddExperienceRequest addExperienceRequest,
+    @PostMapping("/addOrUpdateExperience")
+    public ResponseEntity<BaseResponse> addOrUpdateExperience(
+            @RequestBody ExperienceRequest experienceRequest,
             HttpServletRequest httpServletRequest
     ) {
         BaseResponse response = new BaseResponse();
 
         try {
             String token = JWTHelper.extractToken(httpServletRequest);
-            response = talentsService.addTalentExperience(token, addExperienceRequest);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.setIdMensaje(3);
-            response.setMensaje(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    @PostMapping("/updateExperience")
-    public ResponseEntity<BaseResponse> updateExperience(
-            @RequestBody UpdateExperienceRequest updateExperienceRequest,
-            HttpServletRequest httpServletRequest
-    ) {
-        BaseResponse response = new BaseResponse();
-
-        try {
-            String token = JWTHelper.extractToken(httpServletRequest);
-            response = talentsService.updateTalentExperience(token, updateExperienceRequest);
+            response = talentsService.addOrUpdateTalentExperience(token, experienceRequest);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.setIdMensaje(3);
@@ -184,34 +166,16 @@ public class TalentsController {
         }
     }
 
-    @PostMapping("/addEducation")
-    public ResponseEntity<BaseResponse> addEducation(
-            @RequestBody AddEducationRequest addEducationRequest,
+    @PostMapping("/addOrUpdateEducation")
+    public ResponseEntity<BaseResponse> addOrUpdateEducation(
+            @RequestBody EducationRequest educationRequest,
             HttpServletRequest httpServletRequest
     ) {
         BaseResponse response = new BaseResponse();
 
         try {
             String token = JWTHelper.extractToken(httpServletRequest);
-            response = talentsService.addTalentEducation(token, addEducationRequest);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.setIdMensaje(3);
-            response.setMensaje(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    @PostMapping("/updateEducation")
-    public ResponseEntity<BaseResponse> updateEducation(
-            @RequestBody UpdateEducationRequest updateEducationRequest,
-            HttpServletRequest httpServletRequest
-    ) {
-        BaseResponse response = new BaseResponse();
-
-        try {
-            String token = JWTHelper.extractToken(httpServletRequest);
-            response = talentsService.updateTalentEducation(token, updateEducationRequest);
+            response = talentsService.addOrUpdateTalentEducation(token, educationRequest);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.setIdMensaje(3);
@@ -238,34 +202,16 @@ public class TalentsController {
         }
     }
 
-    @PostMapping("/addLanguage")
-    public ResponseEntity<BaseResponse> addLanguage(
-            @RequestBody AddLanguageRequest addLanguageRequest,
+    @PostMapping("/addOrUpdateLanguage")
+    public ResponseEntity<BaseResponse> addOrUpdateLanguage(
+            @RequestBody LanguageRequest languageRequest,
             HttpServletRequest httpServletRequest
     ) {
         BaseResponse response = new BaseResponse();
 
         try {
             String token = JWTHelper.extractToken(httpServletRequest);
-            response = talentsService.addTalentLanguage(token, addLanguageRequest);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.setIdMensaje(3);
-            response.setMensaje(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    @PostMapping("/updateLanguage")
-    public ResponseEntity<BaseResponse> updateLanguage(
-            @RequestBody UpdateLanguageRequest updateLanguageRequest,
-            HttpServletRequest httpServletRequest
-    ) {
-        BaseResponse response = new BaseResponse();
-
-        try {
-            String token = JWTHelper.extractToken(httpServletRequest);
-            response = talentsService.updateTalentLanguage(token, updateLanguageRequest);
+            response = talentsService.addOrUpdateTalentLanguage(token, languageRequest);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.setIdMensaje(3);
@@ -292,34 +238,16 @@ public class TalentsController {
         }
     }
 
-    @PostMapping("/addFeedback")
+    @PostMapping("/addOrUpdateFeedback")
     public ResponseEntity<BaseResponse> addFeedback(
-            @RequestBody AddFeedbackRequest addFeedbackRequest,
+            @RequestBody FeedbackRequest feedbackRequest,
             HttpServletRequest httpServletRequest
     ) {
         BaseResponse response = new BaseResponse();
 
         try {
             String token = JWTHelper.extractToken(httpServletRequest);
-            response = talentsService.addTalentFeedback(token, addFeedbackRequest);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.setIdMensaje(3);
-            response.setMensaje(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    @PostMapping("/updateFeedback")
-    public ResponseEntity<BaseResponse> updateFeedback(
-            @RequestBody UpdateFeedbackRequest updateFeedbackRequest,
-            HttpServletRequest httpServletRequest
-    ) {
-        BaseResponse response = new BaseResponse();
-
-        try {
-            String token = JWTHelper.extractToken(httpServletRequest);
-            response = talentsService.updateTalentFeedback(token, updateFeedbackRequest);
+            response = talentsService.addOrUpdateTalentFeedback(token, feedbackRequest);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.setIdMensaje(3);
