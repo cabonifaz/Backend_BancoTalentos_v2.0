@@ -8,7 +8,7 @@ import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
 public interface ITalentsService {
     TalentsListResponse getTalents(String token, SearchRequest searchRequest);
     TalentResponse getTalentById(String token, Integer talentId);
-    BaseResponse updateTalent(String token, TalentUpdateRequest updateRequest);
+    BaseResponse addOrUpdateTalent(String token, TalentRequest updateRequest);
     BaseResponse addTalentToFavourite(String token, TalentToFavRequest favRequest);
     BaseResponse addTalentTechAbility(String token, TechAbilityRequest techAbilityRequest);
     BaseResponse addTalentSoftAbility(String token, SoftAbilityRequest techAbilityRequest);

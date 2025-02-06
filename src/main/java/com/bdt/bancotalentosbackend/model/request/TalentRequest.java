@@ -1,13 +1,17 @@
 package com.bdt.bancotalentosbackend.model.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TalentUpdateRequest {
+public class TalentRequest {
+    @JsonProperty()
     private Integer idTalento;
     private String nombres;
     private String apellidoPaterno;
@@ -27,4 +31,14 @@ public class TalentUpdateRequest {
     private Double montoInicialRxH;
     private Double montoFinalRxH;
     private Integer idMoneda;
+    @JsonProperty()
+    private List<TechAbilityRequest> abilidadesTecnicas;
+    @JsonProperty()
+    private List<SoftAbilityRequest> abilidadesBlandas;
+    @JsonProperty()
+    private List<ExperienceRequest> experiencias;
+    @JsonProperty()
+    private List<EducationRequest> educaciones;
+    @JsonProperty()
+    private List<LanguageRequest> idiomas;
 }

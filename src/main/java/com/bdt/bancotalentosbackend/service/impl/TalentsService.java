@@ -34,10 +34,10 @@ public class TalentsService implements ITalentsService {
     }
 
     @Override
-    public BaseResponse updateTalent(String token, TalentUpdateRequest updateRequest) {
+    public BaseResponse addOrUpdateTalent(String token, TalentRequest updateRequest) {
         UserDTO user = jwt.decodeToken(token);
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
-        return talentsRepository.updateTalent(baseRequest, updateRequest);
+        return talentsRepository.addOrUpdateTalent(baseRequest, updateRequest);
     }
 
     @Override

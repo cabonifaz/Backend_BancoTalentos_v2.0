@@ -58,16 +58,16 @@ public class TalentsController {
         }
     }
 
-    @PostMapping("/update")
-    public ResponseEntity<BaseResponse> updateTalent(
-            @RequestBody TalentUpdateRequest updateRequest,
+    @PostMapping("/addOrUpdateTalent")
+    public ResponseEntity<BaseResponse> addOrUpdateTalent(
+            @RequestBody TalentRequest updateRequest,
             HttpServletRequest httpServletRequest
     ) {
         BaseResponse response = new BaseResponse();
 
         try {
             String token = JWTHelper.extractToken(httpServletRequest);
-            response = talentsService.updateTalent(token, updateRequest);
+            response = talentsService.addOrUpdateTalent(token, updateRequest);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.setIdMensaje(3);

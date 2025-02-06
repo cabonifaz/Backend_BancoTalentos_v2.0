@@ -108,34 +108,39 @@ public class TalentsRepository {
         return talentResponse;
     }
 
-    public BaseResponse updateTalent(BaseRequest baseRequest, TalentUpdateRequest updateRequest) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_UPD");
+    public BaseResponse addOrUpdateTalent(BaseRequest baseRequest, TalentRequest talentRequest) {
+        boolean isUpdate = talentRequest.getIdTalento() != null;
+        String procedureName = isUpdate ? "SP_BT_TALENTO_UPD" : "SP_BT_TALENTO_INS";
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
         BaseResponse baseResponse = new BaseResponse();
 
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("ID_TALENTO", updateRequest.getIdTalento())
-                .addValue("NOMBRES", updateRequest.getNombres())
-                .addValue("APELLIDO_PATERNO", updateRequest.getApellidoPaterno())
-                .addValue("APELLIDO_MATERNO", updateRequest.getApellidoMaterno())
-                .addValue("EMAIL", updateRequest.getEmail())
-                .addValue("CELULAR", updateRequest.getTelefono())
-                .addValue("RUTA_IMAGEN", updateRequest.getImagen())
-                .addValue("LINK_LINKEDIN", updateRequest.getLinkedin())
-                .addValue("LINK_GITHUB", updateRequest.getGithub())
-                .addValue("DESCRIPCION", updateRequest.getDescripcion())
-                .addValue("DISPONIBILIDAD", updateRequest.getDisponibilidad())
-                .addValue("PUESTO", updateRequest.getPuesto())
-                .addValue("ID_PAIS", updateRequest.getIdPais())
-                .addValue("ID_CIUDAD", updateRequest.getIdCiudad())
-                .addValue("MONTO_INICIAL_PLANILLA", updateRequest.getMontoInicialPlanilla())
-                .addValue("MONTO_FINAL_PLANILLA", updateRequest.getMontoFinalPlanilla())
-                .addValue("MONTO_INICIAL_RXH", updateRequest.getMontoInicialRxH())
-                .addValue("MONTO_FINAL_RXH", updateRequest.getMontoFinalRxH())
-                .addValue("ID_MONEDA", updateRequest.getIdMoneda())
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("NOMBRES", talentRequest.getNombres())
+                .addValue("APELLIDO_PATERNO", talentRequest.getApellidoPaterno())
+                .addValue("APELLIDO_MATERNO", talentRequest.getApellidoMaterno())
+                .addValue("EMAIL", talentRequest.getEmail())
+                .addValue("CELULAR", talentRequest.getTelefono())
+                .addValue("RUTA_IMAGEN", talentRequest.getImagen())
+                .addValue("LINK_LINKEDIN", talentRequest.getLinkedin())
+                .addValue("LINK_GITHUB", talentRequest.getGithub())
+                .addValue("DESCRIPCION", talentRequest.getDescripcion())
+                .addValue("DISPONIBILIDAD", talentRequest.getDisponibilidad())
+                .addValue("PUESTO", talentRequest.getPuesto())
+                .addValue("ID_PAIS", talentRequest.getIdPais())
+                .addValue("ID_CIUDAD", talentRequest.getIdCiudad())
+                .addValue("MONTO_INICIAL_PLANILLA", talentRequest.getMontoInicialPlanilla())
+                .addValue("MONTO_FINAL_PLANILLA", talentRequest.getMontoFinalPlanilla())
+                .addValue("MONTO_INICIAL_RXH", talentRequest.getMontoInicialRxH())
+                .addValue("MONTO_FINAL_RXH", talentRequest.getMontoFinalRxH())
+                .addValue("ID_MONEDA", talentRequest.getIdMoneda())
                 .addValue("ID_ROL", baseRequest.getIdRol())
                 .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
                 .addValue("ID_USUARIO", baseRequest.getIdUsuario())
                 .addValue("USERNAME", baseRequest.getUsername());
+
+        if (isUpdate) {
+            params.addValue("ID_TALENTO", talentRequest.getIdTalento());
+        }
 
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
