@@ -6,6 +6,7 @@ import com.bdt.bancotalentosbackend.model.request.*;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
+import com.bdt.bancotalentosbackend.util.Common;
 import com.bdt.bancotalentosbackend.util.TalentsUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -13,6 +14,8 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -189,12 +192,15 @@ public class TalentsRepository {
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_EXPERIENCIA_INS");
         BaseResponse baseResponse = new BaseResponse();
 
+        LocalDate dateInit = Common.formatDate(addExperienceRequest.getFechaInicio());
+        LocalDate dateEnd = Common.formatDate(addExperienceRequest.getFechaFin());
+
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ID_TALENTO", addExperienceRequest.getIdTalento())
                 .addValue("EMPRESA", addExperienceRequest.getEmpresa())
                 .addValue("PUESTO", addExperienceRequest.getEmpresa())
-                .addValue("FCH_INICIO", addExperienceRequest.getEmpresa())
-                .addValue("FCH_FIN", addExperienceRequest.getEmpresa())
+                .addValue("FCH_INICIO", dateInit)
+                .addValue("FCH_FIN", dateEnd)
                 .addValue("FL_ACTUALIDAD", addExperienceRequest.getEmpresa())
                 .addValue("FUNCIONES", addExperienceRequest.getEmpresa())
                 .addValue("ID_ROL", baseRequest.getIdRol())
@@ -209,12 +215,15 @@ public class TalentsRepository {
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_EXPERIENCIA_UPD");
         BaseResponse baseResponse = new BaseResponse();
 
+        LocalDate dateInit = Common.formatDate(updateExperienceRequest.getFechaInicio());
+        LocalDate dateEnd = Common.formatDate(updateExperienceRequest.getFechaFin());
+
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ID_EXPERIENCIA", updateExperienceRequest.getIdExperiencia())
                 .addValue("EMPRESA", updateExperienceRequest.getEmpresa())
                 .addValue("PUESTO", updateExperienceRequest.getEmpresa())
-                .addValue("FCH_INICIO", updateExperienceRequest.getEmpresa())
-                .addValue("FCH_FIN", updateExperienceRequest.getEmpresa())
+                .addValue("FCH_INICIO", dateInit)
+                .addValue("FCH_FIN", dateEnd)
                 .addValue("FL_ACTUALIDAD", updateExperienceRequest.getEmpresa())
                 .addValue("FUNCIONES", updateExperienceRequest.getEmpresa())
                 .addValue("ID_ROL", baseRequest.getIdRol())

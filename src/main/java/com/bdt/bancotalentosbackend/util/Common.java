@@ -5,6 +5,8 @@ import com.bdt.bancotalentosbackend.model.request.BaseRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +28,14 @@ public class Common {
             return baseRequest;
         }
         return baseRequest;
+    }
+
+    public static LocalDate formatDate(String date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        if (date != null && !date.isEmpty()) {
+            return LocalDate.parse(date, formatter);
+        }
+        return null;
     }
 
     public static BaseResponse simpleSPCall(SimpleJdbcCall jdbcCall, BaseResponse baseResponse, SqlParameterSource params) {
