@@ -32,9 +32,9 @@ public class TalentRequest {
     private Double montoFinalRxH;
     private Integer idMoneda;
     @JsonProperty()
-    private List<TechAbilityRequest> abilidadesTecnicas;
+    private List<TechAbilityRequest> habilidadesTecnicas;
     @JsonProperty()
-    private List<SoftAbilityRequest> abilidadesBlandas;
+    private List<SoftAbilityRequest> habilidadesBlandas;
     @JsonProperty()
     private List<ExperienceRequest> experiencias;
     @JsonProperty()
