@@ -143,6 +143,11 @@ public class TalentsRepository {
                 .addValue("USERNAME", baseRequest.getUsername());
 
         if (isUpdate) {
+            if (talentRequest.getIdTalento() == null || talentRequest.getIdTalento() <= 0){
+                baseResponse.setIdMensaje(1);
+                baseResponse.setMensaje("El campo idTalento es obligatorio para hacer actualizaciones");
+                return baseResponse;
+            }
             params.addValue("ID_TALENTO", talentRequest.getIdTalento());
         } else {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -231,8 +236,18 @@ public class TalentsRepository {
                 .addValue("USERNAME", baseRequest.getUsername());
 
         if (isUpdate) {
+            if (experienceRequest.getIdExperiencia() == null || experienceRequest.getIdExperiencia() <= 0){
+                baseResponse.setIdMensaje(1);
+                baseResponse.setMensaje("El campo idExperiencia es obligatorio para hacer actualizaciones");
+                return baseResponse;
+            }
             params.addValue("ID_EXPERIENCIA", experienceRequest.getIdExperiencia());
         } else {
+            if (experienceRequest.getIdTalento() == null || experienceRequest.getIdTalento() <= 0){
+                baseResponse.setIdMensaje(1);
+                baseResponse.setMensaje("El campo idTalento es obligatorio para agregar experiencias");
+                return baseResponse;
+            }
             params.addValue("ID_TALENTO", experienceRequest.getIdTalento());
         }
 
@@ -275,8 +290,18 @@ public class TalentsRepository {
                 .addValue("USERNAME", baseRequest.getUsername());
 
         if (isUpdate) {
+            if (educationRequest.getIdTalentoEducacion() == null || educationRequest.getIdTalentoEducacion() <= 0){
+                baseResponse.setIdMensaje(1);
+                baseResponse.setMensaje("El campo idTalentoEducacion es obligatorio para hacer actualizaciones");
+                return baseResponse;
+            }
             params.addValue("ID_TALENTO_EDUCACION", educationRequest.getIdTalentoEducacion());
         } else {
+            if (educationRequest.getIdTalento() == null || educationRequest.getIdTalento() <= 0){
+                baseResponse.setIdMensaje(1);
+                baseResponse.setMensaje("El campo idTalento es obligatorio para agregar educación");
+                return baseResponse;
+            }
             params.addValue("ID_TALENTO", educationRequest.getIdTalento());
         }
 
@@ -313,8 +338,18 @@ public class TalentsRepository {
                 .addValue("USERNAME", baseRequest.getUsername());
 
         if (isUpdate) {
+            if (languageRequest.getIdTalentoIdioma() == null || languageRequest.getIdTalentoIdioma() <= 0){
+                baseResponse.setIdMensaje(1);
+                baseResponse.setMensaje("El campo idTalentoIdioma es obligatorio para hacer actualizaciones");
+                return baseResponse;
+            }
             params.addValue("ID_TALENTO_IDIOMA", languageRequest.getIdTalentoIdioma());
         } else {
+            if (languageRequest.getIdTalento() == null || languageRequest.getIdTalento() <= 0){
+                baseResponse.setIdMensaje(1);
+                baseResponse.setMensaje("El campo idTalento es obligatorio para agregar idiomas");
+                return baseResponse;
+            }
             params.addValue("ID_TALENTO", languageRequest.getIdTalento());
         }
 
@@ -350,8 +385,18 @@ public class TalentsRepository {
                 .addValue("USERNAME", baseRequest.getUsername());
 
         if (isUpdate) {
+            if (feedbackRequest.getIdFeedback() == null || feedbackRequest.getIdFeedback() <= 0){
+                baseResponse.setIdMensaje(1);
+                baseResponse.setMensaje("El campo idFeedback es obligatorio para agregar feedback");
+                return baseResponse;
+            }
             params.addValue("ID_FEEDBACK", feedbackRequest.getIdFeedback());
         } else {
+            if (feedbackRequest.getIdTalento() == null || feedbackRequest.getIdTalento() <= 0){
+                baseResponse.setIdMensaje(1);
+                baseResponse.setMensaje("El campo idTalento es obligatorio para agregar feedback");
+                return baseResponse;
+            }
             params.addValue("ID_TALENTO", feedbackRequest.getIdTalento());
         }
 
