@@ -12,7 +12,7 @@ public class TalentListDTO {
     private String nombres;
     private String apellidoPaterno;
     private String apellidoMaterno;
-    private String rutaImagen;
+    private String imagen;
     private String puesto;
     private String pais;
     private String ciudad;

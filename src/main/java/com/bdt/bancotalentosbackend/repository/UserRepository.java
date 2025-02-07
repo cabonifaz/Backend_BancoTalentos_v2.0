@@ -14,7 +14,6 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import static com.bdt.bancotalentosbackend.util.Common.getBaseResponse;
 import static com.bdt.bancotalentosbackend.util.Common.simpleSPCall;
 
