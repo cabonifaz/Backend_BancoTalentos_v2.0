@@ -4,11 +4,12 @@ import com.bdt.bancotalentosbackend.model.request.*;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 public interface ITalentsService {
     TalentsListResponse getTalents(String token, SearchRequest searchRequest);
     TalentResponse getTalentById(String token, Integer talentId);
-    BaseResponse addOrUpdateTalent(String token, TalentRequest updateRequest);
+    BaseResponse addOrUpdateTalent(String token, TalentRequest updateRequest) throws JsonProcessingException;
     BaseResponse addTalentToFavourite(String token, TalentToFavRequest favRequest);
     BaseResponse addTalentTechAbility(String token, TechAbilityRequest techAbilityRequest);
     BaseResponse addTalentSoftAbility(String token, SoftAbilityRequest techAbilityRequest);

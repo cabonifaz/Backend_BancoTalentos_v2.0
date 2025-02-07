@@ -8,12 +8,16 @@ import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
 import com.bdt.bancotalentosbackend.util.Common;
 import com.bdt.bancotalentosbackend.util.TalentsUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
+import java.sql.Types;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -108,7 +112,7 @@ public class TalentsRepository {
         return talentResponse;
     }
 
-    public BaseResponse addOrUpdateTalent(BaseRequest baseRequest, TalentRequest talentRequest) {
+    public BaseResponse addOrUpdateTalent(BaseRequest baseRequest, TalentRequest talentRequest) throws JsonProcessingException {
         boolean isUpdate = talentRequest.getIdTalento() != null && talentRequest.getIdTalento() > 0;
         String procedureName = isUpdate ? "SP_BT_TALENTO_UPD" : "SP_BT_TALENTO_INS";
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
@@ -140,6 +144,20 @@ public class TalentsRepository {
 
         if (isUpdate) {
             params.addValue("ID_TALENTO", talentRequest.getIdTalento());
+        } else {
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            String habilidadesTecnicasJson = objectMapper.writeValueAsString(talentRequest.getHabilidadesTecnicas());
+            String habilidadesBlandasJson = objectMapper.writeValueAsString(talentRequest.getHabilidadesBlandas());
+            String experienciasJson = objectMapper.writeValueAsString(talentRequest.getExperiencias());
+            String educacionesJson = objectMapper.writeValueAsString(talentRequest.getEducaciones());
+            String idiomasJson = objectMapper.writeValueAsString(talentRequest.getIdiomas());
+
+            params.addValue("HABILIDADES_TECNICAS_JSON", habilidadesTecnicasJson)
+                    .addValue("HABILIDADES_BLANDAS_JSON", habilidadesBlandasJson)
+                    .addValue("EXPERIENCIAS_JSON", experienciasJson)
+                    .addValue("EDUCACIONES_JSON", educacionesJson)
+                    .addValue("IDIOMAS_JSON", idiomasJson);
         }
 
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
