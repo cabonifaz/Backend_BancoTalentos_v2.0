@@ -16,12 +16,15 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import static com.bdt.bancotalentosbackend.util.Common.getBaseResponse;
 import static com.bdt.bancotalentosbackend.util.Common.simpleSPCall;
+import static com.bdt.bancotalentosbackend.util.FileUtils.guardarImagen;
 
 @Repository
 @RequiredArgsConstructor
@@ -231,7 +234,7 @@ public class TalentsRepository {
         if (isUpdate) {
             params.addValue("ID_EXPERIENCIA", experienceRequest.getIdExperiencia());
         } else {
-            if (experienceRequest.getIdTalento() == null || experienceRequest.getIdTalento() <= 0){
+            if (experienceRequest.getIdTalento() == null || experienceRequest.getIdTalento() <= 0) {
                 baseResponse.setIdMensaje(1);
                 baseResponse.setMensaje("El campo idTalento es obligatorio para agregar experiencias");
                 return baseResponse;
@@ -280,7 +283,7 @@ public class TalentsRepository {
         if (isUpdate) {
             params.addValue("ID_TALENTO_EDUCACION", educationRequest.getIdTalentoEducacion());
         } else {
-            if (educationRequest.getIdTalento() == null || educationRequest.getIdTalento() <= 0){
+            if (educationRequest.getIdTalento() == null || educationRequest.getIdTalento() <= 0) {
                 baseResponse.setIdMensaje(1);
                 baseResponse.setMensaje("El campo idTalento es obligatorio para agregar educación");
                 return baseResponse;
@@ -323,7 +326,7 @@ public class TalentsRepository {
         if (isUpdate) {
             params.addValue("ID_TALENTO_IDIOMA", languageRequest.getIdTalentoIdioma());
         } else {
-            if (languageRequest.getIdTalento() == null || languageRequest.getIdTalento() <= 0){
+            if (languageRequest.getIdTalento() == null || languageRequest.getIdTalento() <= 0) {
                 baseResponse.setIdMensaje(1);
                 baseResponse.setMensaje("El campo idTalento es obligatorio para agregar idiomas");
                 return baseResponse;
@@ -365,7 +368,7 @@ public class TalentsRepository {
         if (isUpdate) {
             params.addValue("ID_FEEDBACK", feedbackRequest.getIdFeedback());
         } else {
-            if (feedbackRequest.getIdTalento() == null || feedbackRequest.getIdTalento() <= 0){
+            if (feedbackRequest.getIdTalento() == null || feedbackRequest.getIdTalento() <= 0) {
                 baseResponse.setIdMensaje(1);
                 baseResponse.setMensaje("El campo idTalento es obligatorio para agregar feedback");
                 return baseResponse;
@@ -389,4 +392,47 @@ public class TalentsRepository {
 
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
+
+
+    //    Espacio solo para migración de archivos
+    public void migrateProfilePhoto() {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_TALENTO_MIGRAR_FOTO_LST");
+        Map<String, Object> result = simpleJdbcCall.execute();
+        List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
+
+        if (resultSet != null && !resultSet.isEmpty()) {
+            List<MigrationProfilePhotoDTO> lstMigration = new ArrayList<>();
+
+            for (Map<String, Object> talentRow : resultSet) {
+                MigrationProfilePhotoDTO migration = new MigrationProfilePhotoDTO(
+                        (Integer) talentRow.get("ID_TALENTO"),
+                        (String) talentRow.get("NUEVA_RUTA_IMAGEN"),
+                        (String) talentRow.get("FILE_EXTENSION"),
+                        (String) talentRow.get("IM_IMAGE_VARCHAR")
+                );
+                lstMigration.add(migration);
+            }
+
+
+            for (MigrationProfilePhotoDTO objMigration : lstMigration) {
+                if (objMigration.getNuevaRutaImagen() != null && !objMigration.getNuevaRutaImagen().equals("")) {
+                    System.out.println("Cargando objeto de id: " + objMigration.getIdTalento());
+                    guardarImagen(objMigration.getFileB64(), objMigration.getFileExtension(), objMigration.getNuevaRutaImagen());
+                    migrateProfilePhotoUpdate(objMigration.getIdTalento(), objMigration.getNuevaRutaImagen());
+                }
+
+            }
+
+        }
+    }
+
+    public void migrateProfilePhotoUpdate(Integer idTalento, String rutaImagen) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_TALENTO_MIGRAR_FOTO_UPD");
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_TALENTO", idTalento)
+                .addValue("URLFOTO", rutaImagen);
+        simpleJdbcCall.execute(params);
+    }
+
+
 }

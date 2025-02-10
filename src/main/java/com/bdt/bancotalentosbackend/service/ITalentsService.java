@@ -21,4 +21,7 @@ public interface ITalentsService {
     BaseResponse deleteTalentLanguage(String token, Integer languageId);
     BaseResponse addOrUpdateTalentFeedback(String token, FeedbackRequest feedbackRequest);
     BaseResponse deleteTalentFeedback(String token, Integer feedbackId);
+
+
+    void migrateProfilePhoto();
 }

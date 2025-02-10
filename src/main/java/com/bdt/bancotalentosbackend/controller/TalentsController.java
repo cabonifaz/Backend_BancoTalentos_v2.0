@@ -31,11 +31,11 @@ public class TalentsController {
         TalentsListResponse response = new TalentsListResponse();
         SearchRequest searchRequest = new SearchRequest(nPag, search, techAbilities, idEnglishLevel, idTalentCollection);
 
-        try{
+        try {
             String token = JWTHelper.extractToken(httpServletRequest);
             response = talentsService.getTalents(token, searchRequest);
             return ResponseEntity.ok(response);
-        }catch (Exception e){
+        } catch (Exception e) {
             response.setBaseResponse(new BaseResponse(3, e.getMessage()));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
@@ -273,4 +273,17 @@ public class TalentsController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+
+    //    Espacio solo para migración de archivos
+    @GetMapping("/migration/profile")
+    public void migrateProfilePhoto() {
+        try {
+            talentsService.migrateProfilePhoto();
+        } catch (Exception e) {
+            System.out.println("Error de migración: " + e.getMessage());
+        }
+    }
+
+
 }

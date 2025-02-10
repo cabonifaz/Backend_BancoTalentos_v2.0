@@ -117,4 +117,10 @@ public class TalentsService implements ITalentsService {
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
         return talentsRepository.deleteTalentFeedback(baseRequest, feedbackId);
     }
+
+    //    Espacio solo para migración de archivos
+    @Override
+    public void migrateProfilePhoto() {
+        talentsRepository.migrateProfilePhoto();
+    }
 }
