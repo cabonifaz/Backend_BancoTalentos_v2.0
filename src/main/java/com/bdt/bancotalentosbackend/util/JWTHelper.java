@@ -30,7 +30,7 @@ public class JWTHelper {
         user.setIdUsuario((Integer) claims.get("id_usuario"));
         user.setIdEmpresa( (Integer) claims.get("id_empresa"));
         user.setUsuario( (String) claims.get("username"));
-        user.setIdRoles((List<Integer>) claims.get("roles"));
+        user.setIdRoles((List<Integer>) claims.get("id_roles"));
 
         return user;
     }
