@@ -61,8 +61,16 @@ public class FileUtils {
             if (archivo.exists()) {
                 logger.info("El archivo existe");
                 BufferedImage imagen = ImageIO.read(archivo);
+
+                // Obtener la extensión del archivo
+                String formato = linkImagen.substring(linkImagen.lastIndexOf(".") + 1).toLowerCase();
+                if (!formato.equals("png") && !formato.equals("jpg") && !formato.equals("jpeg")) {
+                    logger.error("Formato de imagen no soportado: " + formato);
+                    return "";
+                }
+
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                ImageIO.write(imagen, "jpg", byteArrayOutputStream);
+                ImageIO.write(imagen, formato, byteArrayOutputStream); // Usar el formato correcto
                 byte[] byteArray = byteArrayOutputStream.toByteArray();
                 String imagenBase64 = Base64.getEncoder().encodeToString(byteArray);
                 logger.info("Fin Utilitarios - CargarImagen");
