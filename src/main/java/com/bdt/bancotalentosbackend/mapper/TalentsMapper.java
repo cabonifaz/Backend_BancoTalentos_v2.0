@@ -1,6 +1,8 @@
 package com.bdt.bancotalentosbackend.mapper;
 
 import com.bdt.bancotalentosbackend.model.dto.*;
+import com.bdt.bancotalentosbackend.util.FileUtils;
+
 import java.util.Map;
 
 public class TalentsMapper {
@@ -67,7 +69,7 @@ public class TalentsMapper {
                 (String) talentRow.get("NOMBRES"),
                 (String) talentRow.get("APELLIDO_PATERNO"),
                 (String) talentRow.get("APELLIDO_MATERNO"),
-                (String) talentRow.get("RUTA_IMAGEN"),
+                FileUtils.cargarImagen((String) talentRow.get("RUTA_IMAGEN")),
                 (String) talentRow.get("PUESTO"),
                 (String) talentRow.get("PAIS"),
                 (String) talentRow.get("CIUDAD"),
