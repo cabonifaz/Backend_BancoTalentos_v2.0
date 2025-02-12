@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FeedbackDTO {
     private Integer idFeedback;
+    private Integer idUsuario;
     private String usuario;
     private String descripcion;
     private Integer estrellas;

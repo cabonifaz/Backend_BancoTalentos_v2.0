@@ -9,6 +9,7 @@ public class TalentsMapper {
     public static FeedbackDTO mapToFeedbackDTO(Map<String, Object> row) {
         return new FeedbackDTO(
                 (Integer) row.get("ID_FEEDBACK"),
+                (Integer) row.get("ID_USUARIO"),
                 (String) row.get("USUARIO"),
                 (String) row.get("DESCRIPCION"),
                 (Integer) row.get("ESTRELLAS")
