@@ -35,10 +35,10 @@ public class TalentsService implements ITalentsService {
     }
 
     @Override
-    public BaseResponse addOrUpdateTalent(String token, TalentRequest updateRequest) throws JsonProcessingException {
+    public BaseResponse addOrUpdateTalent(String token, TalentRequest talentRequest) throws JsonProcessingException {
         UserDTO user = jwt.decodeToken(token);
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
-        return talentsRepository.addOrUpdateTalent(baseRequest, updateRequest);
+        return talentsRepository.addOrUpdateTalent(baseRequest, talentRequest);
     }
 
     @Override

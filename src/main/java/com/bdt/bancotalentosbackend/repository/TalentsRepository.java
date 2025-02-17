@@ -7,6 +7,7 @@ import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
 import com.bdt.bancotalentosbackend.util.Common;
+import com.bdt.bancotalentosbackend.util.Constante;
 import com.bdt.bancotalentosbackend.util.TalentsUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,9 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.bdt.bancotalentosbackend.mapper.TalentsMapper.mapTalentFilesToTableLstArchivos;
 import static com.bdt.bancotalentosbackend.util.Common.getBaseResponse;
 import static com.bdt.bancotalentosbackend.util.Common.simpleSPCall;
-import static com.bdt.bancotalentosbackend.util.FileUtils.guardarImagen;
+import static com.bdt.bancotalentosbackend.util.FileUtils.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -119,13 +121,30 @@ public class TalentsRepository {
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
         BaseResponse baseResponse = new BaseResponse();
 
+        FileRequest fotoRequest = talentRequest.getFotoArchivo();
+        String rutaFoto = Constante.RUTA_REPOSITORIO_FOTO_TALENTO + fotoRequest.getNombreArchivo() + "." + fotoRequest.getExtensionArchivo();
+
+        FileRequest cvRequest = talentRequest.getCvArchivo();
+        String rutaCV = Constante.RUTA_REPOSITORIO_CV_TALENTO + cvRequest.getNombreArchivo() + "." + cvRequest.getExtensionArchivo();
+
+        List<FileDBRequest> talentFiles = new ArrayList<>();
+        FileDBRequest cvFile = new FileDBRequest(
+                null,
+                cvRequest.getNombreArchivo(),
+                cvRequest.getExtensionArchivo(),
+                rutaCV,
+                cvRequest.getIdTipoArchivo(),
+                cvRequest.getIdTipoDocumento()
+        );
+        talentFiles.add(cvFile);
+
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("NOMBRES", talentRequest.getNombres())
                 .addValue("APELLIDO_PATERNO", talentRequest.getApellidoPaterno())
                 .addValue("APELLIDO_MATERNO", talentRequest.getApellidoMaterno())
                 .addValue("EMAIL", talentRequest.getEmail())
                 .addValue("CELULAR", talentRequest.getTelefono())
-                .addValue("RUTA_IMAGEN", talentRequest.getImagen())
+                .addValue("RUTA_IMAGEN", rutaFoto)
                 .addValue("LINK_LINKEDIN", talentRequest.getLinkedin())
                 .addValue("LINK_GITHUB", talentRequest.getGithub())
                 .addValue("DESCRIPCION", talentRequest.getDescripcion())
@@ -146,6 +165,8 @@ public class TalentsRepository {
         if (isUpdate) {
             params.addValue("ID_TALENTO", talentRequest.getIdTalento());
         } else {
+            params.addValue("LST_ARCHIVOS", mapTalentFilesToTableLstArchivos(talentFiles));
+
             ObjectMapper objectMapper = new ObjectMapper();
 
             String habilidadesTecnicasJson = objectMapper.writeValueAsString(talentRequest.getHabilidadesTecnicas());
@@ -161,7 +182,25 @@ public class TalentsRepository {
                     .addValue("IDIOMAS_JSON", idiomasJson);
         }
 
-        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+        BaseResponse finalResponse = simpleSPCall(simpleJdbcCall, baseResponse, params);
+
+        if (finalResponse.getIdMensaje() == 2) {
+            boolean imagenGuardada = guardarImagen(fotoRequest.getStringB64(), fotoRequest.getExtensionArchivo(), rutaFoto);
+            if (!imagenGuardada) {
+                finalResponse.setIdMensaje(1);
+                finalResponse.setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar la foto");
+            }
+        }
+
+        if (finalResponse.getIdMensaje() == 2) {
+            boolean cvGuardado = guardarArchivo(cvRequest.getStringB64(), cvRequest.getExtensionArchivo(), rutaCV);
+            if (!cvGuardado) {
+                finalResponse.setIdMensaje(1);
+                finalResponse.setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar el CV");
+            }
+        }
+
+        return finalResponse;
     }
 
     public BaseResponse addTalentToFavourite(BaseRequest baseRequest, TalentToFavRequest favRequest) {
@@ -417,7 +456,7 @@ public class TalentsRepository {
             for (MigrationProfilePhotoDTO objMigration : lstMigration) {
                 if (objMigration.getNuevaRutaImagen() != null && !objMigration.getNuevaRutaImagen().equals("")) {
                     System.out.println("Cargando objeto de id: " + objMigration.getIdTalento());
-                    guardarImagen(objMigration.getFileB64(), objMigration.getFileExtension(), objMigration.getNuevaRutaImagen());
+                    guardarImagenMigracion(objMigration.getFileB64(), objMigration.getFileExtension(), objMigration.getNuevaRutaImagen());
                     migrateProfilePhotoUpdate(objMigration.getIdTalento(), objMigration.getNuevaRutaImagen());
                 }
 

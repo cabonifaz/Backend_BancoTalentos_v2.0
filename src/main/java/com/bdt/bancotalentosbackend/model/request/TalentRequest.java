@@ -18,7 +18,8 @@ public class TalentRequest {
     private String apellidoMaterno;
     private String email;
     private String telefono;
-    private String imagen;
+    private FileRequest cvArchivo;
+    private FileRequest fotoArchivo;
     private String linkedin;
     private String github;
     private String descripcion;

@@ -6,4 +6,10 @@ public class Constante {
     public static final String LISTAR_TALENTOS = "13";
 
     public static final String TXT_SEPARADOR = "=========================================";
+
+
+    // RUTAS BASE DE REPOSITORIO
+    public static final String RUTA_REPOSITORIO_FOTO_TALENTO = "repositorio/talento/[ID]/";
+    public static final String RUTA_REPOSITORIO_CV_TALENTO = "repositorio/talento/[ID]/CV/";
+    public static final String RUTA_REPOSITORIO_FOTO_ARCHIVOS = "repositorio/talento/[ID]/archivos/";
 }
