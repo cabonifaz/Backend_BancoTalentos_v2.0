@@ -5,11 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Base64;
 
 public class FileUtils {
@@ -122,6 +118,46 @@ public class FileUtils {
             return archivo.getAbsolutePath();
         } catch (IOException e) {
             logger.error("Error al cargar la imagen: " + e.getMessage());
+            return "";
+        }
+    }
+
+    public static String cargarPDF(String linkPDF) {
+        try {
+            logger.info(Constante.TXT_SEPARADOR);
+            logger.info("Inicio Utilitarios - CargarPDF");
+            File archivo = new File(linkPDF).getAbsoluteFile();
+            logger.info("Consultando existencia de archivo...");
+            if (archivo.exists()) {
+                logger.info("El archivo existe");
+
+                if (!linkPDF.toLowerCase().endsWith(".pdf")) {
+                    logger.error("El archivo no es un PDF: " + linkPDF);
+                    return "";
+                }
+
+                FileInputStream fileInputStream = new FileInputStream(archivo);
+                byte[] byteArray = new byte[(int) archivo.length()];
+                int bytesRead = fileInputStream.read(byteArray);
+                fileInputStream.close();
+
+                if (bytesRead != byteArray.length) {
+                    logger.error("No se pudo leer completamente el archivo PDF: " + linkPDF);
+                    return "";
+                }
+
+                String pdfBase64 = Base64.getEncoder().encodeToString(byteArray);
+                logger.info("Fin Utilitarios - CargarPDF");
+                logger.info(Constante.TXT_SEPARADOR);
+                return pdfBase64;
+            } else {
+                logger.info("El archivo no existe");
+                logger.info("Fin Utilitarios - CargarPDF");
+                logger.info(Constante.TXT_SEPARADOR);
+                return "";
+            }
+        } catch (IOException e) {
+            logger.error("Error al cargar el PDF: " + e.getMessage());
             return "";
         }
     }

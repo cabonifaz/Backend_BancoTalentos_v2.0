@@ -3,12 +3,14 @@ package com.bdt.bancotalentosbackend.service.impl;
 import com.bdt.bancotalentosbackend.model.dto.UserDTO;
 import com.bdt.bancotalentosbackend.model.request.*;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
+import com.bdt.bancotalentosbackend.model.response.FileResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
 import com.bdt.bancotalentosbackend.repository.TalentsRepository;
 import com.bdt.bancotalentosbackend.service.ITalentsService;
 import com.bdt.bancotalentosbackend.util.Common;
 import com.bdt.bancotalentosbackend.util.Constante;
+import com.bdt.bancotalentosbackend.util.FileUtils;
 import com.bdt.bancotalentosbackend.util.JWTHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,21 @@ public class TalentsService implements ITalentsService {
         UserDTO user = jwt.decodeToken(token);
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.LISTAR_TALENTOS);
         return talentsRepository.getTalentById(baseRequest, talentId);
+    }
+
+    @Override
+    public FileResponse getTalentFile(String token, String filePath) {
+        FileResponse fileResponse = new FileResponse();
+        String fileB64 = FileUtils.cargarPDF(filePath);
+        fileResponse.setArchivoB64(fileB64);
+
+        if (!fileB64.isBlank()) {
+            fileResponse.setBaseResponse(new BaseResponse(2, "Archivo B64 generado"));
+            return fileResponse;
+        }
+
+        fileResponse.setBaseResponse(new BaseResponse(1, "Archivo no encontrado"));
+        return fileResponse;
     }
 
     @Override

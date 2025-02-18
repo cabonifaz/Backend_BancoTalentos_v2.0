@@ -4,6 +4,7 @@ import com.bdt.bancotalentosbackend.mapper.TalentsMapper;
 import com.bdt.bancotalentosbackend.model.dto.*;
 import com.bdt.bancotalentosbackend.model.request.*;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
+import com.bdt.bancotalentosbackend.model.response.FileResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
 import com.bdt.bancotalentosbackend.util.Common;
@@ -102,6 +103,7 @@ public class TalentsRepository {
                     talentResponse.setDescripcion((String) talentRow.get("DESCRIPCION"));
                     talentResponse.setDisponibilidad((String) talentRow.get("DISPONIBILIDAD"));
                     talentResponse.setIdColeccion((Integer) talentRow.get("ID_COLECCION"));
+                    talentResponse.setIdMoneda((Integer) talentRow.get("ID_MONEDA"));
                     talentResponse.setCv(TalentsUtils.getTalentCv(result));
                     talentResponse.setHabilidadesTecnicas(TalentsUtils.getTechAbilities(result));
                     talentResponse.setHabilidadesBlandas(TalentsUtils.getSoftAbilities(result));

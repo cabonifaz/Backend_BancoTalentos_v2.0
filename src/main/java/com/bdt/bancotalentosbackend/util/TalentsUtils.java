@@ -94,6 +94,7 @@ public class TalentsUtils {
             Map<String, Object> row = dataSet.get(0);
             fileDTO.setIdArchivo((Integer) row.get("ID_ARCHIVO"));
             fileDTO.setNombreArchivo((String) row.get("NOMBRE_ARCHIVO"));
+            fileDTO.setRutaArchivo((String) row.get("RUTA_ARCHIVO"));
             fileDTO.setTipoArchivo((String) row.get("TIPO_ARCHIVO"));
             fileDTO.setTipoDocumento((String) row.get("TIPO_DOCUMENTO"));
         }

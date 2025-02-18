@@ -2,6 +2,7 @@ package com.bdt.bancotalentosbackend.controller;
 
 import com.bdt.bancotalentosbackend.model.request.*;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
+import com.bdt.bancotalentosbackend.model.response.FileResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
 import com.bdt.bancotalentosbackend.service.impl.TalentsService;
@@ -51,6 +52,23 @@ public class TalentsController {
         try {
             String token = JWTHelper.extractToken(httpServletRequest);
             response = talentsService.getTalentById(token, talentId);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.setBaseResponse(new BaseResponse(1, e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @GetMapping("/file")
+    public ResponseEntity<FileResponse> getTalentFile(
+            @RequestParam String filePath,
+            HttpServletRequest httpServletRequest
+    ) {
+        FileResponse response = new FileResponse();
+
+        try {
+            String token = JWTHelper.extractToken(httpServletRequest);
+            response = talentsService.getTalentFile(token, filePath);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.setBaseResponse(new BaseResponse(1, e.getMessage()));
