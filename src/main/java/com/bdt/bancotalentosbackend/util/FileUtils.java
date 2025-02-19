@@ -58,13 +58,15 @@ public class FileUtils {
 
             byte[] fileBytes = Base64.getDecoder().decode(fileb64);
 
-            File archivo = new File(ruta).getAbsoluteFile();
+            File repositorioDir = new File(ruta).getAbsoluteFile();
 
             logger.info("Consultando existencia de repositorio..");
-            if (!archivo.exists() && !archivo.mkdirs()) {
-                logger.error("Error al crear el repositorio: " + archivo.getAbsolutePath());
+            if (!repositorioDir.exists() && !repositorioDir.mkdirs()) {
+                logger.error("Error al crear el repositorio: " + repositorioDir.getAbsolutePath());
                 return;
             }
+
+            File archivo = new File(ruta);
 
             try (FileOutputStream fos = new FileOutputStream(archivo)) {
                 fos.write(fileBytes);
