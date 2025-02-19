@@ -37,17 +37,16 @@ public class TalentsService implements ITalentsService {
     }
 
     @Override
-    public FileResponse getTalentFile(String token, String filePath) {
-        FileResponse fileResponse = new FileResponse();
-        String fileB64 = FileUtils.cargarPDF(filePath);
-        fileResponse.setArchivoB64(fileB64);
+    public FileResponse getTalentFile(String token, Integer fileId) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.LISTAR_TALENTOS);
+        FileResponse fileResponse = talentsRepository.getTalentFile(baseRequest, fileId);
 
-        if (!fileB64.isBlank()) {
-            fileResponse.setBaseResponse(new BaseResponse(2, "Archivo B64 generado"));
-            return fileResponse;
+        if (fileResponse != null && fileResponse.getBaseResponse().getIdMensaje() == 2) {
+            String fileB64 = FileUtils.cargarPDF(fileResponse.getArchivo()); // file path
+            fileResponse.setArchivo(fileB64);
         }
 
-        fileResponse.setBaseResponse(new BaseResponse(1, "Archivo no encontrado"));
         return fileResponse;
     }
 

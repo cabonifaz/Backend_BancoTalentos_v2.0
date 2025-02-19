@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 public class FileDTO {
     private Integer idArchivo;
     private String nombreArchivo;
-    private String rutaArchivo;
     private String tipoArchivo;
     private String tipoDocumento;
 }

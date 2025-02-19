@@ -61,14 +61,14 @@ public class TalentsController {
 
     @GetMapping("/file")
     public ResponseEntity<FileResponse> getTalentFile(
-            @RequestParam String filePath,
+            @RequestParam Integer fileId,
             HttpServletRequest httpServletRequest
     ) {
         FileResponse response = new FileResponse();
 
         try {
             String token = JWTHelper.extractToken(httpServletRequest);
-            response = talentsService.getTalentFile(token, filePath);
+            response = talentsService.getTalentFile(token, fileId);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.setBaseResponse(new BaseResponse(1, e.getMessage()));

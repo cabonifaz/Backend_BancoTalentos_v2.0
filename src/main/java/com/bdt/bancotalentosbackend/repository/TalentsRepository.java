@@ -117,6 +117,35 @@ public class TalentsRepository {
         return talentResponse;
     }
 
+    public FileResponse getTalentFile(BaseRequest baseRequest, Integer fileId) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_ARCHIVOS_SEL");
+        FileResponse fileResponse = new FileResponse();
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_ARCHIVO", fileId)
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario());
+
+        Map<String, Object> result = simpleJdbcCall.execute(params);
+        List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
+
+        if (resultSet != null && !resultSet.isEmpty()) {
+            fileResponse.setBaseResponse(getBaseResponse(resultSet));
+
+            if (fileResponse.getBaseResponse().getIdMensaje() == 2) {
+                List<Map<String, Object>> fileSet = (List<Map<String, Object>>) result.get("#result-set-2");
+
+                if (fileSet != null && !fileSet.isEmpty()) {
+                    Map<String, Object> fileRow = fileSet.get(0);
+                    fileResponse.setArchivo((String) fileRow.get("RUTA_ARCHIVO"));
+                }
+            }
+        }
+
+        return fileResponse;
+    }
+
     public BaseResponse addOrUpdateTalent(BaseRequest baseRequest, TalentRequest talentRequest) throws JsonProcessingException {
         boolean isUpdate = talentRequest.getIdTalento() != null && talentRequest.getIdTalento() > 0;
         String procedureName = isUpdate ? "SP_BT_TALENTO_UPD" : "SP_BT_TALENTO_INS";

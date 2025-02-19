@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 public class FileResponse {
     @JsonProperty("result")
     private BaseResponse baseResponse;
-    private String archivoB64;
+    private String archivo;
 }
