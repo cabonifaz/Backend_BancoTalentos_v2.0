@@ -50,7 +50,7 @@ public class FileUtils {
         }
     }
 
-    public static boolean guardarArchivoMigracion(String fileb64, String ruta) {
+    public static void guardarArchivoMigracion(String fileb64, String ruta) {
         try {
             logger.info(Constante.TXT_SEPARADOR);
             logger.info("Inicio Utilitarios - GuardarArchivoMigracion");
@@ -58,13 +58,12 @@ public class FileUtils {
 
             byte[] fileBytes = Base64.getDecoder().decode(fileb64);
 
-            Path pathCompleto = Paths.get(ruta);
-            File archivo = pathCompleto.toFile();
+            File archivo = new File(ruta).getAbsoluteFile();
 
-            File directorioPadre = archivo.getParentFile();
-            if (!directorioPadre.exists() && !directorioPadre.mkdirs()) {
-                logger.error("Error al crear el directorio: " + directorioPadre.getAbsolutePath());
-                return false;
+            logger.info("Consultando existencia de repositorio..");
+            if (!archivo.exists() && !archivo.mkdirs()) {
+                logger.error("Error al crear el repositorio: " + archivo.getAbsolutePath());
+                return;
             }
 
             try (FileOutputStream fos = new FileOutputStream(archivo)) {
@@ -72,17 +71,15 @@ public class FileUtils {
                 logger.info("Archivo creado exitosamente en la ruta: " + archivo.getAbsolutePath());
             } catch (IOException e) {
                 logger.error("Error al guardar el archivo: " + e.getMessage());
-                return false;
+                return;
             }
 
             logger.info("Archivo creado exitosamente en: " + archivo.getAbsolutePath());
 
             logger.info("Fin Utilitarios - GuardarArchivoMigracion");
             logger.info(Constante.TXT_SEPARADOR);
-            return true;
         } catch (IllegalArgumentException e) {
             logger.error("Cadena Base64 inválida: " + e.getMessage());
-            return false;
         }
     }
 
