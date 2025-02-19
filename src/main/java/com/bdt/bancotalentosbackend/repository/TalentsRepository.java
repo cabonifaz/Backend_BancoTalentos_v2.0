@@ -475,5 +475,42 @@ public class TalentsRepository {
         simpleJdbcCall.execute(params);
     }
 
+    public void migrateCV() {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_TALENTO_MIGRAR_CV_LST");
+        Map<String, Object> result = simpleJdbcCall.execute();
+        List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
 
+        if (resultSet != null && !resultSet.isEmpty()) {
+            List<MigrationCVDTO> lstMigration = new ArrayList<>();
+
+            for (Map<String, Object> talentRow : resultSet) {
+                MigrationCVDTO migration = new MigrationCVDTO(
+                        (Integer) talentRow.get("ID_TALENTO"),
+                        (String) talentRow.get("NUEVA_RUTA_CV"),
+                        (String) talentRow.get("FILE_EXTENSION"),
+                        (String) talentRow.get("ARCHIVO_B64")
+                );
+                lstMigration.add(migration);
+            }
+
+
+            for (MigrationCVDTO objMigration : lstMigration) {
+                if (objMigration.getNuevaRutaCV() != null && !objMigration.getNuevaRutaCV().equals("")) {
+                    System.out.println("Cargando objeto de id: " + objMigration.getIdTalento());
+                    guardarArchivoMigracion(objMigration.getFileBase64(), objMigration.getNuevaRutaCV());
+                    migrateCVUpdate(objMigration.getIdTalento(), objMigration.getNuevaRutaCV());
+                }
+
+            }
+
+        }
+    }
+
+    public void migrateCVUpdate(Integer idTalento, String rutaCV) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_TALENTO_MIGRAR_CV_UPD");
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_TALENTO", idTalento)
+                .addValue("URL_CV", rutaCV);
+        simpleJdbcCall.execute(params);
+    }
 }

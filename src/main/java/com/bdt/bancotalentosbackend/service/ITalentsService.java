@@ -26,4 +26,5 @@ public interface ITalentsService {
 
 
     void migrateProfilePhoto();
+    void migrateCV();
 }

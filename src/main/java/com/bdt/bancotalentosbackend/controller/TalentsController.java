@@ -303,5 +303,12 @@ public class TalentsController {
         }
     }
 
-
+    @GetMapping("/migration/cv")
+    public void migrateCV() {
+        try {
+            talentsService.migrateCV();
+        } catch (Exception e) {
+            System.out.println("Error de migración: " + e.getMessage());
+        }
+    }
 }

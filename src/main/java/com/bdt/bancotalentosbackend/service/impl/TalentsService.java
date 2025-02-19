@@ -140,4 +140,10 @@ public class TalentsService implements ITalentsService {
     public void migrateProfilePhoto() {
         talentsRepository.migrateProfilePhoto();
     }
+
+    @Override
+    public void migrateCV() {
+        talentsRepository.migrateCV();
+    }
+
 }

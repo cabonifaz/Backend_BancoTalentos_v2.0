@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Base64;
 
 public class FileUtils {
@@ -48,6 +50,41 @@ public class FileUtils {
         }
     }
 
+    public static boolean guardarArchivoMigracion(String fileb64, String ruta) {
+        try {
+            logger.info(Constante.TXT_SEPARADOR);
+            logger.info("Inicio Utilitarios - GuardarArchivoMigracion");
+            logger.info("Ruta asignada: " + ruta);
+
+            byte[] fileBytes = Base64.getDecoder().decode(fileb64);
+
+            Path pathCompleto = Paths.get(ruta);
+            File archivo = pathCompleto.toFile();
+
+            File directorioPadre = archivo.getParentFile();
+            if (!directorioPadre.exists() && !directorioPadre.mkdirs()) {
+                logger.error("Error al crear el directorio: " + directorioPadre.getAbsolutePath());
+                return false;
+            }
+
+            try (FileOutputStream fos = new FileOutputStream(archivo)) {
+                fos.write(fileBytes);
+                logger.info("Archivo creado exitosamente en la ruta: " + archivo.getAbsolutePath());
+            } catch (IOException e) {
+                logger.error("Error al guardar el archivo: " + e.getMessage());
+                return false;
+            }
+
+            logger.info("Archivo creado exitosamente en: " + archivo.getAbsolutePath());
+
+            logger.info("Fin Utilitarios - GuardarArchivoMigracion");
+            logger.info(Constante.TXT_SEPARADOR);
+            return true;
+        } catch (IllegalArgumentException e) {
+            logger.error("Cadena Base64 inválida: " + e.getMessage());
+            return false;
+        }
+    }
 
     public static boolean guardarImagen(String imgb64, String fileExtension, String ruta) {
         try {
