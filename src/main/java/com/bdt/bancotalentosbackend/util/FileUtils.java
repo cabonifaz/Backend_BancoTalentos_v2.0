@@ -6,8 +6,10 @@ import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Base64;
 
 public class FileUtils {
@@ -68,12 +70,11 @@ public class FileUtils {
 
             File archivo = new File(ruta).getAbsoluteFile();
 
-            try (FileOutputStream fos = new FileOutputStream(archivo)) {
-                fos.write(fileBytes);
+            try {
+                Files.write(Paths.get(archivo.getAbsolutePath()), fileBytes, StandardOpenOption.CREATE);
                 logger.info("Archivo creado exitosamente en la ruta: " + archivo.getAbsolutePath());
             } catch (IOException e) {
                 logger.error("Error al guardar el archivo: " + e.getMessage());
-                return;
             }
 
             logger.info("Archivo creado exitosamente en: " + archivo.getAbsolutePath());
