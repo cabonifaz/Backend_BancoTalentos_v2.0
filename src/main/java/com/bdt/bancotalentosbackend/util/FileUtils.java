@@ -66,7 +66,7 @@ public class FileUtils {
                 return;
             }
 
-            File archivo = new File(ruta);
+            File archivo = new File(ruta).getAbsoluteFile();
 
             try (FileOutputStream fos = new FileOutputStream(archivo)) {
                 fos.write(fileBytes);
