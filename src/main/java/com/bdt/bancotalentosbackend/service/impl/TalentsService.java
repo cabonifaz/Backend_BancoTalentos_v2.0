@@ -45,6 +45,10 @@ public class TalentsService implements ITalentsService {
         if (fileResponse != null && fileResponse.getBaseResponse().getIdMensaje() == 2) {
             String fileB64 = FileUtils.cargarPDF(fileResponse.getArchivo()); // file path
             fileResponse.setArchivo(fileB64);
+
+            if (fileB64.isEmpty()) {
+                fileResponse.setBaseResponse(new BaseResponse(1, "Archivo no encontrado"));
+            }
         }
 
         return fileResponse;

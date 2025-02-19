@@ -13,24 +13,43 @@ import java.util.List;
 public class TalentRequest {
     @JsonProperty()
     private Integer idTalento;
+    @JsonProperty()
     private String nombres;
+    @JsonProperty()
     private String apellidoPaterno;
+    @JsonProperty()
     private String apellidoMaterno;
+    @JsonProperty()
     private String email;
+    @JsonProperty()
     private String telefono;
+    @JsonProperty()
     private FileRequest cvArchivo;
+    @JsonProperty()
     private FileRequest fotoArchivo;
+    @JsonProperty()
     private String linkedin;
+    @JsonProperty()
     private String github;
+    @JsonProperty()
     private String descripcion;
+    @JsonProperty()
     private String disponibilidad;
+    @JsonProperty()
     private String puesto;
+    @JsonProperty()
     private Integer idPais;
+    @JsonProperty()
     private Integer idCiudad;
+    @JsonProperty()
     private Double montoInicialPlanilla;
+    @JsonProperty()
     private Double montoFinalPlanilla;
+    @JsonProperty()
     private Double montoInicialRxH;
+    @JsonProperty()
     private Double montoFinalRxH;
+    @JsonProperty()
     private Integer idMoneda;
     @JsonProperty()
     private List<TechAbilityRequest> habilidadesTecnicas;
