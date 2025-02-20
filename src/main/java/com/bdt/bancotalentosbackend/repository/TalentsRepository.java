@@ -224,7 +224,7 @@ public class TalentsRepository {
         }
 
         if (finalResponse.getIdMensaje() == 2) {
-            boolean cvGuardado = guardarArchivo(cvRequest.getStringB64(), cvRequest.getExtensionArchivo(), rutaCV);
+            boolean cvGuardado = guardarArchivo(cvRequest.getStringB64(), rutaCV);
             if (!cvGuardado) {
                 finalResponse.setIdMensaje(1);
                 finalResponse.setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar el CV");

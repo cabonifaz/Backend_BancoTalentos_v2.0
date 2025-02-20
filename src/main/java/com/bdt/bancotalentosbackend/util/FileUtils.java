@@ -7,7 +7,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Base64;
@@ -60,7 +59,7 @@ public class FileUtils {
 
             byte[] fileBytes = Base64.getDecoder().decode(fileb64);
 
-            File repositorioDir = new File(ruta).getAbsoluteFile();
+            File repositorioDir = new File(ruta).getParentFile();
 
             logger.info("Consultando existencia de repositorio..");
             if (!repositorioDir.exists() && !repositorioDir.mkdirs()) {
@@ -68,7 +67,7 @@ public class FileUtils {
                 return;
             }
 
-            File archivo = new File(ruta).getAbsoluteFile();
+            File archivo = new File(ruta);
 
             try {
                 Files.write(Paths.get(archivo.getAbsolutePath()), fileBytes, StandardOpenOption.CREATE);
@@ -199,27 +198,29 @@ public class FileUtils {
         }
     }
 
-    public static boolean guardarArchivo(String archivoBase64, String fileExtension, String ruta) {
+    public static boolean guardarArchivo(String archivoBase64, String ruta) {
         try {
             logger.info(Constante.TXT_SEPARADOR);
             logger.info("Inicio Utilitarios - GuardarArchivo");
             logger.info("Ruta asignada: " + ruta);
 
-            byte[] archivoBytes = Base64.getDecoder().decode(archivoBase64);
+            byte[] fileBytes = Base64.getDecoder().decode(archivoBase64);
 
-            File archivo = new File(ruta).getAbsoluteFile();
+            File repositorioDir = new File(ruta).getParentFile();
+
             logger.info("Consultando existencia de repositorio..");
-            if (!archivo.exists() && !archivo.mkdirs()) {
-                logger.error("Error al crear el repositorio: " + archivo.getAbsolutePath());
+            if (!repositorioDir.exists() && !repositorioDir.mkdirs()) {
+                logger.error("Error al crear el repositorio: " + repositorioDir.getAbsolutePath());
                 return false;
             }
 
-            try (FileOutputStream fos = new FileOutputStream(archivo)) {
-                fos.write(archivoBytes);
+            File archivo = new File(ruta);
+
+            try {
+                Files.write(Paths.get(archivo.getAbsolutePath()), fileBytes, StandardOpenOption.CREATE);
                 logger.info("Archivo creado exitosamente en la ruta: " + archivo.getAbsolutePath());
             } catch (IOException e) {
                 logger.error("Error al guardar el archivo: " + e.getMessage());
-                return false;
             }
 
             logger.info("Fin Utilitarios - GuardarArchivo");
