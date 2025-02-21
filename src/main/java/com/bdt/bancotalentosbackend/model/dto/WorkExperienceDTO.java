@@ -14,5 +14,6 @@ public class WorkExperienceDTO {
     private String funciones;
     private String fechaInicio;
     private String fechaFin;
+    private Integer diferenciaAnios;
     private Integer flActualidad;
 }
