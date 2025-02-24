@@ -11,5 +11,5 @@ public class Constante {
     // RUTAS BASE DE REPOSITORIO
     public static final String RUTA_REPOSITORIO_FOTO_TALENTO = "repositorio/talento/[ID]/";
     public static final String RUTA_REPOSITORIO_CV_TALENTO = "repositorio/talento/[ID]/CV/";
-    public static final String RUTA_REPOSITORIO_FOTO_ARCHIVOS = "repositorio/talento/[ID]/archivos/";
+    public static final String RUTA_REPOSITORIO_TALENTO_ARCHIVOS = "repositorio/talento/[ID]/archivos/";
 }

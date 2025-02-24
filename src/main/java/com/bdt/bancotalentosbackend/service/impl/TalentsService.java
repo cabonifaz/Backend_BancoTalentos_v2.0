@@ -138,6 +138,15 @@ public class TalentsService implements ITalentsService {
         return talentsRepository.deleteTalentFeedback(baseRequest, feedbackId);
     }
 
+    @Override
+    public BaseResponse uploadTalentFile(String token, UploadTalentFileRequest uploadTalentFileRequest) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.uploadTalentFile(baseRequest, uploadTalentFileRequest);
+    }
+
+
+
     //    Espacio solo para migración de archivos
     @Override
     public void migrateProfilePhoto() {

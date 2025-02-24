@@ -7,12 +7,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FileDBRequest {
-    private Integer idArchivo;
+public class UploadTalentFileRequest {
+    private Integer idTalento;
     private String nombreArchivo;
     private String extensionArchivo;
-    private String rutaArchivo;
     private Integer idTipoArchivo;
     private Integer idTipoDocumento;
+    private String string64;
 }
-

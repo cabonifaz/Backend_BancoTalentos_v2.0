@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.bdt.bancotalentosbackend.mapper.TalentsMapper.mapTalentFilesToTableLstArchivos;
 import static com.bdt.bancotalentosbackend.util.Common.getBaseResponse;
 import static com.bdt.bancotalentosbackend.util.Common.simpleSPCall;
 import static com.bdt.bancotalentosbackend.util.FileUtils.*;
@@ -158,17 +157,6 @@ public class TalentsRepository {
         FileRequest cvRequest = talentRequest.getCvArchivo();
         String rutaCV = Constante.RUTA_REPOSITORIO_CV_TALENTO + cvRequest.getNombreArchivo() + "." + cvRequest.getExtensionArchivo();
 
-        List<FileDBRequest> talentFiles = new ArrayList<>();
-        FileDBRequest cvFile = new FileDBRequest(
-                null,
-                cvRequest.getNombreArchivo(),
-                cvRequest.getExtensionArchivo(),
-                rutaCV,
-                cvRequest.getIdTipoArchivo(),
-                cvRequest.getIdTipoDocumento()
-        );
-        talentFiles.add(cvFile);
-
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("NOMBRES", talentRequest.getNombres())
                 .addValue("APELLIDO_PATERNO", talentRequest.getApellidoPaterno())
@@ -188,6 +176,12 @@ public class TalentsRepository {
                 .addValue("MONTO_INICIAL_RXH", talentRequest.getMontoInicialRxH())
                 .addValue("MONTO_FINAL_RXH", talentRequest.getMontoFinalRxH())
                 .addValue("ID_MONEDA", talentRequest.getIdMoneda())
+
+                .addValue("CV_NOMBRE_ARCHIVO", cvRequest.getNombreArchivo())
+                .addValue("CV_ID_TIPO_ARCHIVO",cvRequest.getIdTipoArchivo())
+                .addValue("CV_ID_TIPO_DOCUMENTO", cvRequest.getIdTipoDocumento())
+                .addValue("CV_RUTA_ARCHIVO", rutaCV)
+
                 .addValue("ID_ROL", baseRequest.getIdRol())
                 .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
                 .addValue("ID_USUARIO", baseRequest.getIdUsuario())
@@ -196,7 +190,6 @@ public class TalentsRepository {
         if (isUpdate) {
             params.addValue("ID_TALENTO", talentRequest.getIdTalento());
         } else {
-            params.addValue("LST_ARCHIVOS", mapTalentFilesToTableLstArchivos(talentFiles));
 
             ObjectMapper objectMapper = new ObjectMapper();
 
@@ -462,6 +455,33 @@ public class TalentsRepository {
 
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
+
+    public BaseResponse uploadTalentFile(BaseRequest baseRequest, UploadTalentFileRequest uploadTalentFileRequest) {
+        String ruta = Constante.RUTA_REPOSITORIO_TALENTO_ARCHIVOS + uploadTalentFileRequest.getNombreArchivo() + "." + uploadTalentFileRequest.getExtensionArchivo();
+
+
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_ARCHIVOS_INS");
+        BaseResponse baseResponse = new BaseResponse();
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_TALENTO", uploadTalentFileRequest.getIdTalento())
+                .addValue("NOMBRE_ARCHIVO", uploadTalentFileRequest.getNombreArchivo())
+                .addValue("ID_TIPO_ARCHIVO", uploadTalentFileRequest.getIdTipoArchivo())
+                .addValue("ID_TIPO_DOCUMENTO", uploadTalentFileRequest.getIdTipoDocumento())
+                .addValue("RUTA_ARCHIVO", ruta)
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("USERNAME", baseRequest.getUsername());
+
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+    }
+
+
+
+
+
+
 
 
     //    Espacio solo para migración de archivos

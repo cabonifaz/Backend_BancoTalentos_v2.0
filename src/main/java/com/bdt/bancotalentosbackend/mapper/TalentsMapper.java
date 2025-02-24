@@ -1,12 +1,7 @@
 package com.bdt.bancotalentosbackend.mapper;
 
 import com.bdt.bancotalentosbackend.model.dto.*;
-import com.bdt.bancotalentosbackend.model.request.FileDBRequest;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
-import java.util.ArrayList;
-import java.util.List;
 import com.bdt.bancotalentosbackend.util.FileUtils;
 
 import java.util.Map;
@@ -90,38 +85,5 @@ public class TalentsMapper {
                 (Integer) talentRow.get("ES_FAVORITO")
         );
     }
-
-
-    public static SqlParameterSource mapTalentFilesToTableLstArchivos(List<FileDBRequest> talentFiles) {
-        List<MapSqlParameterSource> params = new ArrayList<>();
-
-        for (FileDBRequest file : talentFiles) {
-            MapSqlParameterSource paramSource = new MapSqlParameterSource();
-            paramSource.addValue("ID_ARCHIVO", file.getIdArchivo());
-            paramSource.addValue("NOMBRE_ARCHIVO", file.getNombreArchivo());
-            paramSource.addValue("EXTENSION_ARCHIVO", file.getExtensionArchivo());
-            paramSource.addValue("RUTA_ARCHIVO", file.getRutaArchivo());
-            paramSource.addValue("ID_TIPO_ARCHIVO", file.getIdTipoArchivo());
-            params.add(paramSource);
-        }
-
-        return new SqlParameterSource() {
-            @Override
-            public boolean hasValue(String paramName) {
-                return "LST_ARCHIVOS".equals(paramName);
-            }
-
-            @Override
-            public Object getValue(String paramName) {
-                return params;
-            }
-
-            @Override
-            public String getTypeName(String paramName) {
-                return "LST_ARCHIVOS_TYPE";
-            }
-        };
-    }
-
 
 }
