@@ -118,7 +118,7 @@ public class TalentsMapper {
 
             @Override
             public String getTypeName(String paramName) {
-                return "ARCHIVOS_LST";
+                return "LST_ARCHIVOS_TYPE";
             }
         };
     }
