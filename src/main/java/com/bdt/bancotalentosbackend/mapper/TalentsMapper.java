@@ -53,7 +53,7 @@ public class TalentsMapper {
                 (String) row.get("FUNCIONES"),
                 (String) row.get("FCH_INICIO"),
                 (String) row.get("FCH_FIN"),
-                (Integer) row.get("DIFERENCIA_ANIOS"),
+                (String) row.get("TIEMPO"),
                 (Integer) row.get("FL_ACTUALIDAD")
         );
     }
