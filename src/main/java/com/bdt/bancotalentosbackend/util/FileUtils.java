@@ -128,7 +128,7 @@ public class FileUtils {
             logger.info(Constante.TXT_SEPARADOR);
             logger.info("Inicio Utilitarios - CargarImagen");
             File archivo = new File(linkImagen).getAbsoluteFile();
-            logger.info("Consultando existencia de archivo...");
+            logger.info("Consultando existencia de archivo..." + linkImagen);
             if (archivo.exists()) {
                 logger.info("El archivo existe");
                 BufferedImage imagen = ImageIO.read(archivo);
