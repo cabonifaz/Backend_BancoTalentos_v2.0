@@ -152,10 +152,14 @@ public class TalentsRepository {
         BaseResponse baseResponse = new BaseResponse();
 
         FileRequest fotoRequest = talentRequest.getFotoArchivo();
-        String rutaFoto = Constante.RUTA_REPOSITORIO_FOTO_TALENTO + fotoRequest.getNombreArchivo() + "." + fotoRequest.getExtensionArchivo();
+        String rutaFoto = talentRequest.getFotoArchivo() != null
+                ? Constante.RUTA_REPOSITORIO_FOTO_TALENTO + fotoRequest.getNombreArchivo() + "." + fotoRequest.getExtensionArchivo()
+                : "";
 
         FileRequest cvRequest = talentRequest.getCvArchivo();
-        String rutaCV = Constante.RUTA_REPOSITORIO_CV_TALENTO + cvRequest.getNombreArchivo() + "." + cvRequest.getExtensionArchivo();
+        String rutaCV = talentRequest.getCvArchivo() != null
+                ? Constante.RUTA_REPOSITORIO_CV_TALENTO + cvRequest.getNombreArchivo() + "." + cvRequest.getExtensionArchivo()
+                : "";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("NOMBRES", talentRequest.getNombres())
