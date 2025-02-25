@@ -152,14 +152,14 @@ public class TalentsRepository {
         BaseResponse baseResponse = new BaseResponse();
 
         FileRequest fotoRequest = talentRequest.getFotoArchivo();
-        String rutaFoto = talentRequest.getFotoArchivo() != null
+        String rutaFoto = fotoRequest != null
                 ? Constante.RUTA_REPOSITORIO_FOTO_TALENTO + fotoRequest.getNombreArchivo() + "." + fotoRequest.getExtensionArchivo()
-                : "";
+                : null;
 
         FileRequest cvRequest = talentRequest.getCvArchivo();
-        String rutaCV = talentRequest.getCvArchivo() != null
+        String rutaCV = cvRequest != null
                 ? Constante.RUTA_REPOSITORIO_CV_TALENTO + cvRequest.getNombreArchivo() + "." + cvRequest.getExtensionArchivo()
-                : "";
+                : null;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("NOMBRES", talentRequest.getNombres())
@@ -181,11 +181,6 @@ public class TalentsRepository {
                 .addValue("MONTO_FINAL_RXH", talentRequest.getMontoFinalRxH())
                 .addValue("ID_MONEDA", talentRequest.getIdMoneda())
 
-                .addValue("CV_NOMBRE_ARCHIVO", cvRequest.getNombreArchivo())
-                .addValue("CV_ID_TIPO_ARCHIVO",cvRequest.getIdTipoArchivo())
-                .addValue("CV_ID_TIPO_DOCUMENTO", cvRequest.getIdTipoDocumento())
-                .addValue("CV_RUTA_ARCHIVO", rutaCV)
-
                 .addValue("ID_ROL", baseRequest.getIdRol())
                 .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
                 .addValue("ID_USUARIO", baseRequest.getIdUsuario())
@@ -193,6 +188,7 @@ public class TalentsRepository {
 
         if (isUpdate) {
             params.addValue("ID_TALENTO", talentRequest.getIdTalento());
+            baseResponse = simpleSPCall(simpleJdbcCall, baseResponse, params);
         } else {
 
             ObjectMapper objectMapper = new ObjectMapper();
@@ -207,21 +203,27 @@ public class TalentsRepository {
                     .addValue("HABILIDADES_BLANDAS_JSON", habilidadesBlandasJson)
                     .addValue("EXPERIENCIAS_JSON", experienciasJson)
                     .addValue("EDUCACIONES_JSON", educacionesJson)
-                    .addValue("IDIOMAS_JSON", idiomasJson);
+                    .addValue("IDIOMAS_JSON", idiomasJson)
+                    .addValue("CV_NOMBRE_ARCHIVO", cvRequest != null ? cvRequest.getNombreArchivo() : null)
+                    .addValue("CV_ID_TIPO_ARCHIVO", cvRequest != null ? cvRequest.getIdTipoArchivo() : null)
+                    .addValue("CV_ID_TIPO_DOCUMENTO", cvRequest != null ? cvRequest.getIdTipoDocumento() : null)
+                    .addValue("CV_RUTA_ARCHIVO", rutaCV);
+
+            Map<String, Object> result = simpleJdbcCall.execute(params);
+            List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
+
+            if (resultSet != null && !resultSet.isEmpty()) {
+                baseResponse = getBaseResponse(resultSet);
+                Map<String, Object> row = resultSet.get(0);
+
+                rutaFoto = (String) row.get("NUEVA_RUTA_IMAGEN");
+                rutaCV = (String) row.get("NUEVA_RUTA_CV");
+            }
         }
 
-        Map<String, Object> result = simpleJdbcCall.execute(params);
-        List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
-
-        if (resultSet != null && !resultSet.isEmpty()) {
-            baseResponse = getBaseResponse(resultSet);
-            Map<String, Object> row = resultSet.get(0);
-
-            rutaFoto = (String) row.get("NUEVA_RUTA_IMAGEN");
-            rutaCV = (String) row.get("NUEVA_RUTA_CV");
-        }
-
-        if (baseResponse.getIdMensaje() == 2 && talentRequest.getFotoArchivo() != null) {
+        if (baseResponse.getIdMensaje() == 2 && fotoRequest != null) {
+            // delete photo
+            // save photo
             boolean imagenGuardada = guardarImagen(fotoRequest.getStringB64(), fotoRequest.getExtensionArchivo(), rutaFoto);
             if (!imagenGuardada) {
                 baseResponse.setIdMensaje(1);
@@ -229,7 +231,7 @@ public class TalentsRepository {
             }
         }
 
-        if (baseResponse.getIdMensaje() == 2 && talentRequest.getCvArchivo() != null) {
+        if (baseResponse.getIdMensaje() == 2 && cvRequest != null) {
             boolean cvGuardado = guardarArchivo(cvRequest.getStringB64(), rutaCV);
             if (!cvGuardado) {
                 baseResponse.setIdMensaje(1);
