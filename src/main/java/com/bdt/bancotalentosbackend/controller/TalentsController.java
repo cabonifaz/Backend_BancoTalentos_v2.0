@@ -168,14 +168,14 @@ public class TalentsController {
 
     @PostMapping("/deleteExperience")
     public ResponseEntity<BaseResponse> deleteExperience(
-            @RequestBody Integer idExperiencia,
+            @RequestBody DeleteRequest<Integer> experienceRequest,
             HttpServletRequest httpServletRequest
     ) {
         BaseResponse response = new BaseResponse();
 
         try {
             String token = JWTHelper.extractToken(httpServletRequest);
-            response = talentsService.deleteTalentExperience(token, idExperiencia);
+            response = talentsService.deleteTalentExperience(token, experienceRequest.getId());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.setIdMensaje(3);
@@ -204,14 +204,14 @@ public class TalentsController {
 
     @PostMapping("/deleteEducation")
     public ResponseEntity<BaseResponse> deleteEducation(
-            @RequestBody Integer idEducation,
+            @RequestBody DeleteRequest<Integer> educationRequest,
             HttpServletRequest httpServletRequest
     ) {
         BaseResponse response = new BaseResponse();
 
         try {
             String token = JWTHelper.extractToken(httpServletRequest);
-            response = talentsService.deleteTalentEducation(token, idEducation);
+            response = talentsService.deleteTalentEducation(token, educationRequest.getId());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.setIdMensaje(3);
@@ -240,14 +240,14 @@ public class TalentsController {
 
     @PostMapping("/deleteLanguage")
     public ResponseEntity<BaseResponse> deleteLanguage(
-            @RequestBody Integer idLanguage,
+            @RequestBody DeleteRequest<Integer> languageRequest,
             HttpServletRequest httpServletRequest
     ) {
         BaseResponse response = new BaseResponse();
 
         try {
             String token = JWTHelper.extractToken(httpServletRequest);
-            response = talentsService.deleteTalentLanguage(token, idLanguage);
+            response = talentsService.deleteTalentLanguage(token, languageRequest.getId());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.setIdMensaje(3);
@@ -276,14 +276,14 @@ public class TalentsController {
 
     @PostMapping("/deleteFeedback")
     public ResponseEntity<BaseResponse> deleteFeedback(
-            @RequestBody Integer idFeedback,
+            @RequestBody DeleteRequest<Integer> feedbackRequest,
             HttpServletRequest httpServletRequest
     ) {
         BaseResponse response = new BaseResponse();
 
         try {
             String token = JWTHelper.extractToken(httpServletRequest);
-            response = talentsService.deleteTalentFeedback(token, idFeedback);
+            response = talentsService.deleteTalentFeedback(token, feedbackRequest.getId());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.setIdMensaje(3);
@@ -291,7 +291,6 @@ public class TalentsController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-
 
     @PostMapping("/uploadTalentFile")
     public ResponseEntity<BaseResponse> uploadTalentFile(
