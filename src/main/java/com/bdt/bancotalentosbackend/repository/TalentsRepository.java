@@ -206,25 +206,34 @@ public class TalentsRepository {
                     .addValue("IDIOMAS_JSON", idiomasJson);
         }
 
-        BaseResponse finalResponse = simpleSPCall(simpleJdbcCall, baseResponse, params);
+        Map<String, Object> result = simpleJdbcCall.execute(params);
+        List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
 
-        if (finalResponse.getIdMensaje() == 2) {
+        if (resultSet != null && !resultSet.isEmpty()) {
+            baseResponse = getBaseResponse(resultSet);
+            Map<String, Object> row = resultSet.get(0);
+
+            rutaFoto = (String) row.get("NUEVA_RUTA_IMAGEN");
+            rutaCV = (String) row.get("NUEVA_RUTA_CV");
+        }
+
+        if (baseResponse.getIdMensaje() == 2 && talentRequest.getFotoArchivo() != null) {
             boolean imagenGuardada = guardarImagen(fotoRequest.getStringB64(), fotoRequest.getExtensionArchivo(), rutaFoto);
             if (!imagenGuardada) {
-                finalResponse.setIdMensaje(1);
-                finalResponse.setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar la foto");
+                baseResponse.setIdMensaje(1);
+                baseResponse.setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar la foto");
             }
         }
 
-        if (finalResponse.getIdMensaje() == 2) {
+        if (baseResponse.getIdMensaje() == 2 && talentRequest.getCvArchivo() != null) {
             boolean cvGuardado = guardarArchivo(cvRequest.getStringB64(), rutaCV);
             if (!cvGuardado) {
-                finalResponse.setIdMensaje(1);
-                finalResponse.setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar el CV");
+                baseResponse.setIdMensaje(1);
+                baseResponse.setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar el CV");
             }
         }
 
-        return finalResponse;
+        return baseResponse;
     }
 
     public BaseResponse addTalentToFavourite(BaseRequest baseRequest, TalentToFavRequest favRequest) {
