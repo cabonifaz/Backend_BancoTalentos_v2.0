@@ -24,6 +24,7 @@ public interface ITalentsService {
     BaseResponse addOrUpdateTalentFeedback(String token, FeedbackRequest feedbackRequest);
     BaseResponse deleteTalentFeedback(String token, Integer feedbackId);
     BaseResponse uploadTalentFile(String token, UploadTalentFileRequest uploadTalentFileRequest);
+    BaseResponse updateCvFile(String token, UpdateCvFileRequest updateCvFileRequest);
 
 
     void migrateProfilePhoto();

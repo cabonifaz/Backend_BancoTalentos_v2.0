@@ -145,6 +145,13 @@ public class TalentsService implements ITalentsService {
         return talentsRepository.uploadTalentFile(baseRequest, uploadTalentFileRequest);
     }
 
+    @Override
+    public BaseResponse updateCvFile(String token, UpdateCvFileRequest updateCvFileRequest) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.updateCvFile(baseRequest, updateCvFileRequest);
+    }
+
 
 
     //    Espacio solo para migración de archivos

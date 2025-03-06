@@ -311,6 +311,25 @@ public class TalentsController {
         }
     }
 
+    @PostMapping("/updateCvFile")
+    public ResponseEntity<BaseResponse> updateCvFile(
+            @RequestBody UpdateCvFileRequest updateCvFileRequest,
+            HttpServletRequest httpServletRequest
+    ) {
+        BaseResponse response = new BaseResponse();
+
+        try {
+            String token = JWTHelper.extractToken(httpServletRequest);
+            response = talentsService.updateCvFile(token, updateCvFileRequest);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response.setIdMensaje(3);
+            response.setMensaje(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
 
     //    Espacio solo para migración de archivos
     @GetMapping("/migration/profile")

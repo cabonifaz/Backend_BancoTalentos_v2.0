@@ -188,7 +188,6 @@ public class TalentsRepository {
 
         if (isUpdate) {
             params.addValue("ID_TALENTO", talentRequest.getIdTalento());
-            baseResponse = simpleSPCall(simpleJdbcCall, baseResponse, params);
         } else {
 
             ObjectMapper objectMapper = new ObjectMapper();
@@ -208,23 +207,27 @@ public class TalentsRepository {
                     .addValue("CV_ID_TIPO_ARCHIVO", cvRequest != null ? cvRequest.getIdTipoArchivo() : null)
                     .addValue("CV_ID_TIPO_DOCUMENTO", cvRequest != null ? cvRequest.getIdTipoDocumento() : null)
                     .addValue("CV_RUTA_ARCHIVO", rutaCV);
+        }
 
-            Map<String, Object> result = simpleJdbcCall.execute(params);
-            List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
+        Map<String, Object> result = simpleJdbcCall.execute(params);
+        List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
 
-            if (resultSet != null && !resultSet.isEmpty()) {
-                baseResponse = getBaseResponse(resultSet);
-                Map<String, Object> row = resultSet.get(0);
+        if (resultSet != null && !resultSet.isEmpty()) {
+            baseResponse = getBaseResponse(resultSet);
+            Map<String, Object> row = resultSet.get(0);
 
-                rutaFoto = (String) row.get("NUEVA_RUTA_IMAGEN");
+            rutaFoto = (String) row.get("NUEVA_RUTA_IMAGEN");
+
+            if (cvRequest != null) {
                 rutaCV = (String) row.get("NUEVA_RUTA_CV");
             }
         }
 
         if (baseResponse.getIdMensaje() == 2 && fotoRequest != null) {
-            // delete photo
-            // save photo
-            boolean imagenGuardada = guardarImagen(fotoRequest.getStringB64(), fotoRequest.getExtensionArchivo(), rutaFoto);
+            boolean imagenGuardada = isUpdate
+                    ? reemplazarImagen(fotoRequest.getStringB64(), fotoRequest.getExtensionArchivo(), rutaFoto)
+                    : guardarImagen(fotoRequest.getStringB64(), fotoRequest.getExtensionArchivo(), rutaFoto);
+
             if (!imagenGuardada) {
                 baseResponse.setIdMensaje(1);
                 baseResponse.setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar la foto");
@@ -474,7 +477,6 @@ public class TalentsRepository {
     public BaseResponse uploadTalentFile(BaseRequest baseRequest, UploadTalentFileRequest uploadTalentFileRequest) {
         String ruta = Constante.RUTA_REPOSITORIO_TALENTO_ARCHIVOS + uploadTalentFileRequest.getNombreArchivo() + "." + uploadTalentFileRequest.getExtensionArchivo();
 
-
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_ARCHIVOS_INS");
         BaseResponse baseResponse = new BaseResponse();
 
@@ -489,14 +491,61 @@ public class TalentsRepository {
                 .addValue("ID_USUARIO", baseRequest.getIdUsuario())
                 .addValue("USERNAME", baseRequest.getUsername());
 
-        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+        Map<String, Object> result = simpleJdbcCall.execute(params);
+        List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
+
+        if (resultSet != null && !resultSet.isEmpty()) {
+            baseResponse = getBaseResponse(resultSet);
+            Map<String, Object> row = resultSet.get(0);
+
+            String rutaArchivo = (String) row.get("NUEVA_RUTA_ARCHIVO");
+            boolean archivoGuardado = guardarArchivo(uploadTalentFileRequest.getString64(), rutaArchivo);
+
+            if (!archivoGuardado) {
+                baseResponse.setIdMensaje(1);
+                baseResponse.setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar el CV");
+            }
+        }
+
+        return baseResponse;
     }
 
+    public BaseResponse updateCvFile(BaseRequest baseRequest, UpdateCvFileRequest updateCvFileRequest) {
+        String ruta = Constante.RUTA_REPOSITORIO_CV_TALENTO + updateCvFileRequest.getNombreArchivo() + "." + updateCvFileRequest.getExtensionArchivo();
 
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_ARCHIVOS_UPD");
+        BaseResponse baseResponse = new BaseResponse();
 
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_TALENTO", updateCvFileRequest.getIdTalento())
+                .addValue("ID_ARCHIVO", updateCvFileRequest.getIdArchivo())
+                .addValue("NOMBRE_ARCHIVO", updateCvFileRequest.getNombreArchivo())
+                .addValue("ID_TIPO_ARCHIVO", updateCvFileRequest.getIdTipoArchivo())
+                .addValue("ID_TIPO_DOCUMENTO", updateCvFileRequest.getIdTipoDocumento())
+                .addValue("RUTA_ARCHIVO", ruta)
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("USERNAME", baseRequest.getUsername());
 
+        Map<String, Object> result = simpleJdbcCall.execute(params);
+        List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
 
+        if (resultSet != null && !resultSet.isEmpty()) {
+            baseResponse = getBaseResponse(resultSet);
+            Map<String, Object> row = resultSet.get(0);
 
+            String rutaCV = (String) row.get("NUEVA_RUTA_ARCHIVO");
+            boolean cvGuardado = reemplazarArchivo(updateCvFileRequest.getString64(), rutaCV);
+
+            if (!cvGuardado) {
+                baseResponse.setIdMensaje(1);
+                baseResponse.setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar el CV");
+            }
+        }
+
+        return baseResponse;
+    }
 
 
     //    Espacio solo para migración de archivos

@@ -123,6 +123,57 @@ public class FileUtils {
         return false;
     }
 
+    public static boolean reemplazarImagen(String imgb64, String fileExtension, String ruta) {
+        try {
+            logger.info(Constante.TXT_SEPARADOR);
+            logger.info("Inicio Utilitarios - GuardarImagen");
+            logger.info("Ruta asignada: " + ruta);
+
+            byte[] imagenBytes = Base64.getDecoder().decode(imgb64);
+            ByteArrayInputStream bis = new ByteArrayInputStream(imagenBytes);
+            BufferedImage bufferedImage = ImageIO.read(bis);
+
+            if (bufferedImage == null) {
+                logger.error("BufferedImage is null. Check Base64 input.");
+                return false;
+            }
+
+            File archivo = new File(ruta).getAbsoluteFile();
+            File directorio = archivo.getParentFile();
+            logger.info("Consultando existencia de repositorio...");
+
+            if (directorio.exists() && directorio.isDirectory()) {
+                File[] archivos = directorio.listFiles(File::isFile);
+                if (archivos != null) {
+                    for (File file : archivos) {
+                        logger.info("Archivo encontrado: " + file.getName());
+                        if (!file.delete()) {
+                            logger.error("No se pudo borrar el archivo: " + file.getName());
+                            return false;
+                        }
+                        logger.info("Archivo borrado correctamente: " + file.getName());
+                    }
+                }
+            } else if (!directorio.exists() && !directorio.mkdirs()) {
+                logger.error("Error al crear el repositorio: " + directorio.getAbsolutePath());
+                return false;
+            }
+
+            logger.info("Creando archivo en la ruta: " + archivo.getAbsolutePath());
+            ImageIO.write(bufferedImage, fileExtension, archivo);
+            logger.info("Archivo creado exitosamente.");
+
+            logger.info("Fin Utilitarios - GuardarImagen");
+            logger.info(Constante.TXT_SEPARADOR);
+            return true;
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid Base64 string: " + e.getMessage());
+        } catch (IOException e) {
+            logger.error("Error al guardar la imagen: " + e.getMessage());
+        }
+        return false;
+    }
+
     public static String cargarImagen(String linkImagen) {
         try {
             logger.info(Constante.TXT_SEPARADOR);
@@ -232,6 +283,48 @@ public class FileUtils {
         return false;
     }
 
+    public static boolean reemplazarArchivo(String archivoB64, String ruta) {
+        try {
+            logger.info(Constante.TXT_SEPARADOR);
+            logger.info("Inicio Utilitarios - ReemplazarArchivo");
+            logger.info("Ruta asignada: " + ruta);
 
+            byte[] fileBytes = Base64.getDecoder().decode(archivoB64);
+            File archivo = new File(ruta);
+            File directorio = archivo.getParentFile();
 
+            logger.info("Consultando existencia de repositorio..");
+            if (directorio.exists() && directorio.isDirectory()) {
+                File[] archivos = directorio.listFiles();
+                if (archivos != null) {
+                    for (File file : archivos) {
+                        logger.info("Archivo encontrado: " + file.getName());
+                        if (!file.delete()) {
+                            logger.error("No se pudo eliminar el archivo: " + file.getName());
+                            return false;
+                        }
+                        logger.info("Archivo eliminado correctamente: " + file.getName());
+                    }
+                }
+            } else if (!directorio.exists() && !directorio.mkdirs()) {
+                logger.error("Error al crear el repositorio: " + directorio.getAbsolutePath());
+                return false;
+            }
+
+            try {
+                Files.write(Paths.get(archivo.getAbsolutePath()), fileBytes, StandardOpenOption.CREATE);
+                logger.info("Archivo creado exitosamente en la ruta: " + archivo.getAbsolutePath());
+            } catch (IOException e) {
+                logger.error("Error al guardar el archivo: " + e.getMessage());
+                return false;
+            }
+
+            logger.info("Fin Utilitarios - ReemplazarArchivo");
+            logger.info(Constante.TXT_SEPARADOR);
+            return true;
+        } catch (IllegalArgumentException e) {
+            logger.error("Cadena Base64 inválida: " + e.getMessage());
+        }
+        return false;
+    }
 }
