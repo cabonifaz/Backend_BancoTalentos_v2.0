@@ -66,6 +66,15 @@ public class TalentsMapper {
         );
     }
 
+    public static FileDTO mapToFileDTO(Map<String, Object> row) {
+        return new FileDTO(
+                (Integer) row.get("ID_ARCHIVO"),
+                (String) row.get("NOMBRE_ARCHIVO"),
+                (String) row.get("TIPO_ARCHIVO"),
+                (Integer) row.get("ID_TIPO_DOCUMENTO")
+        );
+    }
+
     public static TalentListDTO mapToTalentListDTO(Map<String, Object> talentRow) {
         return new TalentListDTO(
                 (Integer) talentRow.get("ID_TALENTO"),

@@ -295,15 +295,18 @@ public class FileUtils {
 
             logger.info("Consultando existencia de repositorio..");
             if (directorio.exists() && directorio.isDirectory()) {
-                File[] archivos = directorio.listFiles();
-                if (archivos != null) {
+                File[] archivos = directorio.listFiles(File::isFile);
+                if (archivos == null || archivos.length == 0) {
+                    logger.info("No se encontraron archivos para eliminar");
+                } else {
                     for (File file : archivos) {
                         logger.info("Archivo encontrado: " + file.getName());
-                        if (!file.delete()) {
+                        if (file.delete()) {
+                            logger.info("Archivo eliminado correctamente: " + file.getName());
+                        } else {
                             logger.error("No se pudo eliminar el archivo: " + file.getName());
                             return false;
                         }
-                        logger.info("Archivo eliminado correctamente: " + file.getName());
                     }
                 }
             } else if (!directorio.exists() && !directorio.mkdirs()) {

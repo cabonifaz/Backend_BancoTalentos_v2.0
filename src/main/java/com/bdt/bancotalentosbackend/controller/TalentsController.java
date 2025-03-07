@@ -311,16 +311,35 @@ public class TalentsController {
         }
     }
 
-    @PostMapping("/updateCvFile")
-    public ResponseEntity<BaseResponse> updateCvFile(
-            @RequestBody UpdateCvFileRequest updateCvFileRequest,
+    @PostMapping("/updateTalentFile")
+    public ResponseEntity<BaseResponse> updateTalentFile(
+            @RequestBody UpdateTalentFileRequest updateTalentFileRequest,
             HttpServletRequest httpServletRequest
     ) {
         BaseResponse response = new BaseResponse();
 
         try {
             String token = JWTHelper.extractToken(httpServletRequest);
-            response = talentsService.updateCvFile(token, updateCvFileRequest);
+            response = talentsService.updateTalentFile(token, updateTalentFileRequest);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response.setIdMensaje(3);
+            response.setMensaje(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @PostMapping("/updateCvFile")
+    public ResponseEntity<BaseResponse> updateCvFile(
+            @RequestBody UpdateTalentFileRequest updateTalentFileRequest,
+            HttpServletRequest httpServletRequest
+    ) {
+        BaseResponse response = new BaseResponse();
+
+        try {
+            String token = JWTHelper.extractToken(httpServletRequest);
+            response = talentsService.updateCvFile(token, updateTalentFileRequest);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {

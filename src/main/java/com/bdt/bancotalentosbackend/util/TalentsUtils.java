@@ -86,18 +86,16 @@ public class TalentsUtils {
         return techAbilities;
     }
 
-    public static FileDTO getTalentCv(Map<String, Object> dataSets) {
-        FileDTO fileDTO = new FileDTO();
+    public static List<FileDTO> getTalentFiles(Map<String, Object> dataSets) {
+        List<FileDTO> files = new ArrayList<>();
         List<Map<String, Object>> dataSet = (List<Map<String, Object>>) dataSets.get("#result-set-3");
 
         if (dataSet != null && !dataSet.isEmpty()) {
-            Map<String, Object> row = dataSet.get(0);
-            fileDTO.setIdArchivo((Integer) row.get("ID_ARCHIVO"));
-            fileDTO.setNombreArchivo((String) row.get("NOMBRE_ARCHIVO"));
-            fileDTO.setTipoArchivo((String) row.get("TIPO_ARCHIVO"));
-            fileDTO.setTipoDocumento((String) row.get("TIPO_DOCUMENTO"));
+            for (Map<String, Object> row : dataSet) {
+                files.add(TalentsMapper.mapToFileDTO(row));
+            }
         }
 
-        return fileDTO;
+        return files;
     }
 }

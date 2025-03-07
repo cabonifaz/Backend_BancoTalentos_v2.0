@@ -18,12 +18,10 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import static com.bdt.bancotalentosbackend.util.Common.getBaseResponse;
 import static com.bdt.bancotalentosbackend.util.Common.simpleSPCall;
 import static com.bdt.bancotalentosbackend.util.FileUtils.*;
@@ -103,7 +101,7 @@ public class TalentsRepository {
                     talentResponse.setDisponibilidad((String) talentRow.get("DISPONIBILIDAD"));
                     talentResponse.setIdColeccion((Integer) talentRow.get("ID_COLECCION"));
                     talentResponse.setIdMoneda((Integer) talentRow.get("ID_MONEDA"));
-                    talentResponse.setCv(TalentsUtils.getTalentCv(result));
+                    talentResponse.setFiles(TalentsUtils.getTalentFiles(result));
                     talentResponse.setHabilidadesTecnicas(TalentsUtils.getTechAbilities(result));
                     talentResponse.setHabilidadesBlandas(TalentsUtils.getSoftAbilities(result));
                     talentResponse.setExperiencias(TalentsUtils.getWorkExperience(result));
@@ -476,9 +474,18 @@ public class TalentsRepository {
 
     public BaseResponse uploadTalentFile(BaseRequest baseRequest, UploadTalentFileRequest uploadTalentFileRequest) {
         String ruta = Constante.RUTA_REPOSITORIO_TALENTO_ARCHIVOS + uploadTalentFileRequest.getNombreArchivo() + "." + uploadTalentFileRequest.getExtensionArchivo();
+        ruta = ruta.replace("[ID]", uploadTalentFileRequest.getIdTalento().toString());
+        BaseResponse baseResponse = new BaseResponse();
+
+        boolean archivoGuardado = guardarArchivo(uploadTalentFileRequest.getString64(), ruta);
+
+        if (!archivoGuardado) {
+            baseResponse.setIdMensaje(1);
+            baseResponse.setMensaje("No se pudo guardar el archivo");
+            return baseResponse;
+        }
 
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_ARCHIVOS_INS");
-        BaseResponse baseResponse = new BaseResponse();
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ID_TALENTO", uploadTalentFileRequest.getIdTalento())
@@ -491,60 +498,39 @@ public class TalentsRepository {
                 .addValue("ID_USUARIO", baseRequest.getIdUsuario())
                 .addValue("USERNAME", baseRequest.getUsername());
 
-        Map<String, Object> result = simpleJdbcCall.execute(params);
-        List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
-
-        if (resultSet != null && !resultSet.isEmpty()) {
-            baseResponse = getBaseResponse(resultSet);
-            Map<String, Object> row = resultSet.get(0);
-
-            String rutaArchivo = (String) row.get("NUEVA_RUTA_ARCHIVO");
-            boolean archivoGuardado = guardarArchivo(uploadTalentFileRequest.getString64(), rutaArchivo);
-
-            if (!archivoGuardado) {
-                baseResponse.setIdMensaje(1);
-                baseResponse.setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar el CV");
-            }
-        }
-
-        return baseResponse;
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
 
-    public BaseResponse updateCvFile(BaseRequest baseRequest, UpdateCvFileRequest updateCvFileRequest) {
-        String ruta = Constante.RUTA_REPOSITORIO_CV_TALENTO + updateCvFileRequest.getNombreArchivo() + "." + updateCvFileRequest.getExtensionArchivo();
-
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_ARCHIVOS_UPD");
+    public BaseResponse updateTalentFile(BaseRequest baseRequest, UpdateTalentFileRequest updateTalentFileRequest, String ruta) {
+        // build file path
+        ruta = ruta + updateTalentFileRequest.getNombreArchivo() + "." + updateTalentFileRequest.getExtensionArchivo();
+        // assign a talent folder
+        ruta = ruta.replace("[ID]", updateTalentFileRequest.getIdTalento().toString());
         BaseResponse baseResponse = new BaseResponse();
 
+        boolean cvGuardado = reemplazarArchivo(updateTalentFileRequest.getString64(), ruta);
+
+        if (!cvGuardado) {
+            baseResponse.setIdMensaje(1);
+            baseResponse.setMensaje("No se pudo actualizar el CV");
+            return baseResponse;
+        }
+
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_ARCHIVOS_UPD");
+
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("ID_TALENTO", updateCvFileRequest.getIdTalento())
-                .addValue("ID_ARCHIVO", updateCvFileRequest.getIdArchivo())
-                .addValue("NOMBRE_ARCHIVO", updateCvFileRequest.getNombreArchivo())
-                .addValue("ID_TIPO_ARCHIVO", updateCvFileRequest.getIdTipoArchivo())
-                .addValue("ID_TIPO_DOCUMENTO", updateCvFileRequest.getIdTipoDocumento())
+                .addValue("ID_TALENTO", updateTalentFileRequest.getIdTalento())
+                .addValue("ID_ARCHIVO", updateTalentFileRequest.getIdArchivo())
+                .addValue("NOMBRE_ARCHIVO", updateTalentFileRequest.getNombreArchivo())
+                .addValue("ID_TIPO_ARCHIVO", updateTalentFileRequest.getIdTipoArchivo())
+                .addValue("ID_TIPO_DOCUMENTO", updateTalentFileRequest.getIdTipoDocumento())
                 .addValue("RUTA_ARCHIVO", ruta)
                 .addValue("ID_ROL", baseRequest.getIdRol())
                 .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
                 .addValue("ID_USUARIO", baseRequest.getIdUsuario())
                 .addValue("USERNAME", baseRequest.getUsername());
 
-        Map<String, Object> result = simpleJdbcCall.execute(params);
-        List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
-
-        if (resultSet != null && !resultSet.isEmpty()) {
-            baseResponse = getBaseResponse(resultSet);
-            Map<String, Object> row = resultSet.get(0);
-
-            String rutaCV = (String) row.get("NUEVA_RUTA_ARCHIVO");
-            boolean cvGuardado = reemplazarArchivo(updateCvFileRequest.getString64(), rutaCV);
-
-            if (!cvGuardado) {
-                baseResponse.setIdMensaje(1);
-                baseResponse.setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar el CV");
-            }
-        }
-
-        return baseResponse;
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
 
 

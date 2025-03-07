@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateCvFileRequest {
+public class UpdateTalentFileRequest {
     private Integer idTalento;
     private Integer idArchivo;
     private String nombreArchivo;

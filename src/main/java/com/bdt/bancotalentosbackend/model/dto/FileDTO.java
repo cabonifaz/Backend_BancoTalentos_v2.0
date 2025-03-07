@@ -11,5 +11,5 @@ public class FileDTO {
     private Integer idArchivo;
     private String nombreArchivo;
     private String tipoArchivo;
-    private String tipoDocumento;
+    private Integer idTipoDocumento;
 }

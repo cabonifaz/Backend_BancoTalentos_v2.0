@@ -146,10 +146,17 @@ public class TalentsService implements ITalentsService {
     }
 
     @Override
-    public BaseResponse updateCvFile(String token, UpdateCvFileRequest updateCvFileRequest) {
+    public BaseResponse updateCvFile(String token, UpdateTalentFileRequest updateTalentFileRequest) {
         UserDTO user = jwt.decodeToken(token);
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
-        return talentsRepository.updateCvFile(baseRequest, updateCvFileRequest);
+        return talentsRepository.updateTalentFile(baseRequest, updateTalentFileRequest, Constante.RUTA_REPOSITORIO_CV_TALENTO);
+    }
+
+    @Override
+    public BaseResponse updateTalentFile(String token, UpdateTalentFileRequest updateTalentFileRequest) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.updateTalentFile(baseRequest, updateTalentFileRequest, Constante.RUTA_REPOSITORIO_TALENTO_ARCHIVOS);
     }
 
 
