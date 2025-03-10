@@ -283,7 +283,7 @@ public class FileUtils {
 
             // Guardar archivo
             try {
-                Files.write(archivo.toPath(), fileBytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                Files.write(Paths.get(archivo.getAbsolutePath()), fileBytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
                 logger.info("Archivo guardado exitosamente en la ruta: " + archivo.getAbsolutePath());
                 logger.info("Fin Utilitarios - GuardarArchivo");
                 logger.info(Constante.TXT_SEPARADOR);
