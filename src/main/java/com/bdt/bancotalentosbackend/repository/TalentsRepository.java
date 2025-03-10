@@ -508,7 +508,7 @@ public class TalentsRepository {
         ruta = ruta.replace("[ID]", updateTalentFileRequest.getIdTalento().toString());
         BaseResponse baseResponse = new BaseResponse();
 
-        boolean cvGuardado = guardarArchivo(updateTalentFileRequest.getString64(), ruta);
+        boolean cvGuardado = reemplazarArchivo(updateTalentFileRequest.getString64(), ruta);
 
         if (!cvGuardado) {
             baseResponse.setIdMensaje(1);
