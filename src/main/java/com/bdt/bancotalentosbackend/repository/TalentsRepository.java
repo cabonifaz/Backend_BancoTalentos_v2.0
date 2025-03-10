@@ -538,16 +538,14 @@ public class TalentsRepository {
             if (!archivoEliminado) {
                 baseResponse.setIdMensaje(1);
                 baseResponse.setMensaje("No se pudo eliminar el archivo anterior");
-                return baseResponse;
-            }
+            } else {
+                // save new file
+                boolean cvGuardado = guardarArchivo(updateTalentFileRequest.getString64(), ruta);
 
-            // save new file
-            boolean cvGuardado = guardarArchivo(updateTalentFileRequest.getString64(), ruta);
-
-            if (!cvGuardado) {
-                baseResponse.setIdMensaje(1);
-                baseResponse.setMensaje("No se pudo guardar el archivo");
-                return baseResponse;
+                if (!cvGuardado) {
+                    baseResponse.setIdMensaje(1);
+                    baseResponse.setMensaje("No se pudo guardar el archivo");
+                }
             }
 
             return baseResponse;

@@ -259,7 +259,7 @@ public class FileUtils {
 
             // Obtener el directorio padre
             File archivo = new File(ruta);
-            File repositorioDir = archivo.getAbsoluteFile();
+            File repositorioDir = archivo.getParentFile();
 
             logger.info("Verificando si el directorio ya existe...");
 
