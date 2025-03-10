@@ -257,29 +257,37 @@ public class FileUtils {
 
             byte[] fileBytes = Base64.getDecoder().decode(archivoBase64);
 
-            File repositorioDir = new File(ruta).getParentFile();
-
-            logger.info("Consultando existencia de repositorio..");
-            if (!repositorioDir.exists() && !repositorioDir.mkdirs()) {
-                logger.error("Error al crear el repositorio: " + repositorioDir.getAbsolutePath());
-                return false;
-            }
-
+            // Obtener el directorio padre
             File archivo = new File(ruta);
+            File repositorioDir = archivo.getParentFile();
 
-            try {
-                Files.write(Paths.get(archivo.getAbsolutePath()), fileBytes, StandardOpenOption.CREATE);
-                logger.info("Archivo creado exitosamente en la ruta: " + archivo.getAbsolutePath());
-            } catch (IOException e) {
-                logger.error("Error al guardar el archivo: " + e.getMessage());
+            logger.info("Verificando si el directorio ya existe...");
+
+            // Si el directorio no existe, intentar crearlo
+            if (repositorioDir != null && !repositorioDir.exists()) {
+                if (!repositorioDir.mkdirs()) {
+                    logger.error("Error al crear el directorio: " + repositorioDir.getAbsolutePath());
+                    return false;
+                }
+            } else {
+                logger.info("El directorio ya existe, se procede a guardar el archivo.");
             }
 
-            logger.info("Fin Utilitarios - GuardarArchivo");
-            logger.info(Constante.TXT_SEPARADOR);
-            return true;
+            // Guardar archivo
+            try {
+                Files.write(archivo.toPath(), fileBytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                logger.info("Archivo guardado exitosamente en la ruta: " + archivo.getAbsolutePath());
+                logger.info("Fin Utilitarios - GuardarArchivo");
+                logger.info(Constante.TXT_SEPARADOR);
+                return true;
+            } catch (IOException e) {
+                logger.error("Error al guardar el archivo: " + e.getMessage(), e);
+            }
+
         } catch (IllegalArgumentException e) {
-            logger.error("Cadena Base64 inválida: " + e.getMessage());
+            logger.error("Cadena Base64 inválida: " + e.getMessage(), e);
         }
+
         return false;
     }
 
