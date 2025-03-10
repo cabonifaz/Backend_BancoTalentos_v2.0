@@ -269,9 +269,6 @@ public class FileUtils {
                 return false;
             }
 
-            logger.info("El directorio es: " + repositorioDir);
-            logger.info("El Absolute path es: " + repositorioDir.getAbsolutePath());
-            logger.info("El Parent file es: " + repositorioDir.getParentFile().getPath());
             if (!repositorioDir.getAbsoluteFile().exists()) {
                 if (!repositorioDir.mkdirs()) {
                     logger.error("Error al crear el directorio: " + repositorioDir.getAbsolutePath());
