@@ -258,8 +258,7 @@ public class FileUtils {
             byte[] fileBytes = Base64.getDecoder().decode(archivoBase64);
 
             // Obtener el directorio padre
-            File archivo = new File(ruta);
-            File repositorioDir = archivo.getParentFile();
+            File repositorioDir = new File(ruta).getParentFile();
 
             logger.info("Verificando si el directorio ya existe...");
 
@@ -272,6 +271,8 @@ public class FileUtils {
             } else {
                 logger.info("El directorio ya existe, se procede a guardar el archivo.");
             }
+
+            File archivo = new File(ruta);
 
             // Guardar archivo
             try {
