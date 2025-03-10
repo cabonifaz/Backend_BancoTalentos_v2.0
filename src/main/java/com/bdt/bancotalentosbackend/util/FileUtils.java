@@ -259,12 +259,12 @@ public class FileUtils {
 
             // Obtener el directorio padre
             File archivo = new File(ruta);
-            File repositorioDir = archivo.getParentFile();
+            File repositorioDir = archivo.getAbsoluteFile();
 
             logger.info("Verificando si el directorio ya existe...");
 
             // Si el directorio no existe, intentar crearlo
-            if (repositorioDir != null && !repositorioDir.exists()) {
+            if (!repositorioDir.exists()) {
                 if (!repositorioDir.mkdirs()) {
                     logger.error("Error al crear el directorio: " + repositorioDir.getAbsolutePath());
                     return false;
