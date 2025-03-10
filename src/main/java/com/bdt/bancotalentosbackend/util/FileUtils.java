@@ -263,6 +263,12 @@ public class FileUtils {
             logger.info("Verificando si el directorio ya existe...");
 
             // Si el directorio no existe, intentar crearlo
+            // Comprobar si ya existe un archivo con el mismo nombre que el directorio
+            if (repositorioDir.exists() && !repositorioDir.isDirectory()) {
+                logger.error("El directorio no se puede crear porque existe un archivo con el mismo nombre: " + repositorioDir.getAbsolutePath());
+                return false;
+            }
+
             if (!repositorioDir.exists()) {
                 if (!repositorioDir.mkdirs()) {
                     logger.error("Error al crear el directorio: " + repositorioDir.getAbsolutePath());
