@@ -258,8 +258,7 @@ public class FileUtils {
             byte[] fileBytes = Base64.getDecoder().decode(archivoBase64);
 
             // Obtener el directorio padre
-            File tmpArchivo = new File(ruta);
-            File repositorioDir = new File(tmpArchivo.getAbsolutePath());
+            File repositorioDir = new File(ruta).getParentFile();
 
             logger.info("Verificando si el directorio ya existe...");
 
