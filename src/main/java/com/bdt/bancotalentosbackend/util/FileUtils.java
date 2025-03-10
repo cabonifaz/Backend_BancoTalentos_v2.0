@@ -283,50 +283,36 @@ public class FileUtils {
         return false;
     }
 
-    public static boolean reemplazarArchivo(String archivoB64, String ruta) {
+    public static boolean eliminarArchivo(String archivoRutaPre) {
         try {
             logger.info(Constante.TXT_SEPARADOR);
-            logger.info("Inicio Utilitarios - ReemplazarArchivo");
-            logger.info("Ruta asignada: " + ruta);
+            logger.info("Inicio Utilitarios - EliminarArchivo");
+            logger.info("Ruta recibida: " + archivoRutaPre);
 
-            byte[] fileBytes = Base64.getDecoder().decode(archivoB64);
-            File archivo = new File(ruta);
-            File directorio = archivo.getParentFile();
+            // Obtiene la ruta absoluta y normalizada
+            File archivo = new File(archivoRutaPre).getCanonicalFile();
 
-            logger.info("Consultando existencia de repositorio..");
-            if (directorio.exists() && directorio.isDirectory()) {
-                File[] archivos = directorio.listFiles(File::isFile);
-                if (archivos == null || archivos.length == 0) {
-                    logger.info("No se encontraron archivos para eliminar");
-                } else {
-                    for (File file : archivos) {
-                        logger.info("Archivo encontrado: " + file.getName());
-                        if (file.delete()) {
-                            logger.info("Archivo eliminado correctamente: " + file.getName());
-                        } else {
-                            logger.error("No se pudo eliminar el archivo: " + file.getName());
-                            return false;
-                        }
-                    }
-                }
-            } else if (!directorio.exists() && !directorio.mkdirs()) {
-                logger.error("Error al crear el repositorio: " + directorio.getAbsolutePath());
-                return false;
+            logger.info("Ruta normalizada del archivo: " + archivo.getAbsolutePath());
+
+            if (!archivo.exists()) {
+                logger.warn("El archivo no existe: " + archivo.getAbsolutePath());
+                return true;
             }
 
-            try {
-                Files.write(Paths.get(archivo.getAbsolutePath()), fileBytes, StandardOpenOption.CREATE);
-                logger.info("Archivo creado exitosamente en la ruta: " + archivo.getAbsolutePath());
-            } catch (IOException e) {
-                logger.error("Error al guardar el archivo: " + e.getMessage());
+            if (archivo.delete()) {
+                logger.info("Archivo eliminado exitosamente: " + archivo.getAbsolutePath());
+                return true;
+            } else {
+                logger.error("No se pudo eliminar el archivo: " + archivo.getAbsolutePath());
                 return false;
             }
-
-            logger.info("Fin Utilitarios - ReemplazarArchivo");
+        } catch (IOException e) {
+            logger.error("Error al normalizar la ruta del archivo: " + e.getMessage());
+        } catch (Exception e) {
+            logger.error("Error al eliminar el archivo: " + e.getMessage());
+        } finally {
+            logger.info("Fin Utilitarios - EliminarArchivo");
             logger.info(Constante.TXT_SEPARADOR);
-            return true;
-        } catch (IllegalArgumentException e) {
-            logger.error("Cadena Base64 inválida: " + e.getMessage());
         }
         return false;
     }

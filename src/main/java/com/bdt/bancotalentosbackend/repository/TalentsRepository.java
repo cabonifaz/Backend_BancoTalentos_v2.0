@@ -502,21 +502,13 @@ public class TalentsRepository {
     }
 
     public BaseResponse updateTalentFile(BaseRequest baseRequest, UpdateTalentFileRequest updateTalentFileRequest, String ruta) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_ARCHIVOS_UPD");
+        BaseResponse baseResponse = new BaseResponse();
+
         // build file path
         ruta = ruta + updateTalentFileRequest.getNombreArchivo() + "." + updateTalentFileRequest.getExtensionArchivo();
         // assign a talent folder
         ruta = ruta.replace("[ID]", updateTalentFileRequest.getIdTalento().toString());
-        BaseResponse baseResponse = new BaseResponse();
-
-        boolean cvGuardado = reemplazarArchivo(updateTalentFileRequest.getString64(), ruta);
-
-        if (!cvGuardado) {
-            baseResponse.setIdMensaje(1);
-            baseResponse.setMensaje("No se pudo actualizar el CV");
-            return baseResponse;
-        }
-
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_ARCHIVOS_UPD");
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ID_TALENTO", updateTalentFileRequest.getIdTalento())
@@ -530,7 +522,41 @@ public class TalentsRepository {
                 .addValue("ID_USUARIO", baseRequest.getIdUsuario())
                 .addValue("USERNAME", baseRequest.getUsername());
 
-        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+        Map<String, Object> result = simpleJdbcCall.execute(params);
+        List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
+
+        if (resultSet != null && !resultSet.isEmpty()) {
+            baseResponse = getBaseResponse(resultSet);
+            Map<String, Object> row = resultSet.get(0);
+
+            String rutaArchivoPre = (String) row.get("RUTA_ARCHIVO_PRE");
+            String nombreArchivoPre = (String) row.get("NOMBRE_ARCHIVO_PRE");
+
+            // delete previous file
+            boolean archivoEliminado = eliminarArchivo(rutaArchivoPre);
+
+            if (!archivoEliminado) {
+                baseResponse.setIdMensaje(1);
+                baseResponse.setMensaje("No se pudo eliminar el archivo anterior");
+                return baseResponse;
+            }
+
+            // save new file
+            boolean cvGuardado = guardarArchivo(updateTalentFileRequest.getString64(), ruta);
+
+            if (!cvGuardado) {
+                baseResponse.setIdMensaje(1);
+                baseResponse.setMensaje("No se pudo guardar el archivo");
+                return baseResponse;
+            }
+
+            return baseResponse;
+        }
+
+        baseResponse.setIdMensaje(3);
+        baseResponse.setMensaje("Error al conectar a la base de datos");
+
+        return baseResponse;
     }
 
 
