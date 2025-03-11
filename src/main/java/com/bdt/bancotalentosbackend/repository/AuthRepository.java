@@ -29,16 +29,16 @@ public class AuthRepository {
                 .addValue("CLAVE", password);
 
         Map<String, Object> result = simpleJdbcCall.execute(params);
-        List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
+        List<Map<String, Object>> resultSet1 = (List<Map<String, Object>>) result.get("#result-set-1");
 
-        if (resultSet != null && !resultSet.isEmpty()) {
-            Map<String, Object> row = resultSet.get(0);
+        if (resultSet1 != null && !resultSet1.isEmpty()) {
+            Map<String, Object> row = resultSet1.get(0);
             Integer idTipoMensaje = (Integer) row.get("ID_TIPO_MENSAJE");
             String mensaje = (String) row.get("MENSAJE");
 
             // Success call
             if (idTipoMensaje == 2) {
-                UserDTO user = getUserByUsername(username);
+                UserDTO user = mapToUseDTO(result);
                 String token = jwt.generateToken(user);
 
                 return new AuthResponse(new BaseResponse(idTipoMensaje, mensaje), token);
