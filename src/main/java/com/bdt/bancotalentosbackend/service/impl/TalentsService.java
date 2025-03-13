@@ -30,10 +30,10 @@ public class TalentsService implements ITalentsService {
     }
 
     @Override
-    public TalentResponse getTalentById(String token, Integer talentId) {
+    public TalentResponse getTalentById(String token, Integer talentId, boolean loadExtraInfo) {
         UserDTO user = jwt.decodeToken(token);
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.LISTAR_TALENTOS);
-        return talentsRepository.getTalentById(baseRequest, talentId);
+        return talentsRepository.getTalentById(baseRequest, talentId, loadExtraInfo);
     }
 
     @Override

@@ -14,6 +14,8 @@ public class TalentRequest {
     @JsonProperty()
     private Integer idTalento;
     @JsonProperty()
+    private String dni;
+    @JsonProperty()
     private String nombres;
     @JsonProperty()
     private String apellidoPaterno;

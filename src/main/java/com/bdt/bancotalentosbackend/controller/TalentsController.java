@@ -45,13 +45,14 @@ public class TalentsController {
     @GetMapping("/data")
     public ResponseEntity<TalentResponse> getTalent(
             @RequestParam Integer talentId,
+            @RequestParam boolean loadExtraInfo,
             HttpServletRequest httpServletRequest
     ) {
         TalentResponse response = new TalentResponse();
 
         try {
             String token = JWTHelper.extractToken(httpServletRequest);
-            response = talentsService.getTalentById(token, talentId);
+            response = talentsService.getTalentById(token, talentId, loadExtraInfo);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.setBaseResponse(new BaseResponse(1, e.getMessage()));

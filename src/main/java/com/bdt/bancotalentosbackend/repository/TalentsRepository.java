@@ -71,7 +71,7 @@ public class TalentsRepository {
         return talentsListResponse;
     }
 
-    public TalentResponse getTalentById(BaseRequest baseRequest, Integer talentId) {
+    public TalentResponse getTalentById(BaseRequest baseRequest, Integer talentId, boolean loadExtraInfo) {
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_SEL");
         TalentResponse talentResponse = new TalentResponse();
 
@@ -79,7 +79,8 @@ public class TalentsRepository {
                 .addValue("ID_ROL", baseRequest.getIdRol())
                 .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
                 .addValue("ID_USUARIO", baseRequest.getIdUsuario())
-                .addValue("ID_TALENTO", talentId);
+                .addValue("ID_TALENTO", talentId)
+                .addValue("LOAD_EXTRA_INFO", loadExtraInfo);
 
         Map<String, Object> result = simpleJdbcCall.execute(params);
         List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
@@ -93,6 +94,10 @@ public class TalentsRepository {
                     Map<String, Object> talentRow = talentSet2.get(0);
 
                     // Talent detail
+                    talentResponse.setIdTalento((Integer) talentRow.get("ID_TALENTO"));
+                    talentResponse.setNombres((String) talentRow.get("NOMBRES"));
+                    talentResponse.setApellidos((String) talentRow.get("APELLIDOS"));
+                    talentResponse.setDni((String) talentRow.get("DNI"));
                     talentResponse.setEmail((String) talentRow.get("EMAIL"));
                     talentResponse.setCelular((String) talentRow.get("CELULAR"));
                     talentResponse.setLinkedin((String) talentRow.get("LINK_LINKEDIN"));
@@ -100,6 +105,10 @@ public class TalentsRepository {
                     talentResponse.setDescripcion((String) talentRow.get("DESCRIPCION"));
                     talentResponse.setDisponibilidad((String) talentRow.get("DISPONIBILIDAD"));
                     talentResponse.setIdMoneda((Integer) talentRow.get("ID_MONEDA"));
+
+                    talentResponse.setSituacion((String) talentRow.get("SITUACION"));
+                    talentResponse.setEstado((Integer) talentRow.get("ESTADO"));
+
                     talentResponse.setIdColeccion(TalentsUtils.getTalentCollection(result));
                     talentResponse.setFiles(TalentsUtils.getTalentFiles(result));
                     talentResponse.setHabilidadesTecnicas(TalentsUtils.getTechAbilities(result));
@@ -162,6 +171,7 @@ public class TalentsRepository {
                 : null;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("DNI", talentRequest.getDni())
                 .addValue("NOMBRES", talentRequest.getNombres())
                 .addValue("APELLIDO_PATERNO", talentRequest.getApellidoPaterno())
                 .addValue("APELLIDO_MATERNO", talentRequest.getApellidoMaterno())

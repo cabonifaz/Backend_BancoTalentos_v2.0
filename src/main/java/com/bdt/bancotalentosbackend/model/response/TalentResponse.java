@@ -13,6 +13,10 @@ import java.util.List;
 public class TalentResponse {
     @JsonProperty("result")
     private BaseResponse baseResponse;
+    private Integer idTalento;
+    private String nombres;
+    private String apellidos;
+    private String dni;
     private String email;
     private String celular;
     private String linkedin;
@@ -28,4 +32,6 @@ public class TalentResponse {
     private List<EducationDTO> educaciones;
     private List<LanguageDTO> idiomas;
     private List<FeedbackDTO> feedback;
+    private String situacion;
+    private Integer estado;
 }
