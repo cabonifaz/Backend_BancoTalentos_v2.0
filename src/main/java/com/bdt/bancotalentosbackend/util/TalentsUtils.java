@@ -10,7 +10,7 @@ import java.util.Map;
 public class TalentsUtils {
     public static List<FeedbackDTO> getFeedback(Map<String, Object> dataSets) {
         List<FeedbackDTO> feedbacks = new ArrayList<>();
-        List<Map<String, Object>> dataSet = (List<Map<String, Object>>) dataSets.get("#result-set-9");
+        List<Map<String, Object>> dataSet = (List<Map<String, Object>>) dataSets.get("#result-set-10");
 
         if (dataSet != null && !dataSet.isEmpty()) {
             for (Map<String, Object> row : dataSet) {
@@ -23,7 +23,7 @@ public class TalentsUtils {
 
     public static List<LanguageDTO> getLanguages(Map<String, Object> dataSets) {
         List<LanguageDTO> languages = new ArrayList<>();
-        List<Map<String, Object>> dataSet = (List<Map<String, Object>>) dataSets.get("#result-set-8");
+        List<Map<String, Object>> dataSet = (List<Map<String, Object>>) dataSets.get("#result-set-9");
 
         if (dataSet != null && !dataSet.isEmpty()) {
             for (Map<String, Object> row : dataSet) {
@@ -36,7 +36,7 @@ public class TalentsUtils {
 
     public static List<EducationDTO> getEducations(Map<String, Object> dataSets) {
         List<EducationDTO> educations = new ArrayList<>();
-        List<Map<String, Object>> dataSet = (List<Map<String, Object>>) dataSets.get("#result-set-7");
+        List<Map<String, Object>> dataSet = (List<Map<String, Object>>) dataSets.get("#result-set-8");
 
         if (dataSet != null && !dataSet.isEmpty()) {
             for (Map<String, Object> row : dataSet) {
@@ -49,7 +49,7 @@ public class TalentsUtils {
 
     public static List<WorkExperienceDTO> getWorkExperience(Map<String, Object> dataSets) {
         List<WorkExperienceDTO> workExperiences = new ArrayList<>();
-        List<Map<String, Object>> dataSet = (List<Map<String, Object>>) dataSets.get("#result-set-6");
+        List<Map<String, Object>> dataSet = (List<Map<String, Object>>) dataSets.get("#result-set-7");
 
         if (dataSet != null && !dataSet.isEmpty()) {
             for (Map<String, Object> row : dataSet) {
@@ -62,7 +62,7 @@ public class TalentsUtils {
 
     public static List<SoftAbilityDTO> getSoftAbilities(Map<String, Object> dataSets) {
         List<SoftAbilityDTO> softAbilities = new ArrayList<>();
-        List<Map<String, Object>> dataSet = (List<Map<String, Object>>) dataSets.get("#result-set-5");
+        List<Map<String, Object>> dataSet = (List<Map<String, Object>>) dataSets.get("#result-set-6");
 
         if (dataSet != null && !dataSet.isEmpty()) {
             for (Map<String, Object> row : dataSet) {
@@ -75,7 +75,7 @@ public class TalentsUtils {
 
     public static List<TechAbilityDTO> getTechAbilities(Map<String, Object> dataSets) {
         List<TechAbilityDTO> techAbilities = new ArrayList<>();
-        List<Map<String, Object>> dataSet = (List<Map<String, Object>>) dataSets.get("#result-set-4");
+        List<Map<String, Object>> dataSet = (List<Map<String, Object>>) dataSets.get("#result-set-5");
 
         if (dataSet != null && !dataSet.isEmpty()) {
             for (Map<String, Object> row : dataSet) {
@@ -88,7 +88,7 @@ public class TalentsUtils {
 
     public static List<FileDTO> getTalentFiles(Map<String, Object> dataSets) {
         List<FileDTO> files = new ArrayList<>();
-        List<Map<String, Object>> dataSet = (List<Map<String, Object>>) dataSets.get("#result-set-3");
+        List<Map<String, Object>> dataSet = (List<Map<String, Object>>) dataSets.get("#result-set-4");
 
         if (dataSet != null && !dataSet.isEmpty()) {
             for (Map<String, Object> row : dataSet) {
@@ -97,5 +97,18 @@ public class TalentsUtils {
         }
 
         return files;
+    }
+
+    public static List<Integer> getTalentCollection (Map<String, Object> dataSets) {
+        List<Integer> lstColeccion = new ArrayList<>();
+        List<Map<String, Object>> talentSet3 = (List<Map<String, Object>>) dataSets.get("#result-set-3");
+        if (talentSet3 != null && !talentSet3.isEmpty()) {
+
+            for (Map<String, Object> idColeccionRow : talentSet3) {
+                lstColeccion.add((Integer) idColeccionRow.get("ID_USUARIO_FAVORITOS"));
+            }
+        }
+
+        return lstColeccion;
     }
 }

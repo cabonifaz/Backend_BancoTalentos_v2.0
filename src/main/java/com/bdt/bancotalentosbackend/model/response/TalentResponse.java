@@ -19,7 +19,7 @@ public class TalentResponse {
     private String github;
     private String descripcion;
     private String disponibilidad;
-    private Integer idColeccion;
+    private List<Integer> idColeccion;
     private Integer idMoneda;
     private List<FileDTO> files;
     private List<TechAbilityDTO> habilidadesTecnicas;
