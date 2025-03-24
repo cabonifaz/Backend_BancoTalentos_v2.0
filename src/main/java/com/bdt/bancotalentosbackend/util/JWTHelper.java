@@ -1,6 +1,7 @@
 package com.bdt.bancotalentosbackend.util;
 
 import com.bdt.bancotalentosbackend.model.dto.UserDTO;
+import com.bdt.bancotalentosbackend.model.request.LinkTokenRequest;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -59,5 +60,21 @@ public class JWTHelper {
             throw new Exception("Authorization header is missing or invalid");
         }
         return authorizationHeader.split(" ")[1];
+    }
+
+    public String generateLinkToken(LinkTokenRequest request, String authToken) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("authToken", authToken);
+        claims.put("lst_rq", request.getLstRequerimientos());
+
+
+        String tokenGenerado = Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + Constante.TIEMPO_EXPIRACION))
+                .signWith(SignatureAlgorithm.HS256, secret)
+                .compact();
+
+        return Constante.URL_FRONT + tokenGenerado;
     }
 }

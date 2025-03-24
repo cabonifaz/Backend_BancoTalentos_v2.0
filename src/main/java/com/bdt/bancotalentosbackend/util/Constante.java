@@ -12,4 +12,8 @@ public class Constante {
     public static final String RUTA_REPOSITORIO_FOTO_TALENTO = "repositorio/talento/[ID]/";
     public static final String RUTA_REPOSITORIO_CV_TALENTO = "repositorio/talento/[ID]/CV/";
     public static final String RUTA_REPOSITORIO_TALENTO_ARCHIVOS = "repositorio/talento/[ID]/archivos/";
+
+    // CONFIG LINK TOKEN JWT
+    public static final long TIEMPO_EXPIRACION = 1800000L;
+    public static final String URL_FRONT = "https://calm-water-0f8491110.4.azurestaticapps.net/#/formPostulante?token=";
 }
