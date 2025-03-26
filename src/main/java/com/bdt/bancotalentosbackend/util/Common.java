@@ -3,8 +3,10 @@ package com.bdt.bancotalentosbackend.util;
 import com.bdt.bancotalentosbackend.model.dto.UserDTO;
 import com.bdt.bancotalentosbackend.model.request.BaseRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
+import com.bdt.bancotalentosbackend.model.response.InsertUpdateResponse;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -55,5 +57,14 @@ public class Common {
     public static BaseResponse getBaseResponse(List<Map<String, Object>> resultSet) {
         Map<String, Object> row = resultSet.get(0);
         return new BaseResponse((Integer) row.get("ID_TIPO_MENSAJE"), (String) row.get("MENSAJE"));
+    }
+
+    public static InsertUpdateResponse getInsertUpdateResponse(List<Map<String, Object>> resultSet) {
+        Map<String, Object> row = resultSet.get(0);
+        return new InsertUpdateResponse(
+                (Integer) row.get("ID_TIPO_MENSAJE"),
+                (String) row.get("MENSAJE"),
+                (Integer) row.get("ID_NUEVO")
+        );
     }
 }

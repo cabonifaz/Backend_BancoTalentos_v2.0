@@ -1,12 +1,9 @@
 package com.bdt.bancotalentosbackend.repository;
 
+import com.bdt.bancotalentosbackend.model.response.*;
 import com.bdt.bancotalentosbackend.mapper.TalentsMapper;
 import com.bdt.bancotalentosbackend.model.dto.*;
 import com.bdt.bancotalentosbackend.model.request.*;
-import com.bdt.bancotalentosbackend.model.response.BaseResponse;
-import com.bdt.bancotalentosbackend.model.response.FileResponse;
-import com.bdt.bancotalentosbackend.model.response.TalentResponse;
-import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
 import com.bdt.bancotalentosbackend.util.Common;
 import com.bdt.bancotalentosbackend.util.Constante;
 import com.bdt.bancotalentosbackend.util.TalentsUtils;
@@ -18,12 +15,15 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import static com.bdt.bancotalentosbackend.util.Common.getBaseResponse;
 import static com.bdt.bancotalentosbackend.util.Common.simpleSPCall;
+import static com.bdt.bancotalentosbackend.util.Common.getInsertUpdateResponse;
 import static com.bdt.bancotalentosbackend.util.FileUtils.*;
 
 @Repository
@@ -223,7 +223,7 @@ public class TalentsRepository {
         List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
 
         if (resultSet != null && !resultSet.isEmpty()) {
-            baseResponse = getBaseResponse(resultSet);
+            baseResponse = getInsertUpdateResponse(resultSet);
             Map<String, Object> row = resultSet.get(0);
 
             rutaFoto = (String) row.get("NUEVA_RUTA_IMAGEN");
