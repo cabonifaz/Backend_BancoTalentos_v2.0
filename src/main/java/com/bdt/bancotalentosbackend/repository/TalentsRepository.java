@@ -10,6 +10,7 @@ import com.bdt.bancotalentosbackend.util.TalentsUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.bcel.Const;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -155,104 +156,131 @@ public class TalentsRepository {
     }
 
     public BaseResponse addOrUpdateTalent(BaseRequest baseRequest, TalentRequest talentRequest) throws JsonProcessingException {
-        boolean isUpdate = talentRequest.getIdTalento() != null && talentRequest.getIdTalento() > 0;
-        String procedureName = isUpdate ? "SP_BT_TALENTO_UPD" : "SP_BT_TALENTO_INS";
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
-        BaseResponse baseResponse = new BaseResponse();
+        try {
+            boolean isUpdate = talentRequest.getIdTalento() != null && talentRequest.getIdTalento() > 0;
+            String procedureName = isUpdate ? "SP_BT_TALENTO_UPD" : "SP_BT_TALENTO_INS";
+            SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
+            BaseResponse baseResponse = new BaseResponse();
 
-        FileRequest fotoRequest = talentRequest.getFotoArchivo();
-        String rutaFoto = fotoRequest != null
-                ? Constante.RUTA_REPOSITORIO_FOTO_TALENTO + fotoRequest.getNombreArchivo() + "." + fotoRequest.getExtensionArchivo()
-                : null;
+            FileRequest fotoRequest = talentRequest.getFotoArchivo();
+            String rutaFoto = fotoRequest != null
+                    ? Constante.RUTA_REPOSITORIO_FOTO_TALENTO + fotoRequest.getNombreArchivo() + "." + fotoRequest.getExtensionArchivo()
+                    : null;
 
-        FileRequest cvRequest = talentRequest.getCvArchivo();
-        String rutaCV = cvRequest != null
-                ? Constante.RUTA_REPOSITORIO_CV_TALENTO + cvRequest.getNombreArchivo() + "." + cvRequest.getExtensionArchivo()
-                : null;
+            FileRequest cvRequest = talentRequest.getCvArchivo();
+            String rutaCV = cvRequest != null
+                    ? Constante.RUTA_REPOSITORIO_CV_TALENTO + cvRequest.getNombreArchivo() + "." + cvRequest.getExtensionArchivo()
+                    : null;
 
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("DNI", talentRequest.getDni())
-                .addValue("NOMBRES", talentRequest.getNombres())
-                .addValue("APELLIDO_PATERNO", talentRequest.getApellidoPaterno())
-                .addValue("APELLIDO_MATERNO", talentRequest.getApellidoMaterno())
-                .addValue("EMAIL", talentRequest.getEmail())
-                .addValue("CELULAR", talentRequest.getTelefono())
-                .addValue("RUTA_IMAGEN", rutaFoto)
-                .addValue("LINK_LINKEDIN", talentRequest.getLinkedin())
-                .addValue("LINK_GITHUB", talentRequest.getGithub())
-                .addValue("DESCRIPCION", talentRequest.getDescripcion())
-                .addValue("DISPONIBILIDAD", talentRequest.getDisponibilidad())
-                .addValue("PUESTO", talentRequest.getPuesto())
-                .addValue("ID_PAIS", talentRequest.getIdPais())
-                .addValue("ID_CIUDAD", talentRequest.getIdCiudad())
-                .addValue("MONTO_INICIAL_PLANILLA", talentRequest.getMontoInicialPlanilla())
-                .addValue("MONTO_FINAL_PLANILLA", talentRequest.getMontoFinalPlanilla())
-                .addValue("MONTO_INICIAL_RXH", talentRequest.getMontoInicialRxH())
-                .addValue("MONTO_FINAL_RXH", talentRequest.getMontoFinalRxH())
-                .addValue("ID_MONEDA", talentRequest.getIdMoneda())
+            MapSqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("DNI", talentRequest.getDni())
+                    .addValue("NOMBRES", talentRequest.getNombres())
+                    .addValue("APELLIDO_PATERNO", talentRequest.getApellidoPaterno())
+                    .addValue("APELLIDO_MATERNO", talentRequest.getApellidoMaterno())
+                    .addValue("EMAIL", talentRequest.getEmail())
+                    .addValue("CELULAR", talentRequest.getTelefono())
+                    .addValue("RUTA_IMAGEN", rutaFoto)
+                    .addValue("LINK_LINKEDIN", talentRequest.getLinkedin())
+                    .addValue("LINK_GITHUB", talentRequest.getGithub())
+                    .addValue("DESCRIPCION", talentRequest.getDescripcion())
+                    .addValue("DISPONIBILIDAD", talentRequest.getDisponibilidad())
+                    .addValue("PUESTO", talentRequest.getPuesto())
+                    .addValue("ID_PAIS", talentRequest.getIdPais())
+                    .addValue("ID_CIUDAD", talentRequest.getIdCiudad())
+                    .addValue("MONTO_INICIAL_PLANILLA", talentRequest.getMontoInicialPlanilla())
+                    .addValue("MONTO_FINAL_PLANILLA", talentRequest.getMontoFinalPlanilla())
+                    .addValue("MONTO_INICIAL_RXH", talentRequest.getMontoInicialRxH())
+                    .addValue("MONTO_FINAL_RXH", talentRequest.getMontoFinalRxH())
+                    .addValue("ID_MONEDA", talentRequest.getIdMoneda())
 
-                .addValue("ID_ROL", baseRequest.getIdRol())
-                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
-                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
-                .addValue("USERNAME", baseRequest.getUsername());
+                    .addValue("ID_ROL", baseRequest.getIdRol())
+                    .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                    .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                    .addValue("USERNAME", baseRequest.getUsername());
 
-        if (isUpdate) {
-            params.addValue("ID_TALENTO", talentRequest.getIdTalento());
-        } else {
+            if (isUpdate) {
+                params.addValue("ID_TALENTO", talentRequest.getIdTalento());
+            } else {
 
-            ObjectMapper objectMapper = new ObjectMapper();
+                ObjectMapper objectMapper = new ObjectMapper();
+                String habilidadesTecnicasJson = null;
+                String habilidadesBlandasJson = null;
+                String experienciasJson = null;
+                String educacionesJson = null;
+                String idiomasJson = null;
 
-            String habilidadesTecnicasJson = objectMapper.writeValueAsString(talentRequest.getHabilidadesTecnicas());
-            String habilidadesBlandasJson = objectMapper.writeValueAsString(talentRequest.getHabilidadesBlandas());
-            String experienciasJson = objectMapper.writeValueAsString(talentRequest.getExperiencias());
-            String educacionesJson = objectMapper.writeValueAsString(talentRequest.getEducaciones());
-            String idiomasJson = objectMapper.writeValueAsString(talentRequest.getIdiomas());
+                if(talentRequest.getHabilidadesTecnicas() != null) {
+                    habilidadesTecnicasJson = objectMapper.writeValueAsString(talentRequest.getHabilidadesTecnicas());
+                }
 
-            params.addValue("HABILIDADES_TECNICAS_JSON", habilidadesTecnicasJson)
-                    .addValue("HABILIDADES_BLANDAS_JSON", habilidadesBlandasJson)
-                    .addValue("EXPERIENCIAS_JSON", experienciasJson)
-                    .addValue("EDUCACIONES_JSON", educacionesJson)
-                    .addValue("IDIOMAS_JSON", idiomasJson)
-                    .addValue("CV_NOMBRE_ARCHIVO", cvRequest != null ? cvRequest.getNombreArchivo() : null)
-                    .addValue("CV_ID_TIPO_ARCHIVO", cvRequest != null ? cvRequest.getIdTipoArchivo() : null)
-                    .addValue("CV_ID_TIPO_DOCUMENTO", cvRequest != null ? cvRequest.getIdTipoDocumento() : null)
-                    .addValue("CV_RUTA_ARCHIVO", rutaCV);
-        }
+                if(talentRequest.getHabilidadesBlandas() != null) {
+                    habilidadesBlandasJson = objectMapper.writeValueAsString(talentRequest.getHabilidadesBlandas());
+                }
 
-        Map<String, Object> result = simpleJdbcCall.execute(params);
-        List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
+                if(talentRequest.getExperiencias() != null) {
+                    experienciasJson = objectMapper.writeValueAsString(talentRequest.getExperiencias());
+                }
 
-        if (resultSet != null && !resultSet.isEmpty()) {
-            baseResponse = getInsertUpdateResponse(resultSet);
-            Map<String, Object> row = resultSet.get(0);
+                if(talentRequest.getEducaciones() != null) {
+                    educacionesJson = objectMapper.writeValueAsString(talentRequest.getEducaciones());
+                }
 
-            rutaFoto = (String) row.get("NUEVA_RUTA_IMAGEN");
+                if(talentRequest.getIdiomas() != null) {
+                    idiomasJson = objectMapper.writeValueAsString(talentRequest.getIdiomas());
+                }
 
-            if (cvRequest != null) {
-                rutaCV = (String) row.get("NUEVA_RUTA_CV");
+
+                params.addValue("HABILIDADES_TECNICAS_JSON", habilidadesTecnicasJson)
+                        .addValue("HABILIDADES_BLANDAS_JSON", habilidadesBlandasJson)
+                        .addValue("EXPERIENCIAS_JSON", experienciasJson)
+                        .addValue("EDUCACIONES_JSON", educacionesJson)
+                        .addValue("IDIOMAS_JSON", idiomasJson)
+                        .addValue("CV_NOMBRE_ARCHIVO", cvRequest != null ? cvRequest.getNombreArchivo() : null)
+                        .addValue("CV_ID_TIPO_ARCHIVO", cvRequest != null ? cvRequest.getIdTipoArchivo() : null)
+                        .addValue("CV_ID_TIPO_DOCUMENTO", cvRequest != null ? cvRequest.getIdTipoDocumento() : null)
+                        .addValue("CV_RUTA_ARCHIVO", rutaCV);
             }
-        }
 
-        if (baseResponse.getIdMensaje() == 2 && fotoRequest != null) {
-            boolean imagenGuardada = isUpdate
-                    ? reemplazarImagen(fotoRequest.getStringB64(), fotoRequest.getExtensionArchivo(), rutaFoto)
-                    : guardarImagen(fotoRequest.getStringB64(), fotoRequest.getExtensionArchivo(), rutaFoto);
+            Map<String, Object> result = simpleJdbcCall.execute(params);
+            List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
 
-            if (!imagenGuardada) {
-                baseResponse.setIdMensaje(1);
-                baseResponse.setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar la foto");
+            if (resultSet != null && !resultSet.isEmpty()) {
+                baseResponse = getInsertUpdateResponse(resultSet);
+                Map<String, Object> row = resultSet.get(0);
+
+                rutaFoto = (String) row.get("NUEVA_RUTA_IMAGEN");
+
+                if (cvRequest != null) {
+                    rutaCV = (String) row.get("NUEVA_RUTA_CV");
+                }
             }
-        }
 
-        if (baseResponse.getIdMensaje() == 2 && cvRequest != null) {
-            boolean cvGuardado = guardarArchivo(cvRequest.getStringB64(), rutaCV);
-            if (!cvGuardado) {
-                baseResponse.setIdMensaje(1);
-                baseResponse.setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar el CV");
+            if (baseResponse.getIdMensaje() == 2 && fotoRequest != null) {
+                boolean imagenGuardada = isUpdate
+                        ? reemplazarImagen(fotoRequest.getStringB64(), fotoRequest.getExtensionArchivo(), rutaFoto)
+                        : guardarImagen(fotoRequest.getStringB64(), fotoRequest.getExtensionArchivo(), rutaFoto);
+
+                if (!imagenGuardada) {
+                    baseResponse.setIdMensaje(1);
+                    baseResponse.setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar la foto");
+                }
             }
+
+            if (baseResponse.getIdMensaje() == 2 && cvRequest != null) {
+                boolean cvGuardado = guardarArchivo(cvRequest.getStringB64(), rutaCV);
+                if (!cvGuardado) {
+                    baseResponse.setIdMensaje(1);
+                    baseResponse.setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar el CV");
+                }
+            }
+
+            return baseResponse;
+        } catch (Exception e) {
+            System.err.println("ERROR EN addOrUpdateTalent:::");
+            System.err.println(e.getMessage());
+            return new BaseResponse(3, "Error interno::" + e.getMessage());
         }
 
-        return baseResponse;
     }
 
     public BaseResponse addTalentToFavourite(BaseRequest baseRequest, TalentToFavRequest favRequest) {
