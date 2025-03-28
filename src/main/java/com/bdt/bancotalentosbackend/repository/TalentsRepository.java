@@ -10,7 +10,6 @@ import com.bdt.bancotalentosbackend.util.TalentsUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.bcel.Const;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -33,43 +32,52 @@ public class TalentsRepository {
     private final JdbcTemplate jdbcTemplate;
 
     public TalentsListResponse getTalents(BaseRequest baseRequest, SearchRequest searchRequest) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_LST");
-        TalentsListResponse talentsListResponse = new TalentsListResponse();
+        try {
+            TalentsListResponse talentsListResponse = new TalentsListResponse();
 
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("ID_ROL", baseRequest.getIdRol())
-                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
-                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
-                .addValue("ID_EMPRESA", baseRequest.getIdEmpresa())
-                .addValue("N_PAG", searchRequest.getPage())
-                .addValue("BUSQUEDA", searchRequest.getSearch())
-                .addValue("HABILIDADES_TECNICAS", searchRequest.getTechAbilities())
-                .addValue("ID_NIVEL_INGLES", searchRequest.getIdEnglishLevel())
-                .addValue("ID_USUARIO_FAVORITOS", searchRequest.getIdTalentCollection());
+            SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                    .withProcedureName("SP_BT_TALENTO_LST");
+            SqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("ID_ROL", baseRequest.getIdRol())
+                    .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                    .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                    .addValue("ID_EMPRESA", baseRequest.getIdEmpresa())
+                    .addValue("N_PAG", searchRequest.getPage())
+                    .addValue("BUSQUEDA", searchRequest.getSearch())
+                    .addValue("HABILIDADES_TECNICAS", searchRequest.getTechAbilities())
+                    .addValue("ID_NIVEL_INGLES", searchRequest.getIdEnglishLevel())
+                    .addValue("ID_USUARIO_FAVORITOS", searchRequest.getIdTalentCollection());
 
-        Map<String, Object> result = simpleJdbcCall.execute(params);
-        List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
+            Map<String, Object> result = simpleJdbcCall.execute(params);
+            List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
 
-        if (resultSet != null && !resultSet.isEmpty()) {
-            Map<String, Object> row = resultSet.get(0);
-            Integer totalTalents = (Integer) row.get("TOTAL_LISTA");
+            if (resultSet != null && !resultSet.isEmpty()) {
+                Map<String, Object> row = resultSet.get(0);
+                Integer totalTalents = (Integer) row.get("TOTAL_LISTA");
 
-            talentsListResponse.setBaseResponse(getBaseResponse(resultSet));
-            talentsListResponse.setTotal(totalTalents);
+                talentsListResponse.setBaseResponse(getBaseResponse(resultSet));
+                talentsListResponse.setTotal(totalTalents);
 
-            if (talentsListResponse.getBaseResponse().getIdMensaje() == 2) {
-                List<Map<String, Object>> talentsSet = (List<Map<String, Object>>) result.get("#result-set-2");
-                if (talentsSet != null && !talentsSet.isEmpty()) {
-                    List<TalentListDTO> talents = new ArrayList<>();
+                if (talentsListResponse.getBaseResponse().getIdMensaje() == 2) {
+                    List<Map<String, Object>> talentsSet = (List<Map<String, Object>>) result.get("#result-set-2");
+                    if (talentsSet != null && !talentsSet.isEmpty()) {
+                        List<TalentListDTO> talents = new ArrayList<>();
 
-                    for (Map<String, Object> talentRow : talentsSet) {
-                        talents.add(TalentsMapper.mapToTalentListDTO(talentRow));
+                        for (Map<String, Object> talentRow : talentsSet) {
+                            talents.add(TalentsMapper.mapToTalentListDTO(talentRow));
+                        }
+                        talentsListResponse.setTalents(talents);
                     }
-                    talentsListResponse.setTalents(talents);
                 }
             }
+            return talentsListResponse;
+        } catch (Exception e) {
+            System.err.println("Error en REPOSITORY getTalents");
+            System.err.println(e.getMessage());
+
+            return new TalentsListResponse(new BaseResponse(3, e.getMessage()), null, null);
         }
-        return talentsListResponse;
+
     }
 
     public TalentResponse getTalentById(BaseRequest baseRequest, Integer talentId, boolean loadExtraInfo) {
@@ -209,23 +217,23 @@ public class TalentsRepository {
                 String educacionesJson = null;
                 String idiomasJson = null;
 
-                if(talentRequest.getHabilidadesTecnicas() != null) {
+                if (talentRequest.getHabilidadesTecnicas() != null) {
                     habilidadesTecnicasJson = objectMapper.writeValueAsString(talentRequest.getHabilidadesTecnicas());
                 }
 
-                if(talentRequest.getHabilidadesBlandas() != null) {
+                if (talentRequest.getHabilidadesBlandas() != null) {
                     habilidadesBlandasJson = objectMapper.writeValueAsString(talentRequest.getHabilidadesBlandas());
                 }
 
-                if(talentRequest.getExperiencias() != null) {
+                if (talentRequest.getExperiencias() != null) {
                     experienciasJson = objectMapper.writeValueAsString(talentRequest.getExperiencias());
                 }
 
-                if(talentRequest.getEducaciones() != null) {
+                if (talentRequest.getEducaciones() != null) {
                     educacionesJson = objectMapper.writeValueAsString(talentRequest.getEducaciones());
                 }
 
-                if(talentRequest.getIdiomas() != null) {
+                if (talentRequest.getIdiomas() != null) {
                     idiomasJson = objectMapper.writeValueAsString(talentRequest.getIdiomas());
                 }
 

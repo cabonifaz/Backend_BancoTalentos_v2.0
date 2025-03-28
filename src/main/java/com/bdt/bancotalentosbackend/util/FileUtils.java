@@ -178,35 +178,37 @@ public class FileUtils {
         try {
             logger.info(Constante.TXT_SEPARADOR);
             logger.info("Inicio Utilitarios - CargarImagen");
-            File archivo = new File(linkImagen).getAbsoluteFile();
-            logger.info("Consultando existencia de archivo..." + linkImagen);
-            if (archivo.exists()) {
-                logger.info("El archivo existe");
-                BufferedImage imagen = ImageIO.read(archivo);
+            if(linkImagen != null) {
+                File archivo = new File(linkImagen).getAbsoluteFile();
+                logger.info("Consultando existencia de archivo..." + linkImagen);
+                if (archivo.exists()) {
+                    logger.info("El archivo existe");
+                    BufferedImage imagen = ImageIO.read(archivo);
 
-                // Obtener la extensión del archivo
-                String formato = linkImagen.substring(linkImagen.lastIndexOf(".") + 1).toLowerCase();
-                if (!formato.equals("png") && !formato.equals("jpg") && !formato.equals("jpeg")) {
-                    logger.error("Formato de imagen no soportado: " + formato);
-                    return "";
+                    // Obtener la extensión del archivo
+                    String formato = linkImagen.substring(linkImagen.lastIndexOf(".") + 1).toLowerCase();
+                    if (!formato.equals("png") && !formato.equals("jpg") && !formato.equals("jpeg")) {
+                        logger.error("Formato de imagen no soportado: " + formato);
+                        return "";
+                    }
+
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    ImageIO.write(imagen, formato, byteArrayOutputStream); // Usar el formato correcto
+                    byte[] byteArray = byteArrayOutputStream.toByteArray();
+                    String imagenBase64 = Base64.getEncoder().encodeToString(byteArray);
+                    logger.info("Fin Utilitarios - CargarImagen");
+                    logger.info(Constante.TXT_SEPARADOR);
+                    return imagenBase64;
                 }
 
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                ImageIO.write(imagen, formato, byteArrayOutputStream); // Usar el formato correcto
-                byte[] byteArray = byteArrayOutputStream.toByteArray();
-                String imagenBase64 = Base64.getEncoder().encodeToString(byteArray);
                 logger.info("Fin Utilitarios - CargarImagen");
                 logger.info(Constante.TXT_SEPARADOR);
-                return imagenBase64;
+                return archivo.getAbsolutePath();
             }
-
-            logger.info("Fin Utilitarios - CargarImagen");
-            logger.info(Constante.TXT_SEPARADOR);
-            return archivo.getAbsolutePath();
         } catch (IOException e) {
             logger.error("Error al cargar la imagen: " + e.getMessage());
-            return "";
         }
+        return "";
     }
 
     public static String cargarPDF(String linkPDF) {
