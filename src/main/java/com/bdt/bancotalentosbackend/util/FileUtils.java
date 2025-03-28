@@ -178,7 +178,7 @@ public class FileUtils {
         try {
             logger.info(Constante.TXT_SEPARADOR);
             logger.info("Inicio Utilitarios - CargarImagen");
-            if(linkImagen != null) {
+            if (linkImagen != null) {
                 File archivo = new File(linkImagen).getAbsoluteFile();
                 logger.info("Consultando existencia de archivo..." + linkImagen);
                 if (archivo.exists()) {

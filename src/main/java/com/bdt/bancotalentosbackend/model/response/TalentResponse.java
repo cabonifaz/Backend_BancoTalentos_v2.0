@@ -32,6 +32,6 @@ public class TalentResponse {
     private List<EducationDTO> educaciones;
     private List<LanguageDTO> idiomas;
     private List<FeedbackDTO> feedback;
-    private String situacion;
+    private Integer situacion;
     private Integer estado;
 }

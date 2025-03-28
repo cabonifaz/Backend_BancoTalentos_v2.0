@@ -55,7 +55,7 @@ public class TalentsController {
             response = talentsService.getTalentById(token, talentId, loadExtraInfo);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            response.setBaseResponse(new BaseResponse(1, e.getMessage()));
+            response.setBaseResponse(new BaseResponse(3, e.getMessage()));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
