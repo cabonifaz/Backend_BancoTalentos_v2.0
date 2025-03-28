@@ -103,44 +103,19 @@ public class TalentsRepository {
                     Map<String, Object> talentRow = talentSet2.get(0);
 
                     // Talent detail
-                    System.out.println("Cargando idTalento");
-                    System.out.println(Constante.TXT_SEPARADOR);
                     talentResponse.setIdTalento((Integer) talentRow.get("ID_TALENTO"));
-                    System.out.println("Cargando Nombres");
-                    System.out.println(Constante.TXT_SEPARADOR);
                     talentResponse.setNombres((String) talentRow.get("NOMBRES"));
-                    System.out.println("Cargando Apellidos");
-                    System.out.println(Constante.TXT_SEPARADOR);
                     talentResponse.setApellidos((String) talentRow.get("APELLIDOS"));
-                    System.out.println("Cargando DNI");
-                    System.out.println(Constante.TXT_SEPARADOR);
                     talentResponse.setDni((String) talentRow.get("DNI"));
-                    System.out.println("Cargando EMAIL");
-                    System.out.println(Constante.TXT_SEPARADOR);
                     talentResponse.setEmail((String) talentRow.get("EMAIL"));
-                    System.out.println("Cargando CELULAR");
-                    System.out.println(Constante.TXT_SEPARADOR);
                     talentResponse.setCelular((String) talentRow.get("CELULAR"));
-                    System.out.println("Cargando LINKEDIN");
-                    System.out.println(Constante.TXT_SEPARADOR);
                     talentResponse.setLinkedin((String) talentRow.get("LINK_LINKEDIN"));
-                    System.out.println("Cargando GITHUB");
-                    System.out.println(Constante.TXT_SEPARADOR);
                     talentResponse.setGithub((String) talentRow.get("LINK_GITHUB"));
-                    System.out.println("Cargando DESCRIPCION");
-                    System.out.println(Constante.TXT_SEPARADOR);
                     talentResponse.setDescripcion((String) talentRow.get("DESCRIPCION"));
-                    System.out.println("Cargando DISPONIBILIDAD");
-                    System.out.println(Constante.TXT_SEPARADOR);
                     talentResponse.setDisponibilidad((String) talentRow.get("DISPONIBILIDAD"));
-                    System.out.println("Cargando ID_MONEDA");
-                    System.out.println(Constante.TXT_SEPARADOR);
                     talentResponse.setIdMoneda((Integer) talentRow.get("ID_MONEDA"));
-                    System.out.println("Cargando ID_SITUACION");
-                    System.out.println(Constante.TXT_SEPARADOR);
+
                     talentResponse.setSituacion((Integer) talentRow.get("ID_SITUACION"));
-                    System.out.println("Cargando ID_ESTADO");
-                    System.out.println(Constante.TXT_SEPARADOR);
                     talentResponse.setEstado((Integer) talentRow.get("ID_ESTADO"));
 
                     talentResponse.setIdColeccion(TalentsUtils.getTalentCollection(result));
