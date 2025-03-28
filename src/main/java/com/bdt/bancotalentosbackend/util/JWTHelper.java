@@ -71,7 +71,7 @@ public class JWTHelper {
         String tokenGenerado = Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + Constante.TIEMPO_EXPIRACION))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
 
