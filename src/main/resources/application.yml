@@ -11,7 +11,7 @@ spring:
         boot:
           allow_jdbc_metadata_access: false
   profiles:
-    active: dev
+    active: preprod
 jwt:
   expiration: 172800000 # 48 hours in milliseconds
   secret: JMvkOzKGhZF4jN71iEJBpNWTTyz7NLakjQ0A7VhaV4ogcz03MrDUwRtz6VA9itk5fTyN/NhbPNSAJHN8d5AByQ==
