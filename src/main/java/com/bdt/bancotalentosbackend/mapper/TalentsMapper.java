@@ -85,6 +85,7 @@ public class TalentsMapper {
                 (String) talentRow.get("PUESTO"),
                 (String) talentRow.get("PAIS"),
                 (String) talentRow.get("CIUDAD"),
+                (Integer) talentRow.get("ID_MODALIDAD_FACTURACION"),
                 (Double) talentRow.get("MONTO_INICIAL_PLANILLA"),
                 (Double) talentRow.get("MONTO_FINAL_PLANILLA"),
                 (Double) talentRow.get("MONTO_INICIAL_RXH"),

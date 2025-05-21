@@ -25,7 +25,6 @@ public class TalentResponse {
     private String disponibilidad;
     private List<Integer> idColeccion;
     private Integer idMoneda;
-    private Integer idModalidadFacturacion;
     private List<FileDTO> files;
     private List<TechAbilityDTO> habilidadesTecnicas;
     private List<SoftAbilityDTO> habilidadesBlandas;

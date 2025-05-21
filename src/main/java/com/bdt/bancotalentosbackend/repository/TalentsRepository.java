@@ -114,7 +114,6 @@ public class TalentsRepository {
                     talentResponse.setDescripcion((String) talentRow.get("DESCRIPCION"));
                     talentResponse.setDisponibilidad((String) talentRow.get("DISPONIBILIDAD"));
                     talentResponse.setIdMoneda((Integer) talentRow.get("ID_MONEDA"));
-                    talentResponse.setIdModalidadFacturacion((Integer) talentRow.get("ID_MODALIDAD_FACTURACION"));
 
                     talentResponse.setSituacion((Integer) talentRow.get("ID_SITUACION"));
                     talentResponse.setEstado((Integer) talentRow.get("ID_ESTADO"));

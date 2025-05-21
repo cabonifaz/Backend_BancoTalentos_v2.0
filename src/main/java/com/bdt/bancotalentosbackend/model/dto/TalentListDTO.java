@@ -16,6 +16,7 @@ public class TalentListDTO {
     private String puesto;
     private String pais;
     private String ciudad;
+    private Integer idModalidadFacturacion;
     private Double montoInicialPlanilla;
     private Double montoFinalPlanilla;
     private Double montoInicialRxH;
