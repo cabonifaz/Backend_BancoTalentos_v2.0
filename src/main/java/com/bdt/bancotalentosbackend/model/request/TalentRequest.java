@@ -44,6 +44,8 @@ public class TalentRequest {
     @JsonProperty()
     private Integer idCiudad;
     @JsonProperty()
+    private Integer idModalidadFacturacion;
+    @JsonProperty()
     private Double montoInicialPlanilla;
     @JsonProperty()
     private Double montoFinalPlanilla;

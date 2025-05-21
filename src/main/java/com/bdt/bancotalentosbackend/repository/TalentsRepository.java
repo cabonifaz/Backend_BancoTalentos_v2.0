@@ -114,6 +114,7 @@ public class TalentsRepository {
                     talentResponse.setDescripcion((String) talentRow.get("DESCRIPCION"));
                     talentResponse.setDisponibilidad((String) talentRow.get("DISPONIBILIDAD"));
                     talentResponse.setIdMoneda((Integer) talentRow.get("ID_MONEDA"));
+                    talentResponse.setIdModalidadFacturacion((Integer) talentRow.get("ID_MODALIDAD_FACTURACION"));
 
                     talentResponse.setSituacion((Integer) talentRow.get("ID_SITUACION"));
                     talentResponse.setEstado((Integer) talentRow.get("ID_ESTADO"));
@@ -195,6 +196,7 @@ public class TalentsRepository {
                     .addValue("PUESTO", talentRequest.getPuesto())
                     .addValue("ID_PAIS", talentRequest.getIdPais())
                     .addValue("ID_CIUDAD", talentRequest.getIdCiudad())
+                    .addValue("ID_MODALIDAD_FACTURACION", talentRequest.getIdModalidadFacturacion())
                     .addValue("MONTO_INICIAL_PLANILLA", talentRequest.getMontoInicialPlanilla())
                     .addValue("MONTO_FINAL_PLANILLA", talentRequest.getMontoFinalPlanilla())
                     .addValue("MONTO_INICIAL_RXH", talentRequest.getMontoInicialRxH())
