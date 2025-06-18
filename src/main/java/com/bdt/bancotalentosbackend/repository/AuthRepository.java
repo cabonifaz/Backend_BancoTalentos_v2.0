@@ -26,7 +26,8 @@ public class AuthRepository {
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("USUARIO", username)
-                .addValue("CLAVE", password);
+                .addValue("CLAVE", password)
+                .addValue("ID_MODULO", 8);
 
         Map<String, Object> result = simpleJdbcCall.execute(params);
         List<Map<String, Object>> resultSet1 = (List<Map<String, Object>>) result.get("#result-set-1");
