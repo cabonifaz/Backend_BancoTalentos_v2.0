@@ -7,6 +7,7 @@ import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
 import com.bdt.bancotalentosbackend.service.impl.TalentsService;
 import com.bdt.bancotalentosbackend.util.JWTHelper;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("bdt/talent")
 @RequiredArgsConstructor
+@Tag(name = "Talento")
 public class TalentsController {
     private final TalentsService talentsService;
 

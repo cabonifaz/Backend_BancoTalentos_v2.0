@@ -3,6 +3,7 @@ package com.bdt.bancotalentosbackend.controller;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.ParamsListResponse;
 import com.bdt.bancotalentosbackend.service.impl.ParamsService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("bdt/params")
 @RequiredArgsConstructor
+@Tag(name = "Parametro")
 public class ParamsController {
     private final ParamsService paramsService;
 

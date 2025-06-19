@@ -5,6 +5,7 @@ import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.UserFavListResponse;
 import com.bdt.bancotalentosbackend.service.impl.UserService;
 import com.bdt.bancotalentosbackend.util.JWTHelper;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
+@Tag(name = "Usuario")
 public class UserController {
     private final UserService userService;
 

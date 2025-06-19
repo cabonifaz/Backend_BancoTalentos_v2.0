@@ -4,6 +4,7 @@ import com.bdt.bancotalentosbackend.model.request.LinkTokenRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.GenerateLinkResponse;
 import com.bdt.bancotalentosbackend.util.JWTHelper;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("bdt/link")
 @RequiredArgsConstructor
+@Tag(name = "Generar link token")
 public class GenerateLinkTokenController {
     private final JWTHelper jwt;
 

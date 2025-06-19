@@ -4,6 +4,7 @@ import com.bdt.bancotalentosbackend.model.request.AuthRequest;
 import com.bdt.bancotalentosbackend.model.response.AuthResponse;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.service.IAuthService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("bdt/auth")
+@Tag(name = "Autenticación")
 public class AuthController {
     private final IAuthService authService;
 
