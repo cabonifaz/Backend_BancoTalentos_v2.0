@@ -16,7 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("bdt/talent")
+@RequestMapping("/talent")
 @RequiredArgsConstructor
 @Tag(name = "Talento")
 public class TalentsController {

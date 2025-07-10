@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("bdt/params")
+@RequestMapping("/params")
 @RequiredArgsConstructor
 @Tag(name = "Parametro")
 public class ParamsController {

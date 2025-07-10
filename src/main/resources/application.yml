@@ -1,3 +1,8 @@
+server:
+  port: 8080
+  address: 0.0.0.0
+  servlet:
+    context-path: /bdt
 spring:
   application:
     name: BancoTalentosBackend
@@ -32,3 +37,11 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
