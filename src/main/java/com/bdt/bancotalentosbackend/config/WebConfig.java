@@ -19,7 +19,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "https://calm-water-0f8491110.4.azurestaticapps.net",
                         "http://localhost:4200",
                         // AWS BDT Staging
-                        "https://bdt.aplicacion2-team.com",
+                        "https://bancotalentos.aplicacion2-team.com",
                         "https://api-bdt.aplicacion2-team.com",
                         // AWS FMI Staging
                         "https://autfmi.aplicacion2-team.com",
