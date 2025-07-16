@@ -265,9 +265,7 @@ public class TalentsRepository {
             }
 
             if (baseResponse.getIdMensaje() == 2 && fotoRequest != null) {
-                boolean imagenGuardada = isUpdate
-                        ? reemplazarImagen(fotoRequest.getStringB64(), fotoRequest.getExtensionArchivo(), rutaFoto)
-                        : guardarImagen(fotoRequest.getStringB64(), fotoRequest.getExtensionArchivo(), rutaFoto);
+                boolean imagenGuardada = guardarArchivoAws(fotoRequest.getStringB64(), fotoRequest.getExtensionArchivo(), rutaFoto, true);
 
                 if (!imagenGuardada) {
                     baseResponse.setIdMensaje(1);
@@ -276,7 +274,7 @@ public class TalentsRepository {
             }
 
             if (baseResponse.getIdMensaje() == 2 && cvRequest != null) {
-                boolean cvGuardado = guardarArchivo(cvRequest.getStringB64(), rutaCV);
+                boolean cvGuardado = guardarArchivoAws(cvRequest.getStringB64(), cvRequest.getExtensionArchivo(), rutaCV, false);
                 if (!cvGuardado) {
                     baseResponse.setIdMensaje(1);
                     baseResponse.setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar el CV");
@@ -526,7 +524,7 @@ public class TalentsRepository {
         ruta = ruta.replace("[ID]", uploadTalentFileRequest.getIdTalento().toString());
         BaseResponse baseResponse = new BaseResponse();
 
-        boolean archivoGuardado = guardarArchivo(uploadTalentFileRequest.getString64(), ruta);
+        boolean archivoGuardado = guardarArchivoAws(uploadTalentFileRequest.getString64(), uploadTalentFileRequest.getExtensionArchivo(), ruta, false);
 
         if (!archivoGuardado) {
             baseResponse.setIdMensaje(1);
@@ -576,25 +574,13 @@ public class TalentsRepository {
 
         if (resultSet != null && !resultSet.isEmpty()) {
             baseResponse = getBaseResponse(resultSet);
-            Map<String, Object> row = resultSet.get(0);
 
-            String rutaArchivoPre = (String) row.get("RUTA_ARCHIVO_PRE");
-            String nombreArchivoPre = (String) row.get("NOMBRE_ARCHIVO_PRE");
+            // save new file
+            boolean cvGuardado = guardarArchivoAws(updateTalentFileRequest.getString64(), updateTalentFileRequest.getExtensionArchivo(), ruta, true);
 
-            // delete previous file
-            boolean archivoEliminado = eliminarArchivo(rutaArchivoPre);
-
-            if (!archivoEliminado) {
+            if (!cvGuardado) {
                 baseResponse.setIdMensaje(1);
-                baseResponse.setMensaje("No se pudo eliminar el archivo anterior");
-            } else {
-                // save new file
-                boolean cvGuardado = guardarArchivo(updateTalentFileRequest.getString64(), ruta);
-
-                if (!cvGuardado) {
-                    baseResponse.setIdMensaje(1);
-                    baseResponse.setMensaje("No se pudo guardar el archivo");
-                }
+                baseResponse.setMensaje("No se pudo guardar el archivo");
             }
 
             return baseResponse;
