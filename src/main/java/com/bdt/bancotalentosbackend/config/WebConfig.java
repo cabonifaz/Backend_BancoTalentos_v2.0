@@ -15,15 +15,11 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins(
-                        "http://localhost:3000",
-                        "https://calm-water-0f8491110.4.azurestaticapps.net",
-                        "http://localhost:4200",
-                        // AWS BDT Staging
-                        "https://bancotalentos.aplicacion2-team.com",
-                        "https://api-bdt.aplicacion2-team.com",
-                        // AWS FMI Staging
-                        "https://autfmi.aplicacion2-team.com",
-                        "https://api-fmi.aplicacion2-team.com"
+                        // Front-ends
+                        "https://autfmi.fractal.com.pe",
+                        "https://bancodetalentos.fractal.com.pe",
+                        // Back-ends
+                        "https://api-autfmi.fractal.com.pe"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("Authorization", "Content-Type", "Accept")
