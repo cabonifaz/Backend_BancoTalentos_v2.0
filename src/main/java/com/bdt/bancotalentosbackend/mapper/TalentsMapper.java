@@ -81,7 +81,7 @@ public class TalentsMapper {
                 (String) talentRow.get("NOMBRES"),
                 (String) talentRow.get("APELLIDO_PATERNO"),
                 (String) talentRow.get("APELLIDO_MATERNO"),
-                FileUtils.cargarImagen((String) talentRow.get("RUTA_IMAGEN")),
+                FileUtils.cargarArchivoAws((String) talentRow.get("RUTA_IMAGEN")),
                 (String) talentRow.get("PUESTO"),
                 (String) talentRow.get("PAIS"),
                 (String) talentRow.get("CIUDAD"),

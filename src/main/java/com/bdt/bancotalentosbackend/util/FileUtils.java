@@ -2,6 +2,10 @@ package com.bdt.bancotalentosbackend.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -332,5 +336,171 @@ public class FileUtils {
             logger.info(Constante.TXT_SEPARADOR);
         }
         return false;
+    }
+
+    public static String cargarArchivoAws(String rutaS3) {
+        try {
+            logger.info(Constante.TXT_SEPARADOR);
+            logger.info("Inicio Utilitarios - CargarArchivoAws");
+            logger.info("Ruta recibida: " + rutaS3);
+
+            String bucketName = System.getenv("AWS_BUCKET");
+            if (bucketName == null || bucketName.isEmpty()) {
+                logger.error("Variable de entorno AWS_BUCKET no está definida");
+                return "";
+            }
+
+            // Obtener la extensión
+            String extension = obtenerExtension(rutaS3);
+            if (extension.isEmpty()) {
+                logger.error("No se pudo determinar la extensión del archivo.");
+                return "";
+            }
+
+            extension = extension.toLowerCase();
+
+            // Validar tipo permitido (solo imágenes o PDF)
+            if (!esExtensionSoportada(extension)) {
+                logger.error("Extensión de archivo no soportada: " + extension);
+                return "";
+            }
+
+            S3Client s3 = ClienteS3.getInstance();
+
+            logger.info("Descargando archivo desde S3...");
+            GetObjectRequest getRequest = GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(rutaS3)
+                    .build();
+
+            ResponseBytes<GetObjectResponse> objectBytes = s3.getObjectAsBytes(getRequest);
+            byte[] fileBytes = objectBytes.asByteArray();
+
+            if (esImagen(extension)) {
+                try {
+                    BufferedImage image = ImageIO.read(new ByteArrayInputStream(fileBytes));
+                    if (image == null) {
+                        logger.error("El contenido no es una imagen válida.");
+                        return "";
+                    }
+                } catch (IOException e) {
+                    logger.error("Error al verificar la imagen: " + e.getMessage(), e);
+                    return "";
+                }
+            }
+
+            String base64 = Base64.getEncoder().encodeToString(fileBytes);
+
+            logger.info("Archivo convertido exitosamente a Base64.");
+            logger.info("Fin Utilitarios - CargarArchivoAws");
+            logger.info(Constante.TXT_SEPARADOR);
+
+            return base64;
+
+        } catch (NoSuchKeyException e) {
+            logger.error("Error al acceder o no existe el archivo en S3: " + e.getMessage(), e);
+            return "";
+        } catch (S3Exception e) {
+            logger.warn("Error al acceder al archivo en S3: " + e.awsErrorDetails().errorMessage(), e);
+            return "";
+        } catch (Exception e) {
+            logger.error("Error inesperado al cargar archivo desde S3: " + e.getMessage(), e);
+            return "";
+        }
+    }
+
+    public static boolean guardarArchivoAws(String archivoBase64, String fileExtension, String rutaConNombre, boolean uniqueFile) {
+        try {
+            logger.info(Constante.TXT_SEPARADOR);
+            logger.info("Inicio Utilitarios - GuardarArchivoAws");
+            logger.info("Ruta recibida (S3 Key): " + rutaConNombre);
+            logger.info("Flag uniqueFile: " + uniqueFile);
+            logger.info("Extensión: " + fileExtension);
+
+            byte[] fileBytes = Base64.getDecoder().decode(archivoBase64);
+            String bucketName = System.getenv("AWS_BUCKET");
+
+            if (bucketName == null || bucketName.isEmpty()) {
+                logger.error("Variable de entorno AWS_BUCKET no está definida");
+                return false;
+            }
+
+            S3Client s3 = ClienteS3.getInstance();
+
+            // Eliminar archivos existentes en el mismo prefijo (nivel actual) si uniqueFile es true
+            if (uniqueFile) {
+                String prefijo = obtenerPrefijo(rutaConNombre); // ejemplo: repositorio/talento/123/
+                logger.info("Unique file activado. Eliminando archivos previos en: " + prefijo);
+
+                ListObjectsV2Request listRequest = ListObjectsV2Request.builder()
+                        .bucket(bucketName)
+                        .prefix(prefijo)
+                        .build();
+
+                ListObjectsV2Response listResponse = s3.listObjectsV2(listRequest);
+
+                for (S3Object objeto : listResponse.contents()) {
+                    String key = objeto.key();
+
+                    // Solo eliminar si:
+                    // - Está en el mismo nivel (sin subcarpetas)
+                    // - Es un archivo (no termina en /)
+                    if (esMismoNivel(key, prefijo) && !key.endsWith("/")) {
+                        logger.info("Eliminando archivo previo: " + key);
+                        s3.deleteObject(DeleteObjectRequest.builder()
+                                .bucket(bucketName)
+                                .key(key)
+                                .build());
+                    }
+                }
+            }
+            logger.info("Ruta final para guardar: " + rutaConNombre);
+
+            PutObjectRequest putRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(rutaConNombre)
+                    .build();
+
+            s3.putObject(putRequest, RequestBody.fromBytes(fileBytes));
+
+            logger.info("Archivo guardado exitosamente en S3: " + rutaConNombre);
+            logger.info("Fin Utilitarios - GuardarArchivoAws");
+            logger.info(Constante.TXT_SEPARADOR);
+
+            return true;
+        } catch (IllegalArgumentException e) {
+            logger.error("Cadena Base64 inválida: " + e.getMessage(), e);
+            return false;
+        } catch (Exception e) {
+            logger.error("Error inesperado al subir archivo a S3: " + e.getMessage(), e);
+            return false;
+        }
+    }
+
+
+    // Extrae el prefijo padre (nivel actual)
+    private static String obtenerPrefijo(String ruta) {
+        int lastSlash = ruta.lastIndexOf('/');
+        return (lastSlash != -1) ? ruta.substring(0, lastSlash + 1) : "";
+    }
+
+    // Verifica que esté en el mismo nivel (sin subcarpetas)
+    private static boolean esMismoNivel(String key, String prefijo) {
+        // Quita el prefijo y revisa que no haya otra barra
+        String restante = key.substring(prefijo.length());
+        return !restante.contains("/");
+    }
+
+    private static String obtenerExtension(String ruta) {
+        int i = ruta.lastIndexOf('.');
+        return (i > 0 && i < ruta.length() - 1) ? ruta.substring(i + 1) : "";
+    }
+
+    private static boolean esExtensionSoportada(String ext) {
+        return esImagen(ext) || ext.equals("pdf");
+    }
+
+    private static boolean esImagen(String ext) {
+        return ext.equals("png") || ext.equals("jpg") || ext.equals("jpeg") || ext.equals("webp");
     }
 }

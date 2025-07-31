@@ -43,7 +43,7 @@ public class TalentsService implements ITalentsService {
         FileResponse fileResponse = talentsRepository.getTalentFile(baseRequest, fileId);
 
         if (fileResponse != null && fileResponse.getBaseResponse().getIdMensaje() == 2) {
-            String fileB64 = FileUtils.cargarPDF(fileResponse.getArchivo()); // file path
+            String fileB64 = FileUtils.cargarArchivoAws(fileResponse.getArchivo()); // file path
             fileResponse.setArchivo(fileB64);
 
             if (fileB64.isEmpty()) {
