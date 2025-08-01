@@ -21,6 +21,9 @@ public class JWTHelper {
     @Value("${jwt.expiration}")
     private long expiration;
 
+    @Value("${urlConfig.urlFrontBDT}")
+    private String urlFrontBdt;
+
     public UserDTO decodeToken(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(secret)
@@ -75,6 +78,6 @@ public class JWTHelper {
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
 
-        return Constante.URL_FRONT + tokenGenerado;
+        return urlFrontBdt + Constante.URL_PART_FRONT_FORM_POSTULANT + tokenGenerado;
     }
 }

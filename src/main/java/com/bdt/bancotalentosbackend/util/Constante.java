@@ -15,5 +15,5 @@ public class Constante {
 
     // CONFIG LINK TOKEN JWT
     public static final long TIEMPO_EXPIRACION = 172800000L;
-    public static final String URL_FRONT = "https://calm-water-0f8491110.4.azurestaticapps.net/#/formPostulante?token=";
+    public static final String URL_PART_FRONT_FORM_POSTULANT = "/#/formPostulante?token=";
 }
