@@ -12,4 +12,6 @@ public class SoftAbilityRequest {
     @JsonProperty()
     private Integer idTalento;
     private Integer idHabilidad;
+    @JsonProperty()
+    private String habilidad;
 }

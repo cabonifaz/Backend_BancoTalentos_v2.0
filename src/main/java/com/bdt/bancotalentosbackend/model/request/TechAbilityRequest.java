@@ -12,5 +12,7 @@ public class TechAbilityRequest {
     @JsonProperty()
     private Integer idTalento;
     private Integer idHabilidad;
+    @JsonProperty()
+    private String habilidad;
     private Integer anios;
 }
