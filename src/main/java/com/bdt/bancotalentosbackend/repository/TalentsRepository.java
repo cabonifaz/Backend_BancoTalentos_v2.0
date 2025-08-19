@@ -311,8 +311,8 @@ public class TalentsRepository {
         tvpExperiencia.addColumnMetadata("PUESTO", Types.VARCHAR);
         tvpExperiencia.addColumnMetadata("FCH_INICIO", Types.DATE);
         tvpExperiencia.addColumnMetadata("FCH_FIN", Types.DATE);
-        tvpExperiencia.addColumnMetadata("FL_ACTUALIDAD", Types.INTEGER);
         tvpExperiencia.addColumnMetadata("FUNCIONES", Types.VARCHAR);
+        tvpExperiencia.addColumnMetadata("FL_ACTUALIDAD", Types.INTEGER);
 
         if (experiencias != null && !experiencias.isEmpty()) {
             for (ExperienceRequest experiencia : experiencias) {
@@ -321,8 +321,8 @@ public class TalentsRepository {
                         experiencia.getPuesto(),
                         Common.formatDate(experiencia.getFechaInicio()),
                         Common.formatDate(experiencia.getFechaFin()),
-                        experiencia.getFlActualidad(),
-                        experiencia.getFunciones()
+                        experiencia.getFunciones(),
+                        experiencia.getFlActualidad()
                 );
             }
         }
