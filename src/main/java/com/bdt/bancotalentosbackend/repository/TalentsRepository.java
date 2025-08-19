@@ -8,19 +8,19 @@ import com.bdt.bancotalentosbackend.util.Common;
 import com.bdt.bancotalentosbackend.util.Constante;
 import com.bdt.bancotalentosbackend.util.TalentsUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.sqlserver.jdbc.SQLServerDataTable;
+import com.microsoft.sqlserver.jdbc.SQLServerException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
-
+import java.sql.Types;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import static com.bdt.bancotalentosbackend.util.Common.getBaseResponse;
 import static com.bdt.bancotalentosbackend.util.Common.simpleSPCall;
 import static com.bdt.bancotalentosbackend.util.Common.getInsertUpdateResponse;
@@ -210,40 +210,17 @@ public class TalentsRepository {
             if (isUpdate) {
                 params.addValue("ID_TALENTO", talentRequest.getIdTalento());
             } else {
+                SQLServerDataTable tvpHabilidadesTecnicas = loadTvpHabilidadesTec(talentRequest.getHabilidadesTecnicas());
+                SQLServerDataTable tvpHabilidadesBlandas = loadTvpHabilidadesBlan(talentRequest.getHabilidadesBlandas());
+                SQLServerDataTable tvpExperiencia = loadTvpExperiencia(talentRequest.getExperiencias());
+                SQLServerDataTable tvpEducacion = loadTvpEducacion(talentRequest.getEducaciones());
+                SQLServerDataTable tvpIdioma = loadTvpIdioma(talentRequest.getIdiomas());
 
-                ObjectMapper objectMapper = new ObjectMapper();
-                String habilidadesTecnicasJson = null;
-                String habilidadesBlandasJson = null;
-                String experienciasJson = null;
-                String educacionesJson = null;
-                String idiomasJson = null;
-
-                if (talentRequest.getHabilidadesTecnicas() != null) {
-                    habilidadesTecnicasJson = objectMapper.writeValueAsString(talentRequest.getHabilidadesTecnicas());
-                }
-
-                if (talentRequest.getHabilidadesBlandas() != null) {
-                    habilidadesBlandasJson = objectMapper.writeValueAsString(talentRequest.getHabilidadesBlandas());
-                }
-
-                if (talentRequest.getExperiencias() != null) {
-                    experienciasJson = objectMapper.writeValueAsString(talentRequest.getExperiencias());
-                }
-
-                if (talentRequest.getEducaciones() != null) {
-                    educacionesJson = objectMapper.writeValueAsString(talentRequest.getEducaciones());
-                }
-
-                if (talentRequest.getIdiomas() != null) {
-                    idiomasJson = objectMapper.writeValueAsString(talentRequest.getIdiomas());
-                }
-
-
-                params.addValue("HABILIDADES_TECNICAS_JSON", habilidadesTecnicasJson)
-                        .addValue("HABILIDADES_BLANDAS_JSON", habilidadesBlandasJson)
-                        .addValue("EXPERIENCIAS_JSON", experienciasJson)
-                        .addValue("EDUCACIONES_JSON", educacionesJson)
-                        .addValue("IDIOMAS_JSON", idiomasJson)
+                params.addValue("LST_HABILIDAD_TECNICA", tvpHabilidadesTecnicas)
+                        .addValue("LST_HABILIDAD_BLANDA", tvpHabilidadesBlandas)
+                        .addValue("LST_EXPERIENCIA", tvpExperiencia)
+                        .addValue("LST_EDUCACION", tvpEducacion)
+                        .addValue("LST_IDIOMA", tvpIdioma)
                         .addValue("CV_NOMBRE_ARCHIVO", cvRequest != null ? cvRequest.getNombreArchivo() : null)
                         .addValue("CV_ID_TIPO_ARCHIVO", cvRequest != null ? cvRequest.getIdTipoArchivo() : null)
                         .addValue("CV_ID_TIPO_DOCUMENTO", cvRequest != null ? cvRequest.getIdTipoDocumento() : null)
@@ -287,7 +264,116 @@ public class TalentsRepository {
             System.err.println(e.getMessage());
             return new BaseResponse(3, "Error interno::" + e.getMessage());
         }
+    }
 
+    private SQLServerDataTable loadTvpHabilidadesTec(List<TechAbilityRequest> habilidades) throws SQLServerException {
+        SQLServerDataTable tvpHabilidades = new SQLServerDataTable();
+
+        tvpHabilidades.addColumnMetadata("ID_HABILIDAD", Types.INTEGER);
+        tvpHabilidades.addColumnMetadata("HABILIDAD", Types.VARCHAR);
+        tvpHabilidades.addColumnMetadata("ANIOS", Types.INTEGER);
+
+        if (habilidades != null && !habilidades.isEmpty()) {
+            for (TechAbilityRequest habilidad : habilidades) {
+                tvpHabilidades.addRow(
+                        habilidad.getIdHabilidad(),
+                        habilidad.getHabilidad(),
+                        habilidad.getAnios()
+                );
+            }
+        }
+
+        return tvpHabilidades;
+    }
+
+    private SQLServerDataTable loadTvpHabilidadesBlan(List<SoftAbilityRequest> habilidades) throws SQLServerException {
+        SQLServerDataTable tvpHabilidades= new SQLServerDataTable();
+
+        tvpHabilidades.addColumnMetadata("ID_HABILIDAD", Types.INTEGER);
+        tvpHabilidades.addColumnMetadata("HABILIDAD", Types.VARCHAR);
+
+        if (habilidades != null && !habilidades.isEmpty()) {
+            for (SoftAbilityRequest habilidad : habilidades) {
+                tvpHabilidades.addRow(
+                        habilidad.getIdHabilidad(),
+                        habilidad.getHabilidad()
+                );
+            }
+        }
+
+        return tvpHabilidades;
+    }
+
+    private SQLServerDataTable loadTvpExperiencia(List<ExperienceRequest> experiencias) throws SQLServerException {
+        SQLServerDataTable tvpExperiencia = new SQLServerDataTable();
+
+        tvpExperiencia.addColumnMetadata("EMPRESA", Types.VARCHAR);
+        tvpExperiencia.addColumnMetadata("PUESTO", Types.VARCHAR);
+        tvpExperiencia.addColumnMetadata("FCH_INICIO", Types.DATE);
+        tvpExperiencia.addColumnMetadata("FCH_FIN", Types.DATE);
+        tvpExperiencia.addColumnMetadata("FUNCIONES", Types.VARCHAR);
+        tvpExperiencia.addColumnMetadata("FL_ACTUALIDAD", Types.INTEGER);
+
+        if (experiencias != null && !experiencias.isEmpty()) {
+            for (ExperienceRequest experiencia : experiencias) {
+                tvpExperiencia.addRow(
+                        experiencia.getEmpresa(),
+                        experiencia.getPuesto(),
+                        Common.formatDate(experiencia.getFechaInicio()),
+                        Common.formatDate(experiencia.getFechaFin()),
+                        experiencia.getFunciones(),
+                        experiencia.getFlActualidad()
+                );
+            }
+        }
+
+        return tvpExperiencia;
+    }
+
+    private SQLServerDataTable loadTvpEducacion(List<EducationRequest> educaciones) throws SQLServerException {
+        SQLServerDataTable tvpEducacion = new SQLServerDataTable();
+
+        tvpEducacion.addColumnMetadata("INSTITUCION", Types.VARCHAR);
+        tvpEducacion.addColumnMetadata("CARRERA", Types.VARCHAR);
+        tvpEducacion.addColumnMetadata("GRADO", Types.VARCHAR);
+        tvpEducacion.addColumnMetadata("FCH_INICIO", Types.DATE);
+        tvpEducacion.addColumnMetadata("FCH_FIN", Types.DATE);
+        tvpEducacion.addColumnMetadata("FL_ACTUALIDAD", Types.INTEGER);
+
+        if (educaciones != null && !educaciones.isEmpty()) {
+            for (EducationRequest educacion : educaciones) {
+                tvpEducacion.addRow(
+                        educacion.getInstitucion(),
+                        educacion.getCarrera(),
+                        educacion.getGrado(),
+                        Common.formatDate(educacion.getFechaInicio()),
+                        Common.formatDate(educacion.getFechaFin()),
+                        educacion.getFlActualidad()
+                );
+            }
+        }
+
+        return tvpEducacion;
+    }
+
+    private SQLServerDataTable loadTvpIdioma(List<LanguageRequest> idiomas) throws SQLServerException {
+        SQLServerDataTable tvpIdioma = new SQLServerDataTable();
+
+        tvpIdioma.addColumnMetadata("ID_IDIOMA", Types.INTEGER);
+        tvpIdioma.addColumnMetadata("ID_NIVEL", Types.INTEGER);
+        tvpIdioma.addColumnMetadata("ESTRELLAS", Types.INTEGER);
+
+        if (idiomas != null && !idiomas.isEmpty()) {
+            for (LanguageRequest idioma : idiomas) {
+                tvpIdioma.addRow(
+                        idioma.getIdIdioma(),
+                        idioma.getIdNivel(),
+                        idioma.getEstrellas()
+                );
+            }
+        }
+
+        return tvpIdioma;
     }
 
     public BaseResponse addTalentToFavourite(BaseRequest baseRequest, TalentToFavRequest favRequest) {
