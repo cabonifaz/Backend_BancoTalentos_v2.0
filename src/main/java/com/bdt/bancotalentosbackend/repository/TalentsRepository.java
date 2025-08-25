@@ -563,11 +563,11 @@ public class TalentsRepository {
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
 
-    public BaseResponse addOrUpdateTalentFeedback(BaseRequest baseRequest, FeedbackRequest feedbackRequest) {
+    public FeedbackResponse addOrUpdateTalentFeedback(BaseRequest baseRequest, FeedbackRequest feedbackRequest) {
         boolean isUpdate = feedbackRequest.getIdFeedback() != null && feedbackRequest.getIdFeedback() > 0;
         String procedureName = isUpdate ? "SP_BT_TALENTO_FEEDBACK_UPD" : "SP_BT_TALENTO_FEEDBACK_INS";
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
-        BaseResponse baseResponse = new BaseResponse();
+        FeedbackResponse feedbackResponse = new FeedbackResponse(1,"",0);
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ESTRELLAS", feedbackRequest.getEstrellas())
@@ -581,19 +581,37 @@ public class TalentsRepository {
             params.addValue("ID_FEEDBACK", feedbackRequest.getIdFeedback());
         } else {
             if (feedbackRequest.getIdTalento() == null || feedbackRequest.getIdTalento() <= 0) {
-                baseResponse.setIdMensaje(1);
-                baseResponse.setMensaje("El campo idTalento es obligatorio para agregar feedback");
-                return baseResponse;
+                feedbackResponse.setIdMensaje(1);
+                feedbackResponse.setMensaje("El campo idTalento es obligatorio para agregar feedback");
+
+                return feedbackResponse;
             }
             params.addValue("ID_TALENTO", feedbackRequest.getIdTalento());
         }
 
-        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+        Map<String, Object> result = simpleJdbcCall.execute(params);
+        List<Map<String, Object>> resultSet1 = (List<Map<String, Object>>) result.get("#result-set-1");
+
+        if (resultSet1 != null && !resultSet1.isEmpty()) {
+            Map<String, Object> row = resultSet1.get(0);
+
+            feedbackResponse.setIdMensaje((Integer) row.get("ID_TIPO_MENSAJE"));
+            feedbackResponse.setMensaje((String) row.get("MENSAJE"));
+
+            if(feedbackResponse.getIdMensaje() == 2) {
+                List<Map<String, Object>> resultSet2 = (List<Map<String, Object>>) result.get("#result-set-2");
+                Map<String, Object> rowAvgEstrella = resultSet2.get(0);
+
+                feedbackResponse.setAvgEstrellas((Integer) rowAvgEstrella.get("PROM_ESTRELLAS"));
+            }
+        }
+
+        return feedbackResponse;
     }
 
-    public BaseResponse deleteTalentFeedback(BaseRequest baseRequest, Integer idFeedback) {
+    public FeedbackResponse deleteTalentFeedback(BaseRequest baseRequest, Integer idFeedback) {
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_FEEDBACK_DEL");
-        BaseResponse baseResponse = new BaseResponse();
+        FeedbackResponse feedbackResponse = new FeedbackResponse(1,"",0);
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ID_FEEDBACK", idFeedback)
@@ -602,7 +620,24 @@ public class TalentsRepository {
                 .addValue("ID_USUARIO", baseRequest.getIdUsuario())
                 .addValue("USERNAME", baseRequest.getUsername());
 
-        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+        Map<String, Object> result = simpleJdbcCall.execute(params);
+        List<Map<String, Object>> resultSet1 = (List<Map<String, Object>>) result.get("#result-set-1");
+
+        if (resultSet1 != null && !resultSet1.isEmpty()) {
+            Map<String, Object> row = resultSet1.get(0);
+
+            feedbackResponse.setIdMensaje((Integer) row.get("ID_TIPO_MENSAJE"));
+            feedbackResponse.setMensaje((String) row.get("MENSAJE"));
+
+            if(feedbackResponse.getIdMensaje() == 2) {
+                List<Map<String, Object>> resultSet2 = (List<Map<String, Object>>) result.get("#result-set-2");
+                Map<String, Object> rowAvgEstrella = resultSet2.get(0);
+
+                feedbackResponse.setAvgEstrellas((Integer) rowAvgEstrella.get("PROM_ESTRELLAS"));
+            }
+        }
+
+        return feedbackResponse;
     }
 
     public BaseResponse uploadTalentFile(BaseRequest baseRequest, UploadTalentFileRequest uploadTalentFileRequest) {
