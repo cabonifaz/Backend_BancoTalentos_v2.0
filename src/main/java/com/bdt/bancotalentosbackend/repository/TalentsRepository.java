@@ -210,6 +210,7 @@ public class TalentsRepository {
             if (isUpdate) {
                 params.addValue("ID_TALENTO", talentRequest.getIdTalento());
             } else {
+                params.addValue("TIENE_EQUIPO", talentRequest.getTieneEquipo() ? 1 : 0);
                 SQLServerDataTable tvpHabilidadesTecnicas = loadTvpHabilidadesTec(talentRequest.getHabilidadesTecnicas());
                 SQLServerDataTable tvpHabilidadesBlandas = loadTvpHabilidadesBlan(talentRequest.getHabilidadesBlandas());
                 SQLServerDataTable tvpExperiencia = loadTvpExperiencia(talentRequest.getExperiencias());

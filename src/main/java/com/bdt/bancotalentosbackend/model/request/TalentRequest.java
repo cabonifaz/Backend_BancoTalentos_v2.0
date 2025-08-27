@@ -56,6 +56,8 @@ public class TalentRequest {
     @JsonProperty()
     private Integer idMoneda;
     @JsonProperty()
+    private Boolean tieneEquipo;
+    @JsonProperty()
     private List<TechAbilityRequest> habilidadesTecnicas;
     @JsonProperty()
     private List<SoftAbilityRequest> habilidadesBlandas;
