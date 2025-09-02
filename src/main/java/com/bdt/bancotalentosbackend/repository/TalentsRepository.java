@@ -192,7 +192,7 @@ public class TalentsRepository {
                     .addValue("LINK_GITHUB", talentRequest.getGithub())
                     .addValue("DESCRIPCION", talentRequest.getDescripcion())
                     .addValue("DISPONIBILIDAD", talentRequest.getDisponibilidad())
-                    .addValue("PUESTO", talentRequest.getPuesto())
+                    .addValue("PUESTO", "")
                     .addValue("ID_PAIS", talentRequest.getIdPais())
                     .addValue("ID_CIUDAD", talentRequest.getIdCiudad())
                     .addValue("ID_MODALIDAD_FACTURACION", talentRequest.getIdModalidadFacturacion())

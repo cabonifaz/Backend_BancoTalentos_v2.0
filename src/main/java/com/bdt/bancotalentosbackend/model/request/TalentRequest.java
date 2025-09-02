@@ -37,8 +37,8 @@ public class TalentRequest {
     private String descripcion;
     @JsonProperty()
     private String disponibilidad;
-    @JsonProperty()
-    private String puesto;
+//    @JsonProperty()
+//    private String puesto;
     @JsonProperty()
     private Integer idPais;
     @JsonProperty()
