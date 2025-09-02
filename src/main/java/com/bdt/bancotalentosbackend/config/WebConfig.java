@@ -17,9 +17,9 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins(
                         "http://localhost:3000",
                         "http://localhost:3001",
-                        // Azure BDT Staging
+                        // Azure BDT Preprod
                         "https://happy-forest-038bd820f.1.azurestaticapps.net",
-                        // Azure FMI Staging
+                        // Azure FMI Preprod
                         "https://thankful-glacier-088d1980f.2.azurestaticapps.net",
                         "https://autfmibackendstaging-gnfub6d8cdg5aqbd.canadacentral-01.azurewebsites.net",
                         // AWS BDT Staging
