@@ -17,6 +17,7 @@ public class DataSourceConfig {
     @Bean
     @Profile("preprod")
     @ConfigurationProperties("spring.datasource.preprod")
+
     public DataSourceProperties activeDataSourceProperties() {
         return new DataSourceProperties();
     }
