@@ -24,4 +24,8 @@ public class TalentListDTO {
     private String moneda;
     private Integer estrellas;
     private Integer esFavorito;
+
+    // Coins
+    private Integer idMonedaPlan;
+    private Integer idMonedaRxh;
 }

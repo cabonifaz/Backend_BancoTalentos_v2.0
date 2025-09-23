@@ -29,10 +29,10 @@ public class TalentsController {
             @RequestParam @Nullable String techAbilities,
             @RequestParam @Nullable Integer idEnglishLevel,
             @RequestParam @Nullable Integer idTalentCollection,
-            HttpServletRequest httpServletRequest
-    ) {
+            HttpServletRequest httpServletRequest) {
         TalentsListResponse response = new TalentsListResponse();
-        SearchRequest searchRequest = new SearchRequest(nPag, search, techAbilities, idEnglishLevel, idTalentCollection);
+        SearchRequest searchRequest = new SearchRequest(nPag, search, techAbilities, idEnglishLevel,
+                idTalentCollection);
 
         try {
             String token = JWTHelper.extractToken(httpServletRequest);
@@ -48,8 +48,7 @@ public class TalentsController {
     public ResponseEntity<TalentResponse> getTalent(
             @RequestParam Integer talentId,
             @RequestParam boolean loadExtraInfo,
-            HttpServletRequest httpServletRequest
-    ) {
+            HttpServletRequest httpServletRequest) {
         TalentResponse response = new TalentResponse();
 
         try {
@@ -65,8 +64,7 @@ public class TalentsController {
     @GetMapping("/file")
     public ResponseEntity<FileResponse> getTalentFile(
             @RequestParam Integer fileId,
-            HttpServletRequest httpServletRequest
-    ) {
+            HttpServletRequest httpServletRequest) {
         FileResponse response = new FileResponse();
 
         try {
@@ -82,8 +80,7 @@ public class TalentsController {
     @PostMapping("/addOrUpdateTalent")
     public ResponseEntity<BaseResponse> addOrUpdateTalent(
             @RequestBody TalentRequest updateRequest,
-            HttpServletRequest httpServletRequest
-    ) {
+            HttpServletRequest httpServletRequest) {
         BaseResponse response = new BaseResponse();
 
         try {
@@ -100,8 +97,7 @@ public class TalentsController {
     @PostMapping("/addToFavourite")
     public ResponseEntity<BaseResponse> addToFavourite(
             @RequestBody TalentToFavRequest talentToFavRequest,
-            HttpServletRequest httpServletRequest
-    ) {
+            HttpServletRequest httpServletRequest) {
         BaseResponse response = new BaseResponse();
 
         try {
@@ -118,8 +114,7 @@ public class TalentsController {
     @PostMapping("/addTechAbility")
     public ResponseEntity<BaseResponse> addTechAbility(
             @RequestBody TechAbilityRequest techAbilityRequest,
-            HttpServletRequest httpServletRequest
-    ) {
+            HttpServletRequest httpServletRequest) {
         BaseResponse response = new BaseResponse();
 
         try {
@@ -136,8 +131,7 @@ public class TalentsController {
     @PostMapping("/addSoftAbility")
     public ResponseEntity<BaseResponse> addSoftAbility(
             @RequestBody SoftAbilityRequest softAbilityRequest,
-            HttpServletRequest httpServletRequest
-    ) {
+            HttpServletRequest httpServletRequest) {
         BaseResponse response = new BaseResponse();
 
         try {
@@ -154,8 +148,7 @@ public class TalentsController {
     @PostMapping("/addOrUpdateExperience")
     public ResponseEntity<BaseResponse> addOrUpdateExperience(
             @RequestBody ExperienceRequest experienceRequest,
-            HttpServletRequest httpServletRequest
-    ) {
+            HttpServletRequest httpServletRequest) {
         BaseResponse response = new BaseResponse();
 
         try {
@@ -172,8 +165,7 @@ public class TalentsController {
     @PostMapping("/deleteExperience")
     public ResponseEntity<BaseResponse> deleteExperience(
             @RequestBody DeleteRequest<Integer> experienceRequest,
-            HttpServletRequest httpServletRequest
-    ) {
+            HttpServletRequest httpServletRequest) {
         BaseResponse response = new BaseResponse();
 
         try {
@@ -190,8 +182,7 @@ public class TalentsController {
     @PostMapping("/addOrUpdateEducation")
     public ResponseEntity<BaseResponse> addOrUpdateEducation(
             @RequestBody EducationRequest educationRequest,
-            HttpServletRequest httpServletRequest
-    ) {
+            HttpServletRequest httpServletRequest) {
         BaseResponse response = new BaseResponse();
 
         try {
@@ -208,8 +199,7 @@ public class TalentsController {
     @PostMapping("/deleteEducation")
     public ResponseEntity<BaseResponse> deleteEducation(
             @RequestBody DeleteRequest<Integer> educationRequest,
-            HttpServletRequest httpServletRequest
-    ) {
+            HttpServletRequest httpServletRequest) {
         BaseResponse response = new BaseResponse();
 
         try {
@@ -226,8 +216,7 @@ public class TalentsController {
     @PostMapping("/addOrUpdateLanguage")
     public ResponseEntity<BaseResponse> addOrUpdateLanguage(
             @RequestBody LanguageRequest languageRequest,
-            HttpServletRequest httpServletRequest
-    ) {
+            HttpServletRequest httpServletRequest) {
         BaseResponse response = new BaseResponse();
 
         try {
@@ -244,8 +233,7 @@ public class TalentsController {
     @PostMapping("/deleteLanguage")
     public ResponseEntity<BaseResponse> deleteLanguage(
             @RequestBody DeleteRequest<Integer> languageRequest,
-            HttpServletRequest httpServletRequest
-    ) {
+            HttpServletRequest httpServletRequest) {
         BaseResponse response = new BaseResponse();
 
         try {
@@ -262,8 +250,7 @@ public class TalentsController {
     @PostMapping("/addOrUpdateFeedback")
     public ResponseEntity<BaseResponse> addFeedback(
             @RequestBody FeedbackRequest feedbackRequest,
-            HttpServletRequest httpServletRequest
-    ) {
+            HttpServletRequest httpServletRequest) {
         BaseResponse response = new BaseResponse();
 
         try {
@@ -280,8 +267,7 @@ public class TalentsController {
     @PostMapping("/deleteFeedback")
     public ResponseEntity<BaseResponse> deleteFeedback(
             @RequestBody DeleteRequest<Integer> feedbackRequest,
-            HttpServletRequest httpServletRequest
-    ) {
+            HttpServletRequest httpServletRequest) {
         BaseResponse response = new BaseResponse();
 
         try {
@@ -298,8 +284,7 @@ public class TalentsController {
     @PostMapping("/uploadTalentFile")
     public ResponseEntity<BaseResponse> uploadTalentFile(
             @RequestBody UploadTalentFileRequest uploadTalentFileRequest,
-            HttpServletRequest httpServletRequest
-    ) {
+            HttpServletRequest httpServletRequest) {
         BaseResponse response = new BaseResponse();
 
         try {
@@ -317,8 +302,7 @@ public class TalentsController {
     @PostMapping("/updateTalentFile")
     public ResponseEntity<BaseResponse> updateTalentFile(
             @RequestBody UpdateTalentFileRequest updateTalentFileRequest,
-            HttpServletRequest httpServletRequest
-    ) {
+            HttpServletRequest httpServletRequest) {
         BaseResponse response = new BaseResponse();
 
         try {
@@ -336,8 +320,7 @@ public class TalentsController {
     @PostMapping("/updateCvFile")
     public ResponseEntity<BaseResponse> updateCvFile(
             @RequestBody UpdateTalentFileRequest updateTalentFileRequest,
-            HttpServletRequest httpServletRequest
-    ) {
+            HttpServletRequest httpServletRequest) {
         BaseResponse response = new BaseResponse();
 
         try {
@@ -352,8 +335,7 @@ public class TalentsController {
         }
     }
 
-
-    //    Espacio solo para migración de archivos
+    // Espacio solo para migración de archivos
     @GetMapping("/migration/profile")
     public void migrateProfilePhoto() {
         try {

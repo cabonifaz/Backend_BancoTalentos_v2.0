@@ -128,14 +128,14 @@ public class TalentsRepository {
                     talentResponse.setFeedback(TalentsUtils.getFeedback(result));
                 }
 
-
             }
         }
         return talentResponse;
     }
 
     public FileResponse getTalentFile(BaseRequest baseRequest, Integer fileId) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_ARCHIVOS_SEL");
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                .withProcedureName("SP_BT_TALENTO_ARCHIVOS_SEL");
         FileResponse fileResponse = new FileResponse();
 
         SqlParameterSource params = new MapSqlParameterSource()
@@ -163,7 +163,8 @@ public class TalentsRepository {
         return fileResponse;
     }
 
-    public BaseResponse addOrUpdateTalent(BaseRequest baseRequest, TalentRequest talentRequest) throws JsonProcessingException {
+    public BaseResponse addOrUpdateTalent(BaseRequest baseRequest, TalentRequest talentRequest)
+            throws JsonProcessingException {
         try {
             boolean isUpdate = talentRequest.getIdTalento() != null && talentRequest.getIdTalento() > 0;
             String procedureName = isUpdate ? "SP_BT_TALENTO_UPD" : "SP_BT_TALENTO_INS";
@@ -172,12 +173,14 @@ public class TalentsRepository {
 
             FileRequest fotoRequest = talentRequest.getFotoArchivo();
             String rutaFoto = fotoRequest != null
-                    ? Constante.RUTA_REPOSITORIO_FOTO_TALENTO + fotoRequest.getNombreArchivo() + "." + fotoRequest.getExtensionArchivo()
+                    ? Constante.RUTA_REPOSITORIO_FOTO_TALENTO + fotoRequest.getNombreArchivo() + "."
+                            + fotoRequest.getExtensionArchivo()
                     : null;
 
             FileRequest cvRequest = talentRequest.getCvArchivo();
             String rutaCV = cvRequest != null
-                    ? Constante.RUTA_REPOSITORIO_CV_TALENTO + cvRequest.getNombreArchivo() + "." + cvRequest.getExtensionArchivo()
+                    ? Constante.RUTA_REPOSITORIO_CV_TALENTO + cvRequest.getNombreArchivo() + "."
+                            + cvRequest.getExtensionArchivo()
                     : null;
 
             MapSqlParameterSource params = new MapSqlParameterSource()
@@ -192,15 +195,20 @@ public class TalentsRepository {
                     .addValue("LINK_GITHUB", talentRequest.getGithub())
                     .addValue("DESCRIPCION", talentRequest.getDescripcion())
                     .addValue("DISPONIBILIDAD", talentRequest.getDisponibilidad())
-                    .addValue("PUESTO", talentRequest.getPuesto())
+                    .addValue("PUESTO", "")
                     .addValue("ID_PAIS", talentRequest.getIdPais())
                     .addValue("ID_CIUDAD", talentRequest.getIdCiudad())
                     .addValue("ID_MODALIDAD_FACTURACION", talentRequest.getIdModalidadFacturacion())
+
                     .addValue("MONTO_INICIAL_PLANILLA", talentRequest.getMontoInicialPlanilla())
                     .addValue("MONTO_FINAL_PLANILLA", talentRequest.getMontoFinalPlanilla())
                     .addValue("MONTO_INICIAL_RXH", talentRequest.getMontoInicialRxH())
                     .addValue("MONTO_FINAL_RXH", talentRequest.getMontoFinalRxH())
                     .addValue("ID_MONEDA", talentRequest.getIdMoneda())
+
+                    // Salary expectations
+                    .addValue("ID_MONEDA_PLAN", talentRequest.getIdMonedaPlan())
+                    .addValue("ID_MONEDA_RXH", talentRequest.getIdMonedaRxh())
 
                     .addValue("ID_ROL", baseRequest.getIdRol())
                     .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
@@ -211,8 +219,10 @@ public class TalentsRepository {
                 params.addValue("ID_TALENTO", talentRequest.getIdTalento());
             } else {
                 params.addValue("TIENE_EQUIPO", talentRequest.getTieneEquipo() ? 1 : 0);
-                SQLServerDataTable tvpHabilidadesTecnicas = loadTvpHabilidadesTec(talentRequest.getHabilidadesTecnicas());
-                SQLServerDataTable tvpHabilidadesBlandas = loadTvpHabilidadesBlan(talentRequest.getHabilidadesBlandas());
+                SQLServerDataTable tvpHabilidadesTecnicas = loadTvpHabilidadesTec(
+                        talentRequest.getHabilidadesTecnicas());
+                SQLServerDataTable tvpHabilidadesBlandas = loadTvpHabilidadesBlan(
+                        talentRequest.getHabilidadesBlandas());
                 SQLServerDataTable tvpExperiencia = loadTvpExperiencia(talentRequest.getExperiencias());
                 SQLServerDataTable tvpEducacion = loadTvpEducacion(talentRequest.getEducaciones());
                 SQLServerDataTable tvpIdioma = loadTvpIdioma(talentRequest.getIdiomas());
@@ -243,19 +253,23 @@ public class TalentsRepository {
             }
 
             if (baseResponse.getIdMensaje() == 2 && fotoRequest != null) {
-                boolean imagenGuardada = guardarArchivoAws(fotoRequest.getStringB64(), fotoRequest.getExtensionArchivo(), rutaFoto, true);
+                boolean imagenGuardada = guardarArchivoAws(fotoRequest.getStringB64(),
+                        fotoRequest.getExtensionArchivo(), rutaFoto, true);
 
                 if (!imagenGuardada) {
                     baseResponse.setIdMensaje(1);
-                    baseResponse.setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar la foto");
+                    baseResponse.setMensaje(
+                            "Los datos han sido registrados correctamente, pero no se pudo guardar la foto");
                 }
             }
 
             if (baseResponse.getIdMensaje() == 2 && cvRequest != null) {
-                boolean cvGuardado = guardarArchivoAws(cvRequest.getStringB64(), cvRequest.getExtensionArchivo(), rutaCV, false);
+                boolean cvGuardado = guardarArchivoAws(cvRequest.getStringB64(), cvRequest.getExtensionArchivo(),
+                        rutaCV, false);
                 if (!cvGuardado) {
                     baseResponse.setIdMensaje(1);
-                    baseResponse.setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar el CV");
+                    baseResponse
+                            .setMensaje("Los datos han sido registrados correctamente, pero no se pudo guardar el CV");
                 }
             }
 
@@ -279,8 +293,7 @@ public class TalentsRepository {
                 tvpHabilidades.addRow(
                         habilidad.getIdHabilidad(),
                         habilidad.getHabilidad(),
-                        habilidad.getAnios()
-                );
+                        habilidad.getAnios());
             }
         }
 
@@ -288,7 +301,7 @@ public class TalentsRepository {
     }
 
     private SQLServerDataTable loadTvpHabilidadesBlan(List<SoftAbilityRequest> habilidades) throws SQLServerException {
-        SQLServerDataTable tvpHabilidades= new SQLServerDataTable();
+        SQLServerDataTable tvpHabilidades = new SQLServerDataTable();
 
         tvpHabilidades.addColumnMetadata("ID_HABILIDAD", Types.INTEGER);
         tvpHabilidades.addColumnMetadata("HABILIDAD", Types.VARCHAR);
@@ -297,8 +310,7 @@ public class TalentsRepository {
             for (SoftAbilityRequest habilidad : habilidades) {
                 tvpHabilidades.addRow(
                         habilidad.getIdHabilidad(),
-                        habilidad.getHabilidad()
-                );
+                        habilidad.getHabilidad());
             }
         }
 
@@ -323,8 +335,7 @@ public class TalentsRepository {
                         Common.formatDate(experiencia.getFechaInicio()),
                         Common.formatDate(experiencia.getFechaFin()),
                         experiencia.getFunciones(),
-                        experiencia.getFlActualidad()
-                );
+                        experiencia.getFlActualidad());
             }
         }
 
@@ -349,8 +360,7 @@ public class TalentsRepository {
                         educacion.getGrado(),
                         Common.formatDate(educacion.getFechaInicio()),
                         Common.formatDate(educacion.getFechaFin()),
-                        educacion.getFlActualidad()
-                );
+                        educacion.getFlActualidad());
             }
         }
 
@@ -369,8 +379,7 @@ public class TalentsRepository {
                 tvpIdioma.addRow(
                         idioma.getIdIdioma(),
                         idioma.getIdNivel(),
-                        idioma.getEstrellas()
-                );
+                        idioma.getEstrellas());
             }
         }
 
@@ -378,7 +387,8 @@ public class TalentsRepository {
     }
 
     public BaseResponse addTalentToFavourite(BaseRequest baseRequest, TalentToFavRequest favRequest) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_USUARIO_FAVORITOS_TALENTO_INS");
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                .withProcedureName("SP_BT_USUARIO_FAVORITOS_TALENTO_INS");
         BaseResponse baseResponse = new BaseResponse();
 
         SqlParameterSource params = new MapSqlParameterSource()
@@ -393,7 +403,8 @@ public class TalentsRepository {
     }
 
     public BaseResponse addTalentTechAbility(BaseRequest baseRequest, TechAbilityRequest techAbilityRequest) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_HABILIDAD_TECNICA_INS");
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                .withProcedureName("SP_BT_HABILIDAD_TECNICA_INS");
         BaseResponse baseResponse = new BaseResponse();
 
         SqlParameterSource params = new MapSqlParameterSource()
@@ -409,7 +420,8 @@ public class TalentsRepository {
     }
 
     public BaseResponse addTalentSoftAbility(BaseRequest baseRequest, SoftAbilityRequest softAbilityRequest) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_HABILIDAD_BLANDA_INS");
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                .withProcedureName("SP_BT_HABILIDAD_BLANDA_INS");
         BaseResponse baseResponse = new BaseResponse();
 
         SqlParameterSource params = new MapSqlParameterSource()
@@ -459,7 +471,8 @@ public class TalentsRepository {
     }
 
     public BaseResponse deleteTalentExperience(BaseRequest baseRequest, Integer idExperiencia) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_EXPERIENCIA_DEL");
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                .withProcedureName("SP_BT_TALENTO_EXPERIENCIA_DEL");
         BaseResponse baseResponse = new BaseResponse();
 
         SqlParameterSource params = new MapSqlParameterSource()
@@ -508,7 +521,8 @@ public class TalentsRepository {
     }
 
     public BaseResponse deleteTalentEducation(BaseRequest baseRequest, Integer idEducacion) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_EDUCACION_DEL");
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                .withProcedureName("SP_BT_TALENTO_EDUCACION_DEL");
         BaseResponse baseResponse = new BaseResponse();
 
         SqlParameterSource params = new MapSqlParameterSource()
@@ -568,7 +582,7 @@ public class TalentsRepository {
         boolean isUpdate = feedbackRequest.getIdFeedback() != null && feedbackRequest.getIdFeedback() > 0;
         String procedureName = isUpdate ? "SP_BT_TALENTO_FEEDBACK_UPD" : "SP_BT_TALENTO_FEEDBACK_INS";
         SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
-        FeedbackResponse feedbackResponse = new FeedbackResponse(1,"",0);
+        FeedbackResponse feedbackResponse = new FeedbackResponse(1, "", 0);
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ESTRELLAS", feedbackRequest.getEstrellas())
@@ -599,7 +613,7 @@ public class TalentsRepository {
             feedbackResponse.setIdMensaje((Integer) row.get("ID_TIPO_MENSAJE"));
             feedbackResponse.setMensaje((String) row.get("MENSAJE"));
 
-            if(feedbackResponse.getIdMensaje() == 2) {
+            if (feedbackResponse.getIdMensaje() == 2) {
                 List<Map<String, Object>> resultSet2 = (List<Map<String, Object>>) result.get("#result-set-2");
                 Map<String, Object> rowAvgEstrella = resultSet2.get(0);
 
@@ -611,8 +625,9 @@ public class TalentsRepository {
     }
 
     public FeedbackResponse deleteTalentFeedback(BaseRequest baseRequest, Integer idFeedback) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_FEEDBACK_DEL");
-        FeedbackResponse feedbackResponse = new FeedbackResponse(1,"",0);
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                .withProcedureName("SP_BT_TALENTO_FEEDBACK_DEL");
+        FeedbackResponse feedbackResponse = new FeedbackResponse(1, "", 0);
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ID_FEEDBACK", idFeedback)
@@ -630,7 +645,7 @@ public class TalentsRepository {
             feedbackResponse.setIdMensaje((Integer) row.get("ID_TIPO_MENSAJE"));
             feedbackResponse.setMensaje((String) row.get("MENSAJE"));
 
-            if(feedbackResponse.getIdMensaje() == 2) {
+            if (feedbackResponse.getIdMensaje() == 2) {
                 List<Map<String, Object>> resultSet2 = (List<Map<String, Object>>) result.get("#result-set-2");
                 Map<String, Object> rowAvgEstrella = resultSet2.get(0);
 
@@ -642,11 +657,13 @@ public class TalentsRepository {
     }
 
     public BaseResponse uploadTalentFile(BaseRequest baseRequest, UploadTalentFileRequest uploadTalentFileRequest) {
-        String ruta = Constante.RUTA_REPOSITORIO_TALENTO_ARCHIVOS + uploadTalentFileRequest.getNombreArchivo() + "." + uploadTalentFileRequest.getExtensionArchivo();
+        String ruta = Constante.RUTA_REPOSITORIO_TALENTO_ARCHIVOS + uploadTalentFileRequest.getNombreArchivo() + "."
+                + uploadTalentFileRequest.getExtensionArchivo();
         ruta = ruta.replace("[ID]", uploadTalentFileRequest.getIdTalento().toString());
         BaseResponse baseResponse = new BaseResponse();
 
-        boolean archivoGuardado = guardarArchivoAws(uploadTalentFileRequest.getString64(), uploadTalentFileRequest.getExtensionArchivo(), ruta, false);
+        boolean archivoGuardado = guardarArchivoAws(uploadTalentFileRequest.getString64(),
+                uploadTalentFileRequest.getExtensionArchivo(), ruta, false);
 
         if (!archivoGuardado) {
             baseResponse.setIdMensaje(1);
@@ -654,7 +671,8 @@ public class TalentsRepository {
             return baseResponse;
         }
 
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_ARCHIVOS_INS");
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                .withProcedureName("SP_BT_TALENTO_ARCHIVOS_INS");
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ID_TALENTO", uploadTalentFileRequest.getIdTalento())
@@ -670,8 +688,10 @@ public class TalentsRepository {
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
     }
 
-    public BaseResponse updateTalentFile(BaseRequest baseRequest, UpdateTalentFileRequest updateTalentFileRequest, String ruta) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_BT_TALENTO_ARCHIVOS_UPD");
+    public BaseResponse updateTalentFile(BaseRequest baseRequest, UpdateTalentFileRequest updateTalentFileRequest,
+            String ruta) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                .withProcedureName("SP_BT_TALENTO_ARCHIVOS_UPD");
         BaseResponse baseResponse = new BaseResponse();
 
         // build file path
@@ -698,7 +718,8 @@ public class TalentsRepository {
             baseResponse = getBaseResponse(resultSet);
 
             // save new file
-            boolean cvGuardado = guardarArchivoAws(updateTalentFileRequest.getString64(), updateTalentFileRequest.getExtensionArchivo(), ruta, true);
+            boolean cvGuardado = guardarArchivoAws(updateTalentFileRequest.getString64(),
+                    updateTalentFileRequest.getExtensionArchivo(), ruta, true);
 
             if (!cvGuardado) {
                 baseResponse.setIdMensaje(1);
@@ -714,10 +735,10 @@ public class TalentsRepository {
         return baseResponse;
     }
 
-
-    //    Espacio solo para migración de archivos
+    // Espacio solo para migración de archivos
     public void migrateProfilePhoto() {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_TALENTO_MIGRAR_FOTO_LST");
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                .withProcedureName("SP_TALENTO_MIGRAR_FOTO_LST");
         Map<String, Object> result = simpleJdbcCall.execute();
         List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
 
@@ -729,16 +750,15 @@ public class TalentsRepository {
                         (Integer) talentRow.get("ID_TALENTO"),
                         (String) talentRow.get("NUEVA_RUTA_IMAGEN"),
                         (String) talentRow.get("FILE_EXTENSION"),
-                        (String) talentRow.get("IM_IMAGE_VARCHAR")
-                );
+                        (String) talentRow.get("IM_IMAGE_VARCHAR"));
                 lstMigration.add(migration);
             }
-
 
             for (MigrationProfilePhotoDTO objMigration : lstMigration) {
                 if (objMigration.getNuevaRutaImagen() != null && !objMigration.getNuevaRutaImagen().equals("")) {
                     System.out.println("Cargando objeto de id: " + objMigration.getIdTalento());
-                    guardarImagenMigracion(objMigration.getFileB64(), objMigration.getFileExtension(), objMigration.getNuevaRutaImagen());
+                    guardarImagenMigracion(objMigration.getFileB64(), objMigration.getFileExtension(),
+                            objMigration.getNuevaRutaImagen());
                     migrateProfilePhotoUpdate(objMigration.getIdTalento(), objMigration.getNuevaRutaImagen());
                 }
 
@@ -748,7 +768,8 @@ public class TalentsRepository {
     }
 
     public void migrateProfilePhotoUpdate(Integer idTalento, String rutaImagen) {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_TALENTO_MIGRAR_FOTO_UPD");
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                .withProcedureName("SP_TALENTO_MIGRAR_FOTO_UPD");
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ID_TALENTO", idTalento)
                 .addValue("URLFOTO", rutaImagen);
@@ -768,11 +789,9 @@ public class TalentsRepository {
                         (Integer) talentRow.get("ID_TALENTO"),
                         (String) talentRow.get("NUEVA_RUTA_CV"),
                         (String) talentRow.get("FILE_EXTENSION"),
-                        (String) talentRow.get("ARCHIVO_B64")
-                );
+                        (String) talentRow.get("ARCHIVO_B64"));
                 lstMigration.add(migration);
             }
-
 
             for (MigrationCVDTO objMigration : lstMigration) {
                 if (objMigration.getNuevaRutaCV() != null && !objMigration.getNuevaRutaCV().equals("")) {
