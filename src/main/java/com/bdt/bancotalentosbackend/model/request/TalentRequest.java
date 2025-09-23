@@ -37,8 +37,8 @@ public class TalentRequest {
     private String descripcion;
     @JsonProperty()
     private String disponibilidad;
-//    @JsonProperty()
-//    private String puesto;
+    // @JsonProperty()
+    // private String puesto;
     @JsonProperty()
     private Integer idPais;
     @JsonProperty()
@@ -55,6 +55,14 @@ public class TalentRequest {
     private Double montoFinalRxH;
     @JsonProperty()
     private Integer idMoneda;
+
+    // Tipos de moneda por cada modalidad
+    @JsonProperty()
+    private Integer idMonedaPlan;
+
+    @JsonProperty()
+    private Integer idMonedaRxh;
+
     @JsonProperty()
     private Boolean tieneEquipo;
     @JsonProperty()
@@ -67,4 +75,5 @@ public class TalentRequest {
     private List<EducationRequest> educaciones;
     @JsonProperty()
     private List<LanguageRequest> idiomas;
+
 }
