@@ -22,13 +22,13 @@ public class WebConfig implements WebMvcConfigurer {
                         // Azure FMI Staging
                         "https://thankful-glacier-088d1980f.2.azurestaticapps.net",
                         "https://autfmibackendstaging-gnfub6d8cdg5aqbd.canadacentral-01.azurewebsites.net",
+                        "https://salmon-rock-06416070f.2.azurestaticapps.net",
                         // AWS BDT Staging
                         "https://bancotalentos.aplicacion2-team.com",
                         "https://api-bdt.aplicacion2-team.com",
                         // AWS FMI Staging
                         "https://autfmi.aplicacion2-team.com",
-                        "https://api-fmi.aplicacion2-team.com"
-                )
+                        "https://api-fmi.aplicacion2-team.com")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("Authorization", "Content-Type", "Accept")
                 .exposedHeaders("Authorization")
