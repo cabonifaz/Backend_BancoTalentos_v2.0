@@ -17,19 +17,17 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins(
                         "http://localhost:3000",
                         "http://localhost:3001",
-                        // Azure BDT Preprod
-                        "https://zealous-plant-02486730f.2.azurestaticapps.net",
-                        "https://bancotalentobackendpreprod-awdecbbsgrh4d8bn.canadacentral-01.azurewebsites.net",
-                        // Azure FMI Preprod
-                        "https://salmon-rock-06416070f.2.azurestaticapps.net",
-                        "https://autfmibackendpreprod-hadmdsa5hjaghub8.canadacentral-01.azurewebsites.net",
+                        // Azure BDT Staging
+                        "https://happy-forest-038bd820f.1.azurestaticapps.net",
+                        // Azure FMI Staging
+                        "https://thankful-glacier-088d1980f.2.azurestaticapps.net",
+                        "https://autfmibackendstaging-gnfub6d8cdg5aqbd.canadacentral-01.azurewebsites.net",
                         // AWS BDT Staging
                         "https://bancotalentos.aplicacion2-team.com",
                         "https://api-bdt.aplicacion2-team.com",
                         // AWS FMI Staging
                         "https://autfmi.aplicacion2-team.com",
-                        "https://api-fmi.aplicacion2-team.com"
-                )
+                        "https://api-fmi.aplicacion2-team.com")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("Authorization", "Content-Type", "Accept")
                 .exposedHeaders("Authorization")
