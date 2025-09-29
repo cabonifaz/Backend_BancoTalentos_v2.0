@@ -15,15 +15,16 @@ import javax.sql.DataSource;
 @Configuration(proxyBeanMethods = false)
 public class DataSourceConfig {
     @Bean
-    @Profile("preprod")
-    @ConfigurationProperties("spring.datasource.preprod")
+    @Profile("prod")
+    @ConfigurationProperties("spring.datasource.prod")
 
     public DataSourceProperties activeDataSourceProperties() {
         return new DataSourceProperties();
     }
 
     @Bean
-    public HikariDataSource activeDataSource(@Qualifier("activeDataSourceProperties") DataSourceProperties blogDataSourceProperties) {
+    public HikariDataSource activeDataSource(
+            @Qualifier("activeDataSourceProperties") DataSourceProperties blogDataSourceProperties) {
         return blogDataSourceProperties.initializeDataSourceBuilder()
                 .type(HikariDataSource.class)
                 .build();
