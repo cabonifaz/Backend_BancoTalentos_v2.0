@@ -15,8 +15,8 @@ import javax.sql.DataSource;
 @Configuration(proxyBeanMethods = false)
 public class DataSourceConfig {
     @Bean
-    @Profile("preprod")
-    @ConfigurationProperties("spring.datasource.preprod")
+    @Profile("prod")
+    @ConfigurationProperties("spring.datasource.prod")
 
     public DataSourceProperties activeDataSourceProperties() {
         return new DataSourceProperties();
