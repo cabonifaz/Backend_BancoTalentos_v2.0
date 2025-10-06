@@ -40,7 +40,8 @@ public class Common {
         return null;
     }
 
-    public static BaseResponse simpleSPCall(SimpleJdbcCall jdbcCall, BaseResponse baseResponse, SqlParameterSource params) {
+    public static BaseResponse simpleSPCall(SimpleJdbcCall jdbcCall, BaseResponse baseResponse,
+            SqlParameterSource params) {
         Map<String, Object> result = jdbcCall.execute(params);
         List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
 
@@ -64,7 +65,6 @@ public class Common {
         return new InsertUpdateResponse(
                 (Integer) row.get("ID_TIPO_MENSAJE"),
                 (String) row.get("MENSAJE"),
-                (Integer) row.get("ID_NUEVO")
-        );
+                (Integer) row.get("ID_NUEVO"));
     }
 }
