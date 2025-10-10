@@ -7,9 +7,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bdt.bancotalentosbackend.model.request.AIPromptRequest;
 import com.bdt.bancotalentosbackend.model.request.AnalyzeCVRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.IACVResponse;
+import com.bdt.bancotalentosbackend.model.response.PromptResponse;
 import com.bdt.bancotalentosbackend.service.impl.IAService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,6 +41,19 @@ public class IAController {
             baseResponse.setIdMensaje(3);
             baseResponse.setMensaje("Hubo un error al extraer la información del CV");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(iacvResponse);
+        }
+    }
+
+    @PostMapping("/prompt")
+    public ResponseEntity<BaseResponse> prompt(
+            @RequestBody AIPromptRequest request,
+            HttpServletRequest httpServletRequest) {
+        try {
+            PromptResponse response = (PromptResponse) iAService.prompt(request);
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            BaseResponse baseResponse = new BaseResponse(3, "Hubo un error al procesar el prompt");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(baseResponse);
         }
     }
 
