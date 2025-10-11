@@ -812,4 +812,52 @@ public class TalentsRepository {
                 .addValue("URL_CV", rutaCV);
         simpleJdbcCall.execute(params);
     }
+
+    public BaseResponse uploadTalentCVLang(BaseRequest baseRequest, UploadTalentFileRequest request) {
+
+        String basePath = null;
+
+        switch (request.getIdTipoDocumento()) {
+            case 5: // CV ES
+                basePath = Constante.RUTA_REPOSITORIO_CV_ES_TALENTO;
+                break;
+
+            case 6: // CV ES
+                basePath = Constante.RUTA_REPOSITORIO_CV_EN_TALENTO;
+                break;
+
+            default:
+                return new BaseResponse(3, "Tipo de archivo desconocido");
+        }
+
+        String ruta = basePath + request.getNombreArchivo() + "."
+                + request.getExtensionArchivo();
+        ruta = ruta.replace("[ID]", request.getIdTalento().toString());
+        BaseResponse baseResponse = new BaseResponse();
+
+        boolean archivoGuardado = guardarArchivoAws(request.getString64(),
+                request.getExtensionArchivo(), ruta, true);
+
+        if (!archivoGuardado) {
+            baseResponse.setIdMensaje(1);
+            baseResponse.setMensaje("No se pudo guardar el archivo");
+            return baseResponse;
+        }
+
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                .withProcedureName("SP_BT_TALENTO_ARCHIVOS_INS");
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_TALENTO", request.getIdTalento())
+                .addValue("NOMBRE_ARCHIVO", request.getNombreArchivo())
+                .addValue("ID_TIPO_ARCHIVO", request.getIdTipoArchivo())
+                .addValue("ID_TIPO_DOCUMENTO", request.getIdTipoDocumento())
+                .addValue("RUTA_ARCHIVO", ruta)
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("USERNAME", baseRequest.getUsername());
+
+        return simpleSPCall(simpleJdbcCall, baseResponse, params);
+    }
 }
