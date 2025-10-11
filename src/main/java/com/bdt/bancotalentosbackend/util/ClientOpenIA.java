@@ -6,6 +6,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,46 +18,54 @@ public class ClientOpenIA {
   private static final String OPENAI_API_KEY = System.getenv("OPENAI_API_KEY");
   private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 
-  private final HttpClient httpClient;
-  private final ObjectMapper objectMapper;
+  // HttpClient estático para reutilizar conexiones
+  private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
+      .connectTimeout(Duration.ofSeconds(20))
+      .build();
+
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   public ClientOpenIA() {
     if (OPENAI_API_KEY == null || OPENAI_API_KEY.isBlank()) {
       throw new IllegalStateException("La variable de entorno OPENAI_API_KEY no está configurada");
     }
-    this.httpClient = HttpClient.newBuilder()
-        .connectTimeout(Duration.ofSeconds(20))
-        .build();
-    this.objectMapper = new ObjectMapper();
   }
 
   public String sendPrompt(String prompt) throws IOException, InterruptedException {
-    // Cuerpo de la petición
-    String requestBody = "{"
-        + "\"model\": \"gpt-4o-mini\","
-        + "\"messages\": ["
-        + "  {\"role\": \"system\", \"content\": \"Eres un asistente que responde solo con JSON válido.\"},"
-        + "  {\"role\": \"user\", \"content\": " + objectMapper.writeValueAsString(prompt) + "}"
-        + "],"
-        + "\"temperature\": 0"
-        + "}";
+    // Construir el cuerpo con Map en lugar de concatenación de strings
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put("model", "gpt-4o-mini");
+    requestMap.put("temperature", 0);
+
+    Map<String, String> systemMessage = new HashMap<>();
+    systemMessage.put("role", "system");
+    systemMessage.put("content", "Eres un asistente que responde solo con JSON válido.");
+
+    Map<String, String> userMessage = new HashMap<>();
+    userMessage.put("role", "user");
+    userMessage.put("content", prompt);
+
+    requestMap.put("messages", List.of(systemMessage, userMessage));
+
+    // Convertir a JSON en una sola operación
+    String requestBody = OBJECT_MAPPER.writeValueAsString(requestMap);
 
     HttpRequest request = HttpRequest.newBuilder()
         .uri(URI.create(OPENAI_API_URL))
         .header("Content-Type", "application/json")
         .header("Authorization", "Bearer " + OPENAI_API_KEY)
-        .timeout(Duration.ofSeconds(60))
+        .timeout(Duration.ofSeconds(45))
         .POST(HttpRequest.BodyPublishers.ofString(requestBody))
         .build();
 
-    HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+    HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
 
     if (response.statusCode() != 200) {
       throw new IOException("Error en OpenAI API: " + response.statusCode() + " - " + response.body());
     }
 
     // Parsear JSON para obtener solo el texto
-    JsonNode root = objectMapper.readTree(response.body());
+    JsonNode root = OBJECT_MAPPER.readTree(response.body());
     String text = root.path("choices").get(0).path("message").path("content").asText();
 
     return text;
@@ -167,7 +178,7 @@ public class ClientOpenIA {
         - No devuelvas texto adicional fuera del JSON.
         - En el codigo del celular no debes incluir +
           correcto: 51, incorrecto: +51
-        ---
+          ---
 
         ### Texto del CV a procesar:
         """
