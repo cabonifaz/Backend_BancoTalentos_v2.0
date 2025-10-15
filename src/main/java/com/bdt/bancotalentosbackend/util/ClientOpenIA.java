@@ -54,7 +54,7 @@ public class ClientOpenIA {
         .uri(URI.create(OPENAI_API_URL))
         .header("Content-Type", "application/json")
         .header("Authorization", "Bearer " + OPENAI_API_KEY)
-        .timeout(Duration.ofSeconds(45))
+        .timeout(Duration.ofSeconds(180))
         .POST(HttpRequest.BodyPublishers.ofString(requestBody))
         .build();
 
