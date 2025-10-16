@@ -40,6 +40,7 @@ public class IAController {
         } catch (Exception e) {
             baseResponse.setIdMensaje(3);
             baseResponse.setMensaje("Hubo un error al extraer la información del CV");
+            System.out.println("Error al analizar el CV: " + e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(iacvResponse);
         }
     }
