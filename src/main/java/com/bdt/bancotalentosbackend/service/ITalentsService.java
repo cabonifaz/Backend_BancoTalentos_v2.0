@@ -50,6 +50,8 @@ public interface ITalentsService {
 
     BaseResponse removeTechnicalSkill(String token, Integer targetId);
 
+    BaseResponse removeSoftSkill(String token, Integer targetId);
+
     void migrateProfilePhoto();
 
     void migrateCV();

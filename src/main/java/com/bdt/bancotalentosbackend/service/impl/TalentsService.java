@@ -210,4 +210,11 @@ public class TalentsService implements ITalentsService {
         return this.talentsRepository.removeTechnicalSkill(baseRequest, targetId);
     }
 
+    @Override
+    public BaseResponse removeSoftSkill(String token, Integer targetId) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return this.talentsRepository.removeSoftSkill(baseRequest, targetId);
+    }
+
 }

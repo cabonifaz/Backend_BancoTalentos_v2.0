@@ -264,6 +264,20 @@ public class TalentsController {
         }
     }
 
+    @DeleteMapping("deleteSoftskill")
+    public ResponseEntity<BaseResponse> deleteSoftSkill(
+            @RequestParam Integer targetId,
+            HttpServletRequest httpServletRequest) {
+        try {
+            String token = JWTHelper.extractToken(httpServletRequest);
+            BaseResponse bs = this.talentsService.removeSoftSkill(token, targetId);
+            return ResponseEntity.ok(bs);
+        } catch (Exception e) {
+            BaseResponse bs = new BaseResponse(3, e.getMessage());
+            return new ResponseEntity<>(bs, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PostMapping("/addOrUpdateFeedback")
     public ResponseEntity<BaseResponse> addFeedback(
             @RequestBody FeedbackRequest feedbackRequest,

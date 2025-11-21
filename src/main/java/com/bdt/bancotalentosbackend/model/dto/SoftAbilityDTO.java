@@ -8,5 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SoftAbilityDTO {
+    private Integer id;
     private String nombreHabilidad;
 }

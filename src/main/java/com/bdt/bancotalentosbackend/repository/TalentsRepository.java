@@ -887,4 +887,31 @@ public class TalentsRepository {
 
         return new BaseResponse(messageId, msg);
     }
+
+    public BaseResponse removeSoftSkill(BaseRequest baseRequest, Integer targetId) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                .withProcedureName("SP_BT_HABILIDAD_BLANDA_DEL");
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ID_HABILIDAD_BLANDA", targetId)
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("USERNAME", baseRequest.getUsername());
+
+        Map<String, Object> result = simpleJdbcCall.execute(params);
+        List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.getOrDefault("#result-set-1",
+                Collections.emptyList());
+
+        if (resultSet.isEmpty())
+            return new BaseResponse(3, "No hubo respuesta de la base de datos");
+
+        Map<String, Object> baseRs = resultSet.get(0);
+
+        Integer messageId = (Integer) baseRs.getOrDefault("ID_TIPO_MENSAJE", 3);
+        String msg = (String) baseRs.getOrDefault("MENSAJE", "Mensaje de respuesta desconocido");
+
+        return new BaseResponse(messageId, msg);
+    }
+
 }

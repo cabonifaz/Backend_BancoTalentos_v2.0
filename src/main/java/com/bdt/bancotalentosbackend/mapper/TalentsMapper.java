@@ -49,6 +49,7 @@ public class TalentsMapper {
 
     public static SoftAbilityDTO mapToSoftAbilityDTO(Map<String, Object> row) {
         return new SoftAbilityDTO(
+                (Integer) row.get("ID"),
                 (String) row.get("HABILIDAD"));
     }
 
