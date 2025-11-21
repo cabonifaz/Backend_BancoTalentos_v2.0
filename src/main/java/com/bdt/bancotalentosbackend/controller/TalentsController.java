@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -246,6 +247,34 @@ public class TalentsController {
             response.setIdMensaje(3);
             response.setMensaje(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @DeleteMapping("deleteTechskill")
+    public ResponseEntity<BaseResponse> deleteTechSkill(
+            @RequestParam Integer targetId,
+            HttpServletRequest httpServletRequest) {
+        try {
+            String token = JWTHelper.extractToken(httpServletRequest);
+            BaseResponse bs = this.talentsService.removeTechnicalSkill(token, targetId);
+            return ResponseEntity.ok(bs);
+        } catch (Exception e) {
+            BaseResponse bs = new BaseResponse(3, e.getMessage());
+            return new ResponseEntity<>(bs, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("deleteSoftskill")
+    public ResponseEntity<BaseResponse> deleteSoftSkill(
+            @RequestParam Integer targetId,
+            HttpServletRequest httpServletRequest) {
+        try {
+            String token = JWTHelper.extractToken(httpServletRequest);
+            BaseResponse bs = this.talentsService.removeSoftSkill(token, targetId);
+            return ResponseEntity.ok(bs);
+        } catch (Exception e) {
+            BaseResponse bs = new BaseResponse(3, e.getMessage());
+            return new ResponseEntity<>(bs, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

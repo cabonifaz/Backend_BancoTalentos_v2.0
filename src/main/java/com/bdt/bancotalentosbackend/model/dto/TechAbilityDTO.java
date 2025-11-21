@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TechAbilityDTO {
+    private Integer idHabTec;
     private String nombreHabilidad;
     private Integer aniosExperiencia;
 }
