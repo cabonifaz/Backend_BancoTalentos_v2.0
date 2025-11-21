@@ -203,4 +203,11 @@ public class TalentsService implements ITalentsService {
                 basePath);
     }
 
+    @Override
+    public BaseResponse removeTechnicalSkill(String token, Integer targetId) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return this.talentsRepository.removeTechnicalSkill(baseRequest, targetId);
+    }
+
 }

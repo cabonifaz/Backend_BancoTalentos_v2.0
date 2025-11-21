@@ -2,8 +2,6 @@ package com.bdt.bancotalentosbackend.mapper;
 
 import com.bdt.bancotalentosbackend.model.dto.*;
 
-import com.bdt.bancotalentosbackend.util.FileUtils;
-
 import java.util.Map;
 
 public class TalentsMapper {
@@ -56,6 +54,7 @@ public class TalentsMapper {
 
     public static TechAbilityDTO mapToTechAbilityDTO(Map<String, Object> row) {
         return new TechAbilityDTO(
+                (Integer) row.get("ID_HB_TEC"),
                 (String) row.get("HABILIDAD"),
                 (Integer) row.get("ANIOS"));
     }
