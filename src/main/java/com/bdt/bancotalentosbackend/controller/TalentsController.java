@@ -15,8 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/talent")
@@ -82,7 +80,7 @@ public class TalentsController {
 
     @PostMapping("/addOrUpdateTalent")
     public ResponseEntity<BaseResponse> addOrUpdateTalent(
-            @RequestBody TalentRequest updateRequest,
+            @jakarta.validation.Valid @RequestBody TalentRequest updateRequest,
             HttpServletRequest httpServletRequest) {
         BaseResponse response = new BaseResponse();
 
@@ -280,7 +278,7 @@ public class TalentsController {
 
     @PostMapping("/addOrUpdateFeedback")
     public ResponseEntity<BaseResponse> addFeedback(
-            @RequestBody FeedbackRequest feedbackRequest,
+            @jakarta.validation.Valid @RequestBody FeedbackRequest feedbackRequest,
             HttpServletRequest httpServletRequest) {
         BaseResponse response = new BaseResponse();
 
