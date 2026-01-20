@@ -1,11 +1,14 @@
 package com.bdt.bancotalentosbackend.model.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+
+import org.hibernate.validator.constraints.Length;
 
 @Data
 @AllArgsConstructor
@@ -34,6 +37,7 @@ public class TalentRequest {
     @JsonProperty()
     private String github;
     @JsonProperty()
+    @Length(max = 5000, message = "La descripción no puede exceder los 5000 caracteres")
     private String descripcion;
     @JsonProperty()
     private String disponibilidad;
