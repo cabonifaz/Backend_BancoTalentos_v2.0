@@ -7,13 +7,11 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 /**
  * Client S3 V2
- * 
- * @author Jean Smith
- *         This class is used to create a singleton S3 client and presigner
- *         instance
- *         for AWS S3 operations.
- *         The presigner is used to generate pre-signed URLs for secure access
- *         to S3 objects.
+ * This class is used to create a singleton S3 client and presigner
+ * instance
+ * for AWS S3 operations.
+ * The presigner is used to generate pre-signed URLs for secure access
+ * to S3 objects.
  */
 public class ClientS3V2 {
   private static final S3Client s3Client;
