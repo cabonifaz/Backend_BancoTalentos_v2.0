@@ -18,6 +18,8 @@ public class TalentResponse {
     private String apellidos;
     private String photoUrl;
     private String dni;
+    private Integer idPais;
+    private Integer idCiudad;
     private String email;
     private String celular;
     private String linkedin;
