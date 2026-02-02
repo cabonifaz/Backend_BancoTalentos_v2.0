@@ -132,6 +132,9 @@ public class TalentsRepository {
     talentResponse.setIdMoneda((Integer) talentRow.get("ID_MONEDA"));
     talentResponse.setPhotoUrl((String) talentRow.get("RUTA_IMAGEN"));
 
+    talentResponse.setIdPais((Integer) talentRow.get("ID_PAIS"));
+    talentResponse.setIdCiudad((Integer) talentRow.get("ID_CIUDAD"));
+
     talentResponse.setSituacion((Integer) talentRow.get("ID_SITUACION"));
     talentResponse.setEstado((Integer) talentRow.get("ID_ESTADO"));
 
