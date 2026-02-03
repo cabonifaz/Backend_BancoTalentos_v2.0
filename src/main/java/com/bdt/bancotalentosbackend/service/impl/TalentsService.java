@@ -12,6 +12,7 @@ import com.bdt.bancotalentosbackend.util.Common;
 import com.bdt.bancotalentosbackend.util.Constante;
 import com.bdt.bancotalentosbackend.util.FileUtils;
 import com.bdt.bancotalentosbackend.util.JWTHelper;
+import com.bdt.bancotalentosbackend.util.S3Utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,13 @@ public class TalentsService implements ITalentsService {
     public TalentResponse getTalentById(String token, Integer talentId, boolean loadExtraInfo) {
         UserDTO user = jwt.decodeToken(token);
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.LISTAR_TALENTOS);
-        return talentsRepository.getTalentById(baseRequest, talentId, loadExtraInfo);
+        var talentDetails = talentsRepository.getTalentById(baseRequest, talentId, loadExtraInfo);
+
+        // Load Image from AWS S3
+        var photoUrl = S3Utils.getSignedUrl(talentDetails.getPhotoUrl());
+        talentDetails.setPhotoUrl(photoUrl);
+
+        return talentDetails;
     }
 
     @Override
