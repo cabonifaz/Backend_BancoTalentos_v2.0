@@ -19,7 +19,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class IACVResponse {
-    private BaseResponse result;
     private String nombres;
     private String apellidoPaterno;
     private String apellidoMaterno;
