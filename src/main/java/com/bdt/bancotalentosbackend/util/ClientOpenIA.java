@@ -17,6 +17,7 @@ public class ClientOpenIA {
 
   private static final String OPENAI_API_KEY = System.getenv("OPENAI_API_KEY");
   private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
+  private static final String OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 
   // HttpClient estático para reutilizar conexiones
   private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
@@ -71,7 +72,56 @@ public class ClientOpenIA {
     return text;
   }
 
-  public String buildPrompt(String extractedText) {
+  public String sendPromptResponses(String prompt, String model) throws IOException, InterruptedException {
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put("model", model);
+    requestMap.put("temperature", 0);
+    requestMap.put("input", prompt);
+    requestMap.put("instructions",
+        "Eres un asistente especializado en análisis de currículums. Responde ÚNICAMENTE con JSON válido.");
+
+    // Formato correcto para /v1/responses
+    Map<String, Object> format = new HashMap<>();
+    format.put("type", "json_object");
+
+    Map<String, Object> text = new HashMap<>();
+    text.put("format", format);
+
+    requestMap.put("text", text);
+
+    String requestBody = OBJECT_MAPPER.writeValueAsString(requestMap);
+
+    HttpRequest request = HttpRequest.newBuilder()
+        .uri(URI.create(OPENAI_RESPONSES_URL))
+        .header("Content-Type", "application/json")
+        .header("Authorization", "Bearer " + OPENAI_API_KEY)
+        .timeout(Duration.ofSeconds(180))
+        .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+        .build();
+
+    HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+
+    if (response.statusCode() != 200) {
+      throw new IOException("Error en OpenAI API: " + response.statusCode() + " - " + response.body());
+    }
+
+    JsonNode root = OBJECT_MAPPER.readTree(response.body());
+    JsonNode output = root.path("output");
+
+    if (!output.isArray() || output.isEmpty()) {
+      throw new IOException("Respuesta inesperada de OpenAI: " + response.body());
+    }
+
+    JsonNode content = output.get(0).path("content");
+
+    if (!content.isArray() || content.isEmpty()) {
+      throw new IOException("Contenido inválido en respuesta OpenAI: " + response.body());
+    }
+
+    return content.get(0).path("text").asText();
+  }
+
+  public String buildCVPrompt(String extractedText) {
     return """
         Eres un asistente especializado en análisis de currículums (CV).
         Tu tarea es extraer la información relevante del siguiente texto extraído de un PDF.
@@ -83,6 +133,18 @@ public class ClientOpenIA {
         correspondiente al modelo `IACVResponse` en Java.
         Si no encuentras algún dato, usa `null`.
         No omitas ninguna propiedad.
+
+        # Reglas para la extracción de experiencia laboral:
+
+        Debes retornar las experiencias laborales en orden: Las más recientes primero (Si es actual primero, leugo ordena por fecha fin y finalmente por fecha inicio).
+
+        Para las funciones laborales, trata de no resumirlas, sino de mantener la mayor similitud posible con el texto original, corrigiendo solo errores evidentes de ortografía y gramática. Puedes resumir apartir de la 10ma experiencia laboral, pero siempre manteniendo la esencia de las funciones descritas.
+
+        Para las funciones laborales, incluye TANTO el párrafo descriptivo inicial
+        COMO todos los puntos o bullets que aparezcan bajo la experiencia.
+        No omitas ningún bullet point. Concaténalos en un solo string separados por salto de línea (\n).
+
+        No elimines las habilidades técnicas que se mencionen en las funcionaes laborales.
 
         ### Formato de salida esperado (ejemplo con datos ficticios):
 
@@ -105,8 +167,8 @@ public class ClientOpenIA {
             "ciudad": "Lima"
           },
           "tecSkills": [
-            { "nombreHabilidad": "Java", "aniosExperiencia": 5 },
-            { "nombreHabilidad": "Spring Boot", "aniosExperiencia": 3 }
+            { "nombreHabilidad": "JAVA", "aniosExperiencia": 5 },
+            { "nombreHabilidad": "SPRING BOOT", "aniosExperiencia": 3 }
           ],
           "social": {
             "linkedin": "https://linkedin.com/in/juanperez",
@@ -125,7 +187,6 @@ public class ClientOpenIA {
               "funciones": "Desarrollo de microservicios y mantenimiento de APIs.",
               "fechaInicio": "2020-01-15",
               "fechaFin": null,
-              "tiempo": "3 años",
               "flActualidad": 1
             }
           ],
