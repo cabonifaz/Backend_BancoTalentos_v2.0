@@ -15,7 +15,9 @@ import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.GeneralResponse;
 import com.bdt.bancotalentosbackend.model.response.IACVResponse;
 import com.bdt.bancotalentosbackend.model.response.PromptResponse;
+import com.bdt.bancotalentosbackend.model.response.SummarizeResponse;
 import com.bdt.bancotalentosbackend.util.ClientOpenIA;
+import com.bdt.bancotalentosbackend.util.PromptBuilder;
 import com.bdt.bancotalentosbackend.util.TextUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,13 +30,17 @@ public class IAService {
 
   private final Logger logger = LoggerFactory.getLogger(IAService.class);
   private final ObjectMapper objectMapper;
+  private final ClientOpenIA clientOpenIA;
 
   public BaseResponse prompt(AIPromptRequest request) throws IOException, InterruptedException {
     this.logger.info("Service IA started ");
-    ClientOpenIA client = new ClientOpenIA();
     this.logger.info("Client was created");
     this.logger.info("Prompt generated");
-    String response = client.sendPrompt(request.getPrompt());
+    String response = this.clientOpenIA.sendPrompt(
+        request.getPrompt(),
+        "gpt-4.1-mini",
+        "Response solo con un JSON válido");
+
     this.logger.info("Response received");
 
     // Mapear la respuesta JsonNode
@@ -86,10 +92,9 @@ public class IAService {
 
       long t2 = System.currentTimeMillis();
       this.logger.info("Starting OpenAI API call");
-      ClientOpenIA client = new ClientOpenIA();
-      String prompt = client.buildCVPrompt(extractedText);
+      String prompt = PromptBuilder.buildCVPrompt(extractedText);
 
-      String structuredJson = client.sendPromptResponses(
+      String structuredJson = this.clientOpenIA.sendPromptResponses(
           prompt,
           "gpt-4.1-mini");
 
@@ -103,6 +108,47 @@ public class IAService {
     } catch (Exception e) {
       this.logger.error("Error procesando el CV", e);
       return GeneralResponse.error("Hubo un error al analizar el CV: " + e.getMessage());
+    }
+  }
+
+  /**
+   * Summarizes and improves the job function descriptions of a CV based on the
+   * original text and additional user instructions.
+   * 
+   * @param activities
+   * @param instructions
+   * @return
+   */
+  public GeneralResponse<SummarizeResponse> summarizeActivities(String activities, String instructions) {
+    try {
+      if (activities == null || activities.trim().isEmpty()) {
+        this.logger.warn("No se proporcionaron actividades para resumir");
+        return GeneralResponse.error("El texto de funciones no puede estar vacío");
+      }
+
+      // Build the prompt with the original activities and user instructions
+      this.logger.info("Starting summary process for activities");
+      String prompt = PromptBuilder.buildSummaryPrompt(activities, instructions);
+
+      // Call the OpenAI API to get the summary
+      String aiResponse = this.clientOpenIA.sendPrompt(prompt, "gpt-4.1-mini",
+          "Eres un asistente especializado en resumir y mejorar descripciones de funciones laborales. Responde ÚNICAMENTE con JSON válido que contenga un campo 'summary' con el resumen mejorado.");
+
+      this.logger.info("AI response received for summary");
+
+      // Parse the AI response to extract the summary from the JSON
+      JsonNode rootNode = objectMapper.readTree(aiResponse);
+      String resumen = rootNode.path("summary").asText();
+
+      SummarizeResponse response = SummarizeResponse.builder()
+          .summary(resumen)
+          .build();
+
+      return GeneralResponse.ok(response);
+
+    } catch (Exception e) {
+      this.logger.error("Error al resumir actividades con IA", e);
+      return GeneralResponse.error("No se pudo generar el resumen: " + e.getMessage());
     }
   }
 }
