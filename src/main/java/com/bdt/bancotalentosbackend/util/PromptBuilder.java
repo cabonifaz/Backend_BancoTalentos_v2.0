@@ -6,24 +6,29 @@ import lombok.experimental.UtilityClass;
 public class PromptBuilder {
 
   public static String buildSummaryPrompt(String activities, String instructions) {
-    return String.format("""
-        Tu tarea es resumir y mejorar la descripción de funciones laborales de un CV.
+    return String.format(
+        """
+            Tu tarea es resumir y mejorar la descripción de funciones laborales de un CV.
 
-        TEXTO ORIGINAL:
-        "%s"
+            TEXTO ORIGINAL:
+            "%s"
 
-        INSTRUCCIONES ADICIONALES DEL USUARIO:
-        "%s"
+            INSTRUCCIONES DEL USUARIO:
+            "%s"
 
-        REGLAS:
-        1. Mantén un tono profesional y orientado a logros.
-        2. Usa verbos de acción (ej. "Lideré", "Desarrollé", "Optimicé").
-        3. Si el usuario dio instrucciones específicas, priorízalas.
-        4. Responde ÚNICAMENTE en formato JSON con la clave "summary".
+            REGLAS (en orden de prioridad):
+            1. Si el usuario dio instrucciones específicas, priorízalas sobre las demás reglas.
+            2. NUNCA omitas tecnologías, herramientas, plataformas o estándares técnicos mencionados en el texto original (ej: nombres de software, frameworks, protocolos, certificaciones).
+            3. Mantén un tono profesional y orientado a logros.
+            4. Usa verbos de acción en primera persona (ej. "Lideré", "Desarrollé", "Optimicé").
+            5. Elimina frases de relleno, redundancias y palabras vacías sin valor técnico.
+            6. El resumen no debe superar las 120 palabras salvo que el usuario indique lo contrario.
+            7. Responde ÚNICAMENTE en formato JSON con la clave "summary".
 
-        EJEMPLO DE SALIDA:
-        { "summary": "Texto resumido aquí..." }
-        """, activities, instructions.isBlank() ? "Resumen general profesional" : instructions);
+            EJEMPLO DE SALIDA:
+            { "summary": "Texto resumido aquí..." }
+            """,
+        activities, instructions.isBlank() ? "Resumen general profesional" : instructions);
   }
 
   public String buildCVPrompt(String extractedText) {
