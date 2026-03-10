@@ -17,6 +17,12 @@ spring:
           allow_jdbc_metadata_access: false
   profiles:
     active: dev
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
 jwt:
   expiration: ${JWT_EXPIRATION_MILLISECONDS} # 48 hours in milliseconds
   secret: ${JWT_SECRET}
