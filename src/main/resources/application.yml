@@ -3,6 +3,10 @@ server:
   address: 0.0.0.0
   servlet:
     context-path: /bdt
+
+  tomcat:
+    max-http-form-post-size: 50MB
+
 spring:
   application:
     name: BancoTalentosBackend
@@ -17,6 +21,11 @@ spring:
           allow_jdbc_metadata_access: false
   profiles:
     active: preprod
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
 
 jwt:
   expiration: ${JWT_EXPIRATION_MILLISECONDS} # 48 hours in milliseconds
@@ -34,9 +43,6 @@ logging:
     root: info
     org.springframework.web: debug
     com.iotdml.configsrf: debug
-  file:
-    name: logs/app-logs.log
-    path: logs
+
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
