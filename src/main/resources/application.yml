@@ -3,6 +3,10 @@ server:
   address: 0.0.0.0
   servlet:
     context-path: /bdt
+
+  tomcat:
+    max-http-form-post-size: 50MB
+
 spring:
   application:
     name: BancoTalentosBackend
@@ -39,9 +43,6 @@ logging:
     root: info
     org.springframework.web: debug
     com.iotdml.configsrf: debug
-  file:
-    name: logs/app-logs.log
-    path: logs
+
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
