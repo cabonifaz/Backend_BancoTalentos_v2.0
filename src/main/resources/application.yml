@@ -20,7 +20,7 @@ spring:
         boot:
           allow_jdbc_metadata_access: false
   profiles:
-    active: dev
+    active: preprod
 
   servlet:
     multipart:
