@@ -3,6 +3,10 @@ server:
   address: 0.0.0.0
   servlet:
     context-path: /bdt
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
   tomcat:
     max-http-form-post-size: 50MB
@@ -20,7 +24,7 @@ spring:
         boot:
           allow_jdbc_metadata_access: false
   profiles:
-    active: preprod
+    active: dev
 
   servlet:
     multipart:

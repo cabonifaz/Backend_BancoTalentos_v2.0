@@ -30,9 +30,11 @@ public class TalentsController {
             @RequestParam @Nullable String techAbilities,
             @RequestParam @Nullable Integer idEnglishLevel,
             @RequestParam @Nullable Integer idTalentCollection,
+            @RequestParam @Nullable String jobPosition,
+            @RequestParam @Nullable Integer yearsExperience,
             HttpServletRequest httpServletRequest) {
         TalentsListResponse response = new TalentsListResponse();
-        SearchRequest searchRequest = new SearchRequest(nPag, search, techAbilities, idEnglishLevel,
+        SearchRequest searchRequest = new SearchRequest(nPag, search, techAbilities, idEnglishLevel, jobPosition, yearsExperience,
                 idTalentCollection);
 
         try {
