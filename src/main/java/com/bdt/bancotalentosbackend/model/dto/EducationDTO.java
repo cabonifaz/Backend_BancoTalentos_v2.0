@@ -15,4 +15,5 @@ public class EducationDTO {
     private String fechaInicio;
     private String fechaFin;
     private Integer flActualidad;
+    private Integer tipoFechaEducaciones; // 1: Años, 2: Mes y año
 }
