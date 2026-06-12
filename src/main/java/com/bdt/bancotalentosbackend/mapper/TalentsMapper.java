@@ -32,7 +32,9 @@ public class TalentsMapper {
                 (String) row.get("GRADO"),
                 (String) row.get("FCH_INICIO"),
                 (String) row.get("FCH_FIN"),
-                (Integer) row.get("FL_ACTUALIDAD"));
+                (Integer) row.get("FL_ACTUALIDAD"),
+                (Integer) row.get("TIPO_FECHA_EDUCACIONES")
+            );
     }
 
     public static WorkExperienceDTO mapToWorkExperienceDTO(Map<String, Object> row) {

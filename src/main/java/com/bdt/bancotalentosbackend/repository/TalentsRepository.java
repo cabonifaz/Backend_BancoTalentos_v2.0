@@ -370,6 +370,7 @@ public class TalentsRepository {
     tvpEducacion.addColumnMetadata("FCH_INICIO", Types.DATE);
     tvpEducacion.addColumnMetadata("FCH_FIN", Types.DATE);
     tvpEducacion.addColumnMetadata("FL_ACTUALIDAD", Types.INTEGER);
+    tvpEducacion.addColumnMetadata("TIPO_FECHA_EDUCACIONES", Types.INTEGER);
 
     if (educaciones != null && !educaciones.isEmpty()) {
       for (EducationRequest educacion : educaciones) {
@@ -379,7 +380,8 @@ public class TalentsRepository {
             educacion.getGrado(),
             Common.formatDate(educacion.getFechaInicio()),
             Common.formatDate(educacion.getFechaFin()),
-            educacion.getFlActualidad());
+            educacion.getFlActualidad(),
+            educacion.getTipoFechaEducaciones());
       }
     }
 
@@ -513,6 +515,8 @@ public class TalentsRepository {
     LocalDate dateInit = Common.formatDate(educationRequest.getFechaInicio());
     LocalDate dateEnd = Common.formatDate(educationRequest.getFechaFin());
 
+    System.out.println(educationRequest);
+
     MapSqlParameterSource params = new MapSqlParameterSource()
         .addValue("INSTITUCION_EDUCATIVA", educationRequest.getInstitucion())
         .addValue("CARRERA", educationRequest.getCarrera())
@@ -523,7 +527,8 @@ public class TalentsRepository {
         .addValue("ID_ROL", baseRequest.getIdRol())
         .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
         .addValue("ID_USUARIO", baseRequest.getIdUsuario())
-        .addValue("USERNAME", baseRequest.getUsername());
+        .addValue("USERNAME", baseRequest.getUsername())
+        .addValue("TIPO_FECHA_EDUCACIONES", educationRequest.getTipoFechaEducaciones());
 
     if (isUpdate) {
       params.addValue("ID_TALENTO_EDUCACION", educationRequest.getIdTalentoEducacion());
