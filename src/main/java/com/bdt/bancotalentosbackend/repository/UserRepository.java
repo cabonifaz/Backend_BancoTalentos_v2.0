@@ -2,9 +2,12 @@ package com.bdt.bancotalentosbackend.repository;
 
 import com.bdt.bancotalentosbackend.model.dto.UserFavDTO;
 import com.bdt.bancotalentosbackend.model.request.FavCollectionRequest;
+import com.bdt.bancotalentosbackend.model.request.UpdateUserRequest;
 import com.bdt.bancotalentosbackend.model.request.BaseRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.UserFavListResponse;
+import com.bdt.bancotalentosbackend.model.response.UserInfoResponse;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -34,6 +37,53 @@ public class UserRepository {
                 .addValue("USERNAME", baseRequest.getUsername());
 
         return simpleSPCall(simpleJdbcCall, baseResponse, params);
+    }
+
+    public UserInfoResponse getUserInfo(BaseRequest baseRequest) {
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_USUARIOS_SEL");
+        UserInfoResponse userInfoResponse = new UserInfoResponse();
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("USUARIO", baseRequest.getUsername())
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario());
+
+        Map<String, Object> result = simpleJdbcCall.execute(params);
+        List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-2");
+
+        if (resultSet != null && !resultSet.isEmpty()) {
+            Map<String, Object> row = resultSet.get(0);
+            userInfoResponse.setUsuario((String) row.get("USUARIO"));
+            userInfoResponse.setNombres((String) row.get("NOMBRES"));
+            userInfoResponse.setApellidos((String) row.get("APELLIDOS"));
+            userInfoResponse.setEmail((String) row.get("EMAIL"));
+            userInfoResponse.setTelefono((String) row.get("TELEFONO"));
+        }
+        return userInfoResponse;
+    }
+
+    public BaseResponse updateUserInfo(BaseRequest baseRequest, UpdateUserRequest updateUserRequest) {
+        
+        try {
+            SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("SP_USUARIOS_UPD");
+            BaseResponse baseResponse = new BaseResponse();
+
+            SqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("ID_ROL", baseRequest.getIdRol())
+                    .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                    .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                    .addValue("USERNAME", baseRequest.getUsername())
+                    .addValue("TELEFONO", updateUserRequest.getTelefono());
+
+            return simpleSPCall(simpleJdbcCall, baseResponse, params);
+        } catch (Exception e) { 
+
+            System.err.println("ERROR EN updateUserInfo:::");
+            System.err.println(e.getMessage());
+            return new BaseResponse(3, "Error interno::" + e.getMessage());
+
+        }
     }
 
     public UserFavListResponse getFavourites(BaseRequest baseRequest) {
