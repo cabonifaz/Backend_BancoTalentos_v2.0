@@ -49,7 +49,9 @@ public class TalentsRepository {
           .addValue("ID_NIVEL_INGLES", searchRequest.getIdEnglishLevel())
           .addValue("ID_USUARIO_FAVORITOS", searchRequest.getIdTalentCollection())
           .addValue("PUESTO", searchRequest.getJobPosition())
-          .addValue("ANIOS_EXPERIENCIA", searchRequest.getYearsExperience());
+          .addValue("ANIOS_EXPERIENCIA", searchRequest.getYearsExperience())
+          .addValue("EDUCACION", searchRequest.getEducationName())
+          .addValue("ID_GRADO", searchRequest.getIdAcademicGrade());
 
       Map<String, Object> result = simpleJdbcCall.execute(params);
       List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
