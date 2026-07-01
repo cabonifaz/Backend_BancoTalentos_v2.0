@@ -14,5 +14,7 @@ public class SearchRequest {
     private Integer idEnglishLevel;
     private String jobPosition;
     private Integer yearsExperience;
+    private String educationName;
+    private Integer idAcademicGrade;
     private Integer idTalentCollection;
 }
