@@ -7,8 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TechAbilityDTO {
-    private Integer idHabTec;
-    private String nombreHabilidad;
-    private Integer aniosExperiencia;
+public class LocationDTO {
+    private String pais;
+    private String ciudad;
 }

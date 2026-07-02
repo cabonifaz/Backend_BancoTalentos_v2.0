@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TechAbilityDTO {
-    private Integer idHabTec;
-    private String nombreHabilidad;
-    private Integer aniosExperiencia;
+public class ContactDTO {
+    private String celularNum;
+    private String celularCod;
+    private String email;
 }

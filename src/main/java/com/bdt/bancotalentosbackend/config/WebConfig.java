@@ -19,8 +19,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "https://autfmi.fractal.com.pe",
                         "https://bancodetalentos.fractal.com.pe",
                         // Back-ends
-                        "https://api-autfmi.fractal.com.pe"
-                )
+                        "https://api-autfmi.fractal.com.pe")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("Authorization", "Content-Type", "Accept")
                 .exposedHeaders("Authorization")

@@ -44,6 +44,13 @@ public interface ITalentsService {
 
     BaseResponse updateTalentFile(String token, UpdateTalentFileRequest updateTalentFileRequest);
 
+    BaseResponse uploadCVLang(String token, UploadTalentFileRequest uploadRequest);
+
+    BaseResponse updateCVLang(String token, UpdateTalentFileRequest request);
+
+    BaseResponse removeTechnicalSkill(String token, Integer targetId);
+
+    BaseResponse removeSoftSkill(String token, Integer targetId);
 
     void migrateProfilePhoto();
 

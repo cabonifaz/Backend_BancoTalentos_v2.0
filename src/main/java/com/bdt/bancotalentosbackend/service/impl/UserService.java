@@ -2,9 +2,11 @@ package com.bdt.bancotalentosbackend.service.impl;
 
 import com.bdt.bancotalentosbackend.model.dto.UserDTO;
 import com.bdt.bancotalentosbackend.model.request.FavCollectionRequest;
+import com.bdt.bancotalentosbackend.model.request.UpdateUserRequest;
 import com.bdt.bancotalentosbackend.model.request.BaseRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.UserFavListResponse;
+import com.bdt.bancotalentosbackend.model.response.UserInfoResponse;
 import com.bdt.bancotalentosbackend.repository.UserRepository;
 import com.bdt.bancotalentosbackend.service.IUserService;
 import com.bdt.bancotalentosbackend.util.Common;
@@ -33,5 +35,21 @@ public class UserService implements IUserService {
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
 
         return userRepository.getFavourites(baseRequest);
+    }
+
+    @Override
+    public UserInfoResponse getUserInfo(String token) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_USUARIO);
+
+        return userRepository.getUserInfo(baseRequest);
+    }
+
+    @Override
+    public BaseResponse updateUserInfo(String token, UpdateUserRequest updateUserRequest) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_USUARIO);
+
+        return userRepository.updateUserInfo(baseRequest, updateUserRequest);
     }
 }

@@ -12,6 +12,7 @@ import com.bdt.bancotalentosbackend.util.Common;
 import com.bdt.bancotalentosbackend.util.Constante;
 import com.bdt.bancotalentosbackend.util.FileUtils;
 import com.bdt.bancotalentosbackend.util.JWTHelper;
+import com.bdt.bancotalentosbackend.util.S3Utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,13 @@ public class TalentsService implements ITalentsService {
     public TalentResponse getTalentById(String token, Integer talentId, boolean loadExtraInfo) {
         UserDTO user = jwt.decodeToken(token);
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.LISTAR_TALENTOS);
-        return talentsRepository.getTalentById(baseRequest, talentId, loadExtraInfo);
+        var talentDetails = talentsRepository.getTalentById(baseRequest, talentId, loadExtraInfo);
+
+        // Load Image from AWS S3
+        var photoUrl = S3Utils.getSignedUrl(talentDetails.getPhotoUrl());
+        talentDetails.setPhotoUrl(photoUrl);
+
+        return talentDetails;
     }
 
     @Override
@@ -149,19 +156,19 @@ public class TalentsService implements ITalentsService {
     public BaseResponse updateCvFile(String token, UpdateTalentFileRequest updateTalentFileRequest) {
         UserDTO user = jwt.decodeToken(token);
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
-        return talentsRepository.updateTalentFile(baseRequest, updateTalentFileRequest, Constante.RUTA_REPOSITORIO_CV_TALENTO);
+        return talentsRepository.updateTalentFile(baseRequest, updateTalentFileRequest,
+                Constante.RUTA_REPOSITORIO_CV_TALENTO);
     }
 
     @Override
     public BaseResponse updateTalentFile(String token, UpdateTalentFileRequest updateTalentFileRequest) {
         UserDTO user = jwt.decodeToken(token);
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
-        return talentsRepository.updateTalentFile(baseRequest, updateTalentFileRequest, Constante.RUTA_REPOSITORIO_TALENTO_ARCHIVOS);
+        return talentsRepository.updateTalentFile(baseRequest, updateTalentFileRequest,
+                Constante.RUTA_REPOSITORIO_TALENTO_ARCHIVOS);
     }
 
-
-
-    //    Espacio solo para migración de archivos
+    // Espacio solo para migración de archivos
     @Override
     public void migrateProfilePhoto() {
         talentsRepository.migrateProfilePhoto();
@@ -170,6 +177,51 @@ public class TalentsService implements ITalentsService {
     @Override
     public void migrateCV() {
         talentsRepository.migrateCV();
+    }
+
+    @Override
+    public BaseResponse uploadCVLang(String token, UploadTalentFileRequest uploadRequest) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.uploadTalentCVLang(baseRequest, uploadRequest);
+    }
+
+    @Override
+    public BaseResponse updateCVLang(String token, UpdateTalentFileRequest request) {
+
+        String basePath = null;
+
+        switch (request.getIdTipoDocumento()) {
+            case 5: // CV ES
+                basePath = Constante.RUTA_REPOSITORIO_CV_ES_TALENTO;
+                break;
+
+            case 6: // CV EN
+                basePath = Constante.RUTA_REPOSITORIO_CV_EN_TALENTO;
+                break;
+
+            default:
+                return new BaseResponse(3, "Tipo de documento desconocido");
+        }
+
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return talentsRepository.updateTalentFile(baseRequest, request,
+                basePath);
+    }
+
+    @Override
+    public BaseResponse removeTechnicalSkill(String token, Integer targetId) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return this.talentsRepository.removeTechnicalSkill(baseRequest, targetId);
+    }
+
+    @Override
+    public BaseResponse removeSoftSkill(String token, Integer targetId) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        return this.talentsRepository.removeSoftSkill(baseRequest, targetId);
     }
 
 }

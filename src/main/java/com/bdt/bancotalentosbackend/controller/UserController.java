@@ -1,8 +1,10 @@
 package com.bdt.bancotalentosbackend.controller;
 
 import com.bdt.bancotalentosbackend.model.request.FavCollectionRequest;
+import com.bdt.bancotalentosbackend.model.request.UpdateUserRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.UserFavListResponse;
+import com.bdt.bancotalentosbackend.model.response.UserInfoResponse;
 import com.bdt.bancotalentosbackend.service.impl.UserService;
 import com.bdt.bancotalentosbackend.util.JWTHelper;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,6 +39,37 @@ public class UserController {
         }
     }
 
+    @GetMapping("/getUserInfo")
+    public ResponseEntity<UserInfoResponse> getUserInfo(HttpServletRequest httpServletRequest) {
+        UserInfoResponse response = new UserInfoResponse();
+
+        try {
+            String token = JWTHelper.extractToken(httpServletRequest);
+            response = userService.getUserInfo(token);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @PutMapping("/updateUserInfo")
+    public ResponseEntity<BaseResponse> updateUserInfo(
+            @RequestBody UpdateUserRequest updateUserRequest,
+            HttpServletRequest httpServletRequest
+    ) {
+        BaseResponse response = new BaseResponse();
+
+        try {
+            String token = JWTHelper.extractToken(httpServletRequest);
+            response = userService.updateUserInfo(token, updateUserRequest);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.setIdMensaje(3);
+            response.setMensaje(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
     @GetMapping("/getFavourites")
     public ResponseEntity<UserFavListResponse> getFavourites(HttpServletRequest httpServletRequest) {
         UserFavListResponse response = new UserFavListResponse();
@@ -51,3 +84,4 @@ public class UserController {
         }
     }
 }
+//

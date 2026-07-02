@@ -2,8 +2,6 @@ package com.bdt.bancotalentosbackend.mapper;
 
 import com.bdt.bancotalentosbackend.model.dto.*;
 
-import com.bdt.bancotalentosbackend.util.FileUtils;
-
 import java.util.Map;
 
 public class TalentsMapper {
@@ -13,8 +11,7 @@ public class TalentsMapper {
                 (Integer) row.get("ES_EDITABLE"),
                 (String) row.get("USUARIO"),
                 (String) row.get("DESCRIPCION"),
-                (Integer) row.get("ESTRELLAS")
-        );
+                (Integer) row.get("ESTRELLAS"));
     }
 
     public static LanguageDTO mapToLanguageDTO(Map<String, Object> row) {
@@ -24,8 +21,7 @@ public class TalentsMapper {
                 (String) row.get("IDIOMA"),
                 (Integer) row.get("ID_NIVEL"),
                 (String) row.get("NIVEL"),
-                (Integer) row.get("ESTRELLAS")
-        );
+                (Integer) row.get("ESTRELLAS"));
     }
 
     public static EducationDTO mapToEducationDTO(Map<String, Object> row) {
@@ -36,8 +32,9 @@ public class TalentsMapper {
                 (String) row.get("GRADO"),
                 (String) row.get("FCH_INICIO"),
                 (String) row.get("FCH_FIN"),
-                (Integer) row.get("FL_ACTUALIDAD")
-        );
+                (Integer) row.get("FL_ACTUALIDAD"),
+                (Integer) row.get("TIPO_FECHA_EDUCACIONES")
+            );
     }
 
     public static WorkExperienceDTO mapToWorkExperienceDTO(Map<String, Object> row) {
@@ -49,21 +46,20 @@ public class TalentsMapper {
                 (String) row.get("FCH_INICIO"),
                 (String) row.get("FCH_FIN"),
                 (String) row.get("TIEMPO"),
-                (Integer) row.get("FL_ACTUALIDAD")
-        );
+                (Integer) row.get("FL_ACTUALIDAD"));
     }
 
     public static SoftAbilityDTO mapToSoftAbilityDTO(Map<String, Object> row) {
         return new SoftAbilityDTO(
-                (String) row.get("HABILIDAD")
-        );
+                (Integer) row.get("ID"),
+                (String) row.get("HABILIDAD"));
     }
 
     public static TechAbilityDTO mapToTechAbilityDTO(Map<String, Object> row) {
         return new TechAbilityDTO(
+                (Integer) row.get("ID_HB_TEC"),
                 (String) row.get("HABILIDAD"),
-                (Integer) row.get("ANIOS")
-        );
+                (Integer) row.get("ANIOS"));
     }
 
     public static FileDTO mapToFileDTO(Map<String, Object> row) {
@@ -71,8 +67,7 @@ public class TalentsMapper {
                 (Integer) row.get("ID_ARCHIVO"),
                 (String) row.get("NOMBRE_ARCHIVO"),
                 (String) row.get("TIPO_ARCHIVO"),
-                (Integer) row.get("ID_TIPO_DOCUMENTO")
-        );
+                (Integer) row.get("ID_TIPO_DOCUMENTO"));
     }
 
     public static TalentListDTO mapToTalentListDTO(Map<String, Object> talentRow) {
@@ -81,7 +76,8 @@ public class TalentsMapper {
                 (String) talentRow.get("NOMBRES"),
                 (String) talentRow.get("APELLIDO_PATERNO"),
                 (String) talentRow.get("APELLIDO_MATERNO"),
-                FileUtils.cargarArchivoAws((String) talentRow.get("RUTA_IMAGEN")),
+                // FileUtils.cargarArchivoAws((String) talentRow.get("RUTA_IMAGEN")),
+                "", // No cargamos la imagen por temas de rendimiento
                 (String) talentRow.get("PUESTO"),
                 (String) talentRow.get("PAIS"),
                 (String) talentRow.get("CIUDAD"),
@@ -92,8 +88,11 @@ public class TalentsMapper {
                 (Double) talentRow.get("MONTO_FINAL_RXH"),
                 (String) talentRow.get("MONEDA"),
                 (Integer) talentRow.get("ESTRELLAS"),
-                (Integer) talentRow.get("ES_FAVORITO")
-        );
+                (Integer) talentRow.get("ES_FAVORITO"),
+
+                // Coins
+                (Integer) talentRow.get("ID_MONEDA_PLAN"),
+                (Integer) talentRow.get("ID_MONEDA_RXH"));
     }
 
 }
