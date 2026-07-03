@@ -714,6 +714,59 @@ public class TalentsRepository {
     return simpleSPCall(simpleJdbcCall, baseResponse, params);
   }
 
+  /**
+   * Persiste en BD un archivo de talento que YA fue subido a S3 mediante una URL
+   * pre-firmada (PUT directo). No vuelve a subir el archivo: solo registra la ruta
+   * recibida. Si {@code idArchivo} viene informado (> 0) reemplaza el archivo
+   * existente (UPD); en caso contrario inserta uno nuevo (INS).
+   */
+  public BaseResponse confirmTalentFile(BaseRequest baseRequest, TalentConfirmUploadRequest request) {
+    boolean isUpdate = request.getIdArchivo() != null && request.getIdArchivo() > 0;
+
+    if (isUpdate) {
+      SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
+          .withProcedureName("SP_BT_TALENTO_ARCHIVOS_UPD");
+
+      SqlParameterSource params = new MapSqlParameterSource()
+          .addValue("ID_TALENTO", request.getIdTalento())
+          .addValue("ID_ARCHIVO", request.getIdArchivo())
+          .addValue("NOMBRE_ARCHIVO", request.getNombreArchivo())
+          .addValue("ID_TIPO_ARCHIVO", request.getIdTipoArchivo())
+          .addValue("ID_TIPO_DOCUMENTO", request.getIdTipoDocumento())
+          .addValue("RUTA_ARCHIVO", request.getPath())
+          .addValue("ID_ROL", baseRequest.getIdRol())
+          .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+          .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+          .addValue("USERNAME", baseRequest.getUsername());
+
+      Map<String, Object> result = simpleJdbcCall.execute(params);
+      List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get("#result-set-1");
+
+      if (resultSet != null && !resultSet.isEmpty()) {
+        return getBaseResponse(resultSet);
+      }
+
+      return new BaseResponse(3, "Error al conectar a la base de datos");
+    }
+
+    SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
+        .withProcedureName("SP_BT_TALENTO_ARCHIVOS_INS");
+    BaseResponse baseResponse = new BaseResponse();
+
+    SqlParameterSource params = new MapSqlParameterSource()
+        .addValue("ID_TALENTO", request.getIdTalento())
+        .addValue("NOMBRE_ARCHIVO", request.getNombreArchivo())
+        .addValue("ID_TIPO_ARCHIVO", request.getIdTipoArchivo())
+        .addValue("ID_TIPO_DOCUMENTO", request.getIdTipoDocumento())
+        .addValue("RUTA_ARCHIVO", request.getPath())
+        .addValue("ID_ROL", baseRequest.getIdRol())
+        .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+        .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+        .addValue("USERNAME", baseRequest.getUsername());
+
+    return simpleSPCall(simpleJdbcCall, baseResponse, params);
+  }
+
   public BaseResponse updateTalentFile(BaseRequest baseRequest, UpdateTalentFileRequest updateTalentFileRequest,
       String ruta) {
     SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
