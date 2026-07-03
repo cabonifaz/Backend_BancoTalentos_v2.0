@@ -3,6 +3,7 @@ package com.bdt.bancotalentosbackend.controller;
 import com.bdt.bancotalentosbackend.model.request.*;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.FileResponse;
+import com.bdt.bancotalentosbackend.model.response.TalentPresignedUrlResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
 import com.bdt.bancotalentosbackend.service.impl.TalentsService;
@@ -364,6 +365,53 @@ public class TalentsController {
             response.setIdMensaje(3);
             response.setMensaje(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    // ─── Subida directa a S3 mediante URL pre-firmada ──────────────────────────
+
+    @PostMapping("/file/upload-url")
+    public ResponseEntity<TalentPresignedUrlResponse> generateUploadUrl(
+            @RequestBody TalentUploadUrlRequest request,
+            HttpServletRequest httpServletRequest) {
+        try {
+            String token = JWTHelper.extractToken(httpServletRequest);
+            TalentPresignedUrlResponse response = talentsService.generateTalentUploadUrl(token, request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new TalentPresignedUrlResponse(new BaseResponse(3, e.getMessage()), null, null, null));
+        }
+    }
+
+    @PostMapping("/file/confirm-upload")
+    public ResponseEntity<BaseResponse> confirmUpload(
+            @RequestBody TalentConfirmUploadRequest request,
+            HttpServletRequest httpServletRequest) {
+        BaseResponse response = new BaseResponse();
+
+        try {
+            String token = JWTHelper.extractToken(httpServletRequest);
+            response = talentsService.confirmTalentUpload(token, request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.setIdMensaje(3);
+            response.setMensaje(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @PostMapping("/file/download-url")
+    public ResponseEntity<TalentPresignedUrlResponse> generateDownloadUrl(
+            @RequestBody TalentDownloadUrlRequest request,
+            HttpServletRequest httpServletRequest) {
+        try {
+            String token = JWTHelper.extractToken(httpServletRequest);
+            TalentPresignedUrlResponse response = talentsService.generateTalentDownloadUrl(token, request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new TalentPresignedUrlResponse(new BaseResponse(3, e.getMessage()), null, null, null));
         }
     }
 

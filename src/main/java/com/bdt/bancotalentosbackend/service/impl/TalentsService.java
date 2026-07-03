@@ -4,6 +4,7 @@ import com.bdt.bancotalentosbackend.model.dto.UserDTO;
 import com.bdt.bancotalentosbackend.model.request.*;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.FileResponse;
+import com.bdt.bancotalentosbackend.model.response.TalentPresignedUrlResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
 import com.bdt.bancotalentosbackend.repository.TalentsRepository;
@@ -166,6 +167,91 @@ public class TalentsService implements ITalentsService {
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
         return talentsRepository.updateTalentFile(baseRequest, updateTalentFileRequest,
                 Constante.RUTA_REPOSITORIO_TALENTO_ARCHIVOS);
+    }
+
+    // ─── Subida directa a S3 mediante URL pre-firmada ──────────────────────────
+
+    @Override
+    public TalentPresignedUrlResponse generateTalentUploadUrl(String token, TalentUploadUrlRequest request) {
+        UserDTO user = jwt.decodeToken(token);
+        // Se decodifica el token para validar la sesión (autorización consistente).
+        Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+
+        if (request.getIdTalento() == null) {
+            return new TalentPresignedUrlResponse(new BaseResponse(3, "Talento inválido"), null, null, null);
+        }
+        if (request.getFileName() == null || request.getFileName().trim().isEmpty()) {
+            return new TalentPresignedUrlResponse(new BaseResponse(3, "Nombre de archivo inválido"), null, null, null);
+        }
+
+        String originalFilename = request.getFileName();
+        String extension = originalFilename.contains(".")
+                ? originalFilename.substring(originalFilename.lastIndexOf("."))
+                : "";
+
+        String cleanName = originalFilename;
+        if (cleanName.length() > 100) {
+            cleanName = cleanName.substring(0, 95) + extension;
+        }
+
+        // Carpeta destino según el tipo de documento (1 = CV, resto = archivos).
+        String folder = (request.getIdTipoDocumento() != null && request.getIdTipoDocumento() == 1)
+                ? Constante.RUTA_REPOSITORIO_CV_TALENTO
+                : Constante.RUTA_REPOSITORIO_TALENTO_ARCHIVOS;
+        folder = folder.replace("[ID]", request.getIdTalento().toString());
+
+        // Nombre único en S3 para evitar colisiones.
+        String generatedFileName = System.currentTimeMillis() + "_" + cleanName.replaceAll("\\s+", "_");
+        String s3Path = folder + generatedFileName;
+
+        String uploadUrl = S3Utils.getUploadSignedUrl(s3Path, request.getContentType(), 5);
+        if (uploadUrl == null || uploadUrl.isEmpty()) {
+            return new TalentPresignedUrlResponse(new BaseResponse(3, "Error generando URL"), null, null, null);
+        }
+
+        return new TalentPresignedUrlResponse(
+                new BaseResponse(2, "URL generada correctamente"), uploadUrl, s3Path, cleanName);
+    }
+
+    @Override
+    public BaseResponse confirmTalentUpload(String token, TalentConfirmUploadRequest request) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+
+        if (request.getPath() == null || request.getPath().trim().isEmpty()) {
+            return new BaseResponse(3, "Ruta de archivo inválida");
+        }
+
+        // Se valida que el archivo exista físicamente en S3 antes de registrarlo en BD.
+        if (!S3Utils.exists(request.getPath())) {
+            return new BaseResponse(3, "El archivo no existe en S3");
+        }
+
+        return talentsRepository.confirmTalentFile(baseRequest, request);
+    }
+
+    @Override
+    public TalentPresignedUrlResponse generateTalentDownloadUrl(String token, TalentDownloadUrlRequest request) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.LISTAR_TALENTOS);
+
+        // El repositorio devuelve la RUTA_ARCHIVO (path S3) en el campo 'archivo'.
+        FileResponse fileResponse = talentsRepository.getTalentFile(baseRequest, request.getIdFile());
+
+        if (fileResponse == null || fileResponse.getBaseResponse() == null
+                || fileResponse.getBaseResponse().getIdMensaje() != 2
+                || fileResponse.getArchivo() == null || fileResponse.getArchivo().isEmpty()) {
+            return new TalentPresignedUrlResponse(new BaseResponse(3, "Archivo no encontrado"), null, null, null);
+        }
+
+        String path = fileResponse.getArchivo();
+        String url = S3Utils.getSignedUrl(path, 5);
+        if (url == null || url.isEmpty()) {
+            return new TalentPresignedUrlResponse(new BaseResponse(3, "Error generando URL de descarga"), null, null, null);
+        }
+
+        String fileName = path.contains("/") ? path.substring(path.lastIndexOf("/") + 1) : path;
+        return new TalentPresignedUrlResponse(new BaseResponse(2, "URL generada correctamente"), url, null, fileName);
     }
 
     // Espacio solo para migración de archivos

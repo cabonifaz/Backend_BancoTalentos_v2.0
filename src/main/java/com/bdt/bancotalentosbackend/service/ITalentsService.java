@@ -3,6 +3,7 @@ package com.bdt.bancotalentosbackend.service;
 import com.bdt.bancotalentosbackend.model.request.*;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.FileResponse;
+import com.bdt.bancotalentosbackend.model.response.TalentPresignedUrlResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -47,6 +48,12 @@ public interface ITalentsService {
     BaseResponse uploadCVLang(String token, UploadTalentFileRequest uploadRequest);
 
     BaseResponse updateCVLang(String token, UpdateTalentFileRequest request);
+
+    TalentPresignedUrlResponse generateTalentUploadUrl(String token, TalentUploadUrlRequest request);
+
+    BaseResponse confirmTalentUpload(String token, TalentConfirmUploadRequest request);
+
+    TalentPresignedUrlResponse generateTalentDownloadUrl(String token, TalentDownloadUrlRequest request);
 
     BaseResponse removeTechnicalSkill(String token, Integer targetId);
 
