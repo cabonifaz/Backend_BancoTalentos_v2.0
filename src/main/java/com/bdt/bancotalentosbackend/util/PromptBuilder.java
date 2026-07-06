@@ -156,4 +156,98 @@ public class PromptBuilder {
         + extractedText;
   }
 
+  /**
+   * Construye el prompt para el "Analizador de Diferencias".
+   *
+   * A diferencia de {@link #buildCVPrompt(String)}, este prompt NO extrae toda la
+   * información del CV. Recibe la información actual del talento (ya almacenada en
+   * la base de datos) y el texto del nuevo CV, y le pide a la IA que devuelva
+   * ÚNICAMENTE la información nueva, adicional o mejorada respecto a la existente.
+   *
+   * @param extractedText     texto plano extraído del nuevo CV.
+   * @param currentTalentJson estado actual del talento serializado como JSON
+   *                          (misma estructura que {@code IACVResponse}).
+   * @return prompt listo para enviar a la IA.
+   */
+  public String buildCVDiffPrompt(String extractedText, String currentTalentJson) {
+    return """
+        Eres un asistente especializado en actualizar la información de un talento (perfil profesional).
+        NO eres un extractor de CV: eres un ANALIZADOR DE DIFERENCIAS.
+
+        Recibirás dos fuentes de información:
+        1. INFORMACIÓN ACTUAL DEL TALENTO: lo que ya está almacenado en el sistema (JSON).
+        2. NUEVO CV: el texto extraído de un nuevo currículum (puede provenir de OCR y tener errores menores).
+
+        Tu tarea es COMPARAR ambas fuentes y devolver ÚNICAMENTE:
+        - Información NUEVA que aparece en el CV y NO existe en la información actual.
+        - Información ADICIONAL que enriquece un elemento ya existente.
+        - MEJORAS sobre información ya existente (por ejemplo, un puesto más senior o funciones más detalladas).
+
+        REGLA FUNDAMENTAL: NUNCA repitas información que ya existe y es idéntica.
+        Si un dato ya está presente en la información actual y el CV no aporta nada nuevo sobre él, NO lo devuelvas.
+
+        # Reglas por sección
+
+        ## Habilidades técnicas (tecSkills)
+        - Devuelve SOLO las habilidades técnicas que NO estén ya en la lista actual (comparación sin distinguir mayúsculas/acentos).
+        - Ejemplo: si el talento ya tiene [Java, Spring Boot, React] y el CV trae [Java, Spring Boot, React, Docker, Kubernetes],
+          debes devolver ÚNICAMENTE [Docker, Kubernetes]. NUNCA repitas Java, Spring Boot ni React.
+
+        ## Habilidades blandas (softSkills) — IGNORAR POR COMPLETO
+        - NO analices, extraigas, compares ni infieras habilidades blandas (comunicación, trabajo en equipo,
+          liderazgo, adaptabilidad, etc.).
+        - Ignora por completo cualquier información relacionada con habilidades blandas presente en el CV.
+        - El campo `softSkills` SIEMPRE debe devolverse como lista vacía `[]`.
+
+        ## Experiencia laboral (workExps) y educación (edExps)
+        - Si el CV describe una experiencia/educación que YA existe (misma empresa/institución y puesto/carrera similar),
+          NO la dupliques. En su lugar, MEJÓRALA: devuelve ese elemento reutilizando su `idExperiencia`/`idEducacion`
+          existente (tomado de la información actual) y combina/mejora los campos con la nueva información
+          (por ejemplo, un puesto más senior o funciones más completas concatenando las nuevas responsabilidades).
+        - Si es una experiencia/educación completamente NUEVA que no existe en la información actual,
+          devuélvela con `idExperiencia`/`idEducacion` en `null`.
+        - NO devuelvas experiencias/educaciones existentes que no tengan ningún cambio.
+        - Para las funciones, mantén la mayor similitud posible con el texto original y no elimines tecnologías mencionadas.
+
+        ## Idiomas (langs)
+        - Devuelve SOLO idiomas nuevos, o idiomas existentes cuyo nivel MEJORE según el CV.
+        - Si mejoras un idioma existente, reutiliza su `idTalentoIdioma` e `idIdioma` de la información actual.
+
+        ## Presentación (presentacion)
+        - Devuelve un texto SOLO si el CV aporta una presentación materialmente más completa o mejor que la actual.
+        - Si no hay mejora relevante, devuelve `null`.
+
+        ## Datos personales, contacto, ubicación y redes (nombres, apellidos, contacto, location, social, docIdentidad)
+        - Devuelve un campo SOLO si el CV aporta un valor nuevo o corregido que NO coincide con el actual.
+        - Si el dato ya existe y es equivalente, devuelve `null` en ese campo.
+
+        # Formato de salida
+
+        Responde ÚNICAMENTE con un JSON válido con EXACTAMENTE la misma estructura del modelo `IACVResponse`
+        (las mismas claves que la INFORMACIÓN ACTUAL DEL TALENTO). No agregues texto fuera del JSON.
+        - Las listas (tecSkills, workExps, edExps, langs) deben contener SOLO los elementos nuevos o mejorados.
+          Si no hay nada nuevo en una lista, devuélvela como lista vacía `[]`.
+        - El campo `softSkills` SIEMPRE debe ir como lista vacía `[]` (las habilidades blandas se ignoran).
+        - Los campos escalares que no cambien deben ir en `null`.
+        - Respeta las mismas reglas de formato del extractor original:
+          - `fechaInicio` y `fechaFin` en formato `yyyy-MM-dd`. Si `flActualidad = 1`, entonces `fechaFin = null`.
+          - Idiomas: BASICO=1, INTERMEDIO=2, AVANZADO=3, NATIVO=4 (para `idNivel` y `estrellas`).
+          - `idIdioma`: 1=ESPAÑOL, 2=INGLES, 3=FRANCES, 4=ALEMAN, 5=CHINO.
+          - Educación `grado` como string numérico (Bachiller=1, Título=2, Curso=3, Técnico=4, Egresado=5, Estudiante=6) o `null`.
+          - En el código del celular no incluyas el signo `+` (correcto: 51, incorrecto: +51).
+        - Para elementos NUEVOS de listas, los ids (`idExperiencia`, `idEducacion`, `idTalentoIdioma`, `idIdioma`) van en `null`,
+          salvo que estés MEJORANDO un elemento existente, en cuyo caso debes reutilizar su id real de la información actual.
+
+        =====================================================================
+        INFORMACIÓN ACTUAL DEL TALENTO (JSON):
+        """
+        + currentTalentJson
+        + """
+
+            =====================================================================
+            NUEVO CV A COMPARAR:
+            """
+        + extractedText;
+  }
+
 }

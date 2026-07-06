@@ -430,9 +430,13 @@ public class TalentsRepository {
         .withProcedureName("SP_BT_HABILIDAD_TECNICA_INS");
     BaseResponse baseResponse = new BaseResponse();
 
+    System.out.println(techAbilityRequest);
+    System.out.println(baseRequest);
+
     SqlParameterSource params = new MapSqlParameterSource()
         .addValue("ID_TALENTO", techAbilityRequest.getIdTalento())
         .addValue("ID_HABILIDAD", techAbilityRequest.getIdHabilidad())
+        .addValue("HABILIDAD", techAbilityRequest.getHabilidad())
         .addValue("ANIOS", techAbilityRequest.getAnios())
         .addValue("ID_ROL", baseRequest.getIdRol())
         .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
