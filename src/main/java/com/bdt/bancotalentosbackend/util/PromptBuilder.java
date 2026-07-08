@@ -206,15 +206,55 @@ public class PromptBuilder {
         - Ignora por completo cualquier información de ubicación presente en el CV.
         - El campo `location` SIEMPRE debe devolverse como `null`.
 
-        ## Experiencia laboral (workExps) y educación (edExps)
-        - Si el CV describe una experiencia/educación que YA existe (misma empresa/institución y puesto/carrera similar),
-          NO la dupliques. En su lugar, MEJÓRALA: devuelve ese elemento reutilizando su `idExperiencia`/`idEducacion`
-          existente (tomado de la información actual) y combina/mejora los campos con la nueva información
-          (por ejemplo, un puesto más senior o funciones más completas concatenando las nuevas responsabilidades).
-        - Si es una experiencia/educación completamente NUEVA que no existe en la información actual,
-          devuélvela con `idExperiencia`/`idEducacion` en `null`.
-        - NO devuelvas experiencias/educaciones existentes que no tengan ningún cambio.
-        - Para las funciones, mantén la mayor similitud posible con el texto original y no elimines tecnologías mencionadas.
+        ## Experiencia laboral (workExps)
+        Cómo IDENTIFICAR y EXTRAER cada experiencia (haz esto SIEMPRE, antes de comparar):
+        - En muchos CV cada experiencia empieza con el NOMBRE DE LA EMPRESA como título o viñeta (bullet),
+          SIN una etiqueta "Empresa:". Trata cada bloque encabezado por un nombre de empresa como una experiencia
+          independiente. La empresa NO es la ciudad ni el país (ej. "Lima, Perú" es ubicación, no empresa).
+        - `nombreEmpresa`: el nombre de la empresa (la línea de título/viñeta). Nunca la dejes vacía si el bloque existe.
+        - `puesto`: el cargo. Suele venir con prefijos como "Rol:", "Puesto:", "Cargo:" — ELIMINA ese prefijo y guarda
+          SOLO el cargo (ej. "Rol: Asesor Comercial" → "Asesor Comercial"; "Rol: Desarrollador FullStack - Gestor de proyectos"
+          → "Desarrollador FullStack - Gestor de proyectos").
+        - `funciones`: el párrafo descriptivo inicial MÁS todos los bullets que aparezcan bajo la experiencia, concatenados
+          con salto de línea (\\n). Mantén la mayor similitud posible con el texto original y NO elimines tecnologías
+          mencionadas. Si el bloque no tiene ninguna descripción, usa `null`.
+        - fechas: aplica las "Reglas de fechas" de abajo.
+        REGLA CRÍTICA: NO descartes una experiencia porque le falten fechas o funciones. Si una experiencia no tiene
+          fechas, devuélvela igualmente con `fechaInicio`/`fechaFin` en `null` y `flActualidad = 0`. Es SIEMPRE preferible
+          una experiencia con campos en `null` que omitirla por completo.
+        Lógica de diferencias (después de extraer):
+        - Si el CV describe una experiencia que YA existe (misma empresa y puesto similar), NO la dupliques: MEJÓRALA
+          reutilizando su `idExperiencia` de la información actual y combinando/mejorando los campos (puesto más senior,
+          funciones más completas, o fechas que antes faltaban). Devuélvela SOLO si aporta algo nuevo.
+        - Si es una experiencia completamente NUEVA, devuélvela con `idExperiencia` en `null`.
+        - NO devuelvas experiencias existentes que no tengan ningún cambio.
+
+        ## Educación (edExps)
+        Cómo IDENTIFICAR y EXTRAER cada estudio (haz esto SIEMPRE, antes de comparar):
+        - El nombre de la INSTITUCIÓN suele ser una línea propia (ej. "Universidad Peruana de Ciencias Aplicadas (UPC)").
+          Encabezados como "Estudios Superiores:", "Educación" o "Formación" NO son la institución, solo son títulos de sección.
+        - `nombreInstitucion`: la universidad/instituto/centro de estudios.
+        - `carrera`: la carrera, programa o especialidad (ej. "Ingeniería de Sistemas de Información").
+        - Indicadores como "En curso", "Actualidad", "Presente", "Actual", o "X ciclo/semestre" significan estudios en curso
+          → `flActualidad = 1` y `fechaFin = null`.
+        - `grado`: mapea según las reglas de formato (usa 6=Estudiante cuando el estudio está en curso).
+        - fechas: aplica las "Reglas de fechas" de abajo.
+        REGLA CRÍTICA: igual que en experiencia, NO descartes un estudio por falta de fechas u otros campos; complétalo con
+          `null` donde no haya dato, pero NO lo omitas.
+        Lógica de diferencias (después de extraer):
+        - Si el estudio YA existe (misma institución y carrera similar), NO lo dupliques: MEJÓRALO reutilizando su
+          `idEducacion` de la información actual. Devuélvelo SOLO si aporta algo nuevo.
+        - Si es un estudio completamente NUEVO, devuélvelo con `idEducacion` en `null`.
+        - NO devuelvas estudios existentes que no tengan ningún cambio.
+
+        ## Reglas de fechas (aplican a workExps y edExps)
+        - Formato de salida SIEMPRE `yyyy-MM-dd`.
+        - Si el CV solo da el AÑO (ej. "2022"), usa el 1 de enero de ese año: `2022-01-01`.
+        - Si da MES y AÑO (ej. "Marzo 2020", "03/2020", "Mar. 2020"), usa el día 01: `2020-03-01`.
+        - Palabras como "Actualidad", "Presente", "En curso", "Actual" en la fecha de fin significan que sigue vigente
+          → `flActualidad = 1` y `fechaFin = null`.
+        - Si el elemento NO tiene ninguna fecha, deja `fechaInicio` y `fechaFin` en `null` y `flActualidad = 0`,
+          pero NUNCA omitas el elemento por eso.
 
         ## Idiomas (langs)
         - Devuelve SOLO idiomas nuevos, o idiomas existentes cuyo nivel MEJORE según el CV.
