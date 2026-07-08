@@ -29,6 +29,8 @@ public class TalentRequest {
     @JsonProperty()
     private String telefono;
     @JsonProperty()
+    private String procedencia;
+    @JsonProperty()
     private FileRequest cvArchivo;
     @JsonProperty()
     private FileRequest fotoArchivo;

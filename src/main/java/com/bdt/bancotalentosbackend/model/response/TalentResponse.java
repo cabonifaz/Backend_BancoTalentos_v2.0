@@ -25,6 +25,7 @@ public class TalentResponse {
     private String linkedin;
     private String github;
     private String descripcion;
+    private String procedencia;
     private String disponibilidad;
     private List<Integer> idColeccion;
     private Integer idMoneda;
