@@ -199,6 +199,13 @@ public class PromptBuilder {
         - Ignora por completo cualquier información relacionada con habilidades blandas presente en el CV.
         - El campo `softSkills` SIEMPRE debe devolverse como lista vacía `[]`.
 
+        ## Ubicación (location) — IGNORAR POR COMPLETO
+        - NO extraigas, detectes, normalices ni infieras la ubicación (país/ciudad) del talento a partir del CV.
+        - La ubicación en los CV suele ser ambigua o inconsistente (ciudades, países, trabajo remoto o direcciones),
+          por lo que NO es un campo confiable para actualización automática.
+        - Ignora por completo cualquier información de ubicación presente en el CV.
+        - El campo `location` SIEMPRE debe devolverse como `null`.
+
         ## Experiencia laboral (workExps) y educación (edExps)
         - Si el CV describe una experiencia/educación que YA existe (misma empresa/institución y puesto/carrera similar),
           NO la dupliques. En su lugar, MEJÓRALA: devuelve ese elemento reutilizando su `idExperiencia`/`idEducacion`
@@ -217,9 +224,10 @@ public class PromptBuilder {
         - Devuelve un texto SOLO si el CV aporta una presentación materialmente más completa o mejor que la actual.
         - Si no hay mejora relevante, devuelve `null`.
 
-        ## Datos personales, contacto, ubicación y redes (nombres, apellidos, contacto, location, social, docIdentidad)
+        ## Datos personales, contacto y redes (nombres, apellidos, contacto, social, docIdentidad)
         - Devuelve un campo SOLO si el CV aporta un valor nuevo o corregido que NO coincide con el actual.
         - Si el dato ya existe y es equivalente, devuelve `null` en ese campo.
+        - NO incluyas la ubicación (location): ese campo se ignora por completo (ver sección "Ubicación").
 
         # Formato de salida
 
@@ -228,6 +236,7 @@ public class PromptBuilder {
         - Las listas (tecSkills, workExps, edExps, langs) deben contener SOLO los elementos nuevos o mejorados.
           Si no hay nada nuevo en una lista, devuélvela como lista vacía `[]`.
         - El campo `softSkills` SIEMPRE debe ir como lista vacía `[]` (las habilidades blandas se ignoran).
+        - El campo `location` SIEMPRE debe ir como `null` (la ubicación se ignora y no debe actualizarse).
         - Los campos escalares que no cambien deben ir en `null`.
         - Respeta las mismas reglas de formato del extractor original:
           - `fechaInicio` y `fechaFin` en formato `yyyy-MM-dd`. Si `flActualidad = 1`, entonces `fechaFin = null`.

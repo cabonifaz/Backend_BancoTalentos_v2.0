@@ -129,6 +129,7 @@ public class TalentsRepository {
     talentResponse.setDni((String) talentRow.get("DNI"));
     talentResponse.setEmail((String) talentRow.get("EMAIL"));
     talentResponse.setCelular((String) talentRow.get("CELULAR"));
+    talentResponse.setProcedencia((String) talentRow.get("PROCEDENCIA"));
     talentResponse.setLinkedin((String) talentRow.get("LINK_LINKEDIN"));
     talentResponse.setGithub((String) talentRow.get("LINK_GITHUB"));
     talentResponse.setDescripcion((String) talentRow.get("DESCRIPCION"));
@@ -211,6 +212,7 @@ public class TalentsRepository {
           .addValue("APELLIDO_MATERNO", talentRequest.getApellidoMaterno())
           .addValue("EMAIL", talentRequest.getEmail())
           .addValue("CELULAR", talentRequest.getTelefono())
+          .addValue("PROCEDENCIA", talentRequest.getProcedencia())
           .addValue("RUTA_IMAGEN", rutaFoto)
           .addValue("LINK_LINKEDIN", talentRequest.getLinkedin())
           .addValue("LINK_GITHUB", talentRequest.getGithub())
@@ -429,9 +431,6 @@ public class TalentsRepository {
     SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
         .withProcedureName("SP_BT_HABILIDAD_TECNICA_INS");
     BaseResponse baseResponse = new BaseResponse();
-
-    System.out.println(techAbilityRequest);
-    System.out.println(baseRequest);
 
     SqlParameterSource params = new MapSqlParameterSource()
         .addValue("ID_TALENTO", techAbilityRequest.getIdTalento())
