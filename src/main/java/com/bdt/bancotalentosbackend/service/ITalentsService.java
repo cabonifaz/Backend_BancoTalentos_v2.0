@@ -45,10 +45,6 @@ public interface ITalentsService {
 
     BaseResponse updateTalentFile(String token, UpdateTalentFileRequest updateTalentFileRequest);
 
-    BaseResponse uploadCVLang(String token, UploadTalentFileRequest uploadRequest);
-
-    BaseResponse updateCVLang(String token, UpdateTalentFileRequest request);
-
     TalentPresignedUrlResponse generateTalentUploadUrl(String token, TalentUploadUrlRequest request);
 
     BaseResponse confirmTalentUpload(String token, TalentConfirmUploadRequest request);

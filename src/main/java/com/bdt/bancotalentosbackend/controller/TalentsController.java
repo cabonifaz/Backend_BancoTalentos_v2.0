@@ -434,40 +434,4 @@ public class TalentsController {
         }
     }
 
-    @PostMapping("/uploadcvlang")
-    public ResponseEntity<BaseResponse> uploadCVLang(
-            @RequestBody UploadTalentFileRequest request,
-            HttpServletRequest httpServletRequest) {
-        BaseResponse response = new BaseResponse();
-
-        try {
-            String token = JWTHelper.extractToken(httpServletRequest);
-            response = talentsService.uploadCVLang(token, request);
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            response.setIdMensaje(3);
-            response.setMensaje("Ocurrió un error al subir el archivo");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    @PostMapping("/updatecvlang")
-    public ResponseEntity<BaseResponse> updatecvlang(
-            @RequestBody UpdateTalentFileRequest request,
-            HttpServletRequest httpServletRequest) {
-        BaseResponse response = new BaseResponse();
-
-        try {
-            String token = JWTHelper.extractToken(httpServletRequest);
-            response = talentsService.updateCVLang(token, request);
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            response.setIdMensaje(3);
-            response.setMensaje("Ocurrió un error al subir el archivo");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
 }
