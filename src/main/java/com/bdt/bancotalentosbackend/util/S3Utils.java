@@ -88,6 +88,71 @@ public class S3Utils {
   }
 
   /**
+   * Generates a pre-signed URL for viewing (GET) an S3 object inline in the
+   * browser (PDF/image viewer) instead of forcing a download.
+   *
+   * <p>
+   * It overrides the response headers so the object is served with
+   * {@code Content-Disposition: inline} and a {@code Content-Type} derived from
+   * the file extension. This guarantees inline rendering even for objects that
+   * were stored in S3 with a generic content type (e.g. legacy/migrated files
+   * saved as {@code application/octet-stream}).
+   *
+   * @param fileUrl The S3 object key.
+   * @param minutes Expiration in minutes.
+   * @return URL as a String, or empty string on error.
+   */
+  public static String getSignedUrlInline(String fileUrl, int minutes) {
+    if (fileUrl == null || fileUrl.isEmpty())
+      return "";
+
+    try {
+      String fileName = fileUrl.contains("/") ? fileUrl.substring(fileUrl.lastIndexOf("/") + 1) : fileUrl;
+      String contentType = resolveContentType(fileName);
+
+      GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+          .bucket(BUCKET_NAME)
+          .key(fileUrl)
+          .responseContentType(contentType)
+          .responseContentDisposition("inline; filename=\"" + fileName + "\"")
+          .build();
+
+      GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+          .signatureDuration(Duration.ofMinutes(minutes))
+          .getObjectRequest(getObjectRequest)
+          .build();
+
+      PresignedGetObjectRequest presignedRequest = ClientS3V2.getPresignerInstance().presignGetObject(presignRequest);
+      return presignedRequest.url().toString();
+
+    } catch (Exception e) {
+      logger.error("Error al generar URL firmada inline: {}", e.getMessage());
+      return "";
+    }
+  }
+
+  /**
+   * Resolves the MIME type from a file name extension for inline viewing.
+   *
+   * @param fileName The file name (may include extension).
+   * @return The MIME type, or {@code application/octet-stream} if unknown.
+   */
+  private static String resolveContentType(String fileName) {
+    String lower = fileName == null ? "" : fileName.toLowerCase();
+    if (lower.endsWith(".pdf"))
+      return "application/pdf";
+    if (lower.endsWith(".jpg") || lower.endsWith(".jpeg"))
+      return "image/jpeg";
+    if (lower.endsWith(".png"))
+      return "image/png";
+    if (lower.endsWith(".gif"))
+      return "image/gif";
+    if (lower.endsWith(".webp"))
+      return "image/webp";
+    return "application/octet-stream";
+  }
+
+  /**
    * Generates a pre-signed URL to upload (PUT) a file directly to S3.
    * The client must send the file with the same Content-Type used here.
    *

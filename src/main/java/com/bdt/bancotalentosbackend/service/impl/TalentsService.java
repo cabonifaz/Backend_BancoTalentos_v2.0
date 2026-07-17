@@ -194,10 +194,19 @@ public class TalentsService implements ITalentsService {
             cleanName = cleanName.substring(0, 95) + extension;
         }
 
-        // Carpeta destino según el tipo de documento (1 = CV, resto = archivos).
-        String folder = (request.getIdTipoDocumento() != null && request.getIdTipoDocumento() == 1)
-                ? Constante.RUTA_REPOSITORIO_CV_TALENTO
-                : Constante.RUTA_REPOSITORIO_TALENTO_ARCHIVOS;
+        // Carpeta destino según el tipo de documento:
+        // 1 = CV, 5 = CV Fractal ES, 6 = CV Fractal EN, resto = archivos.
+        Integer idTipoDocumento = request.getIdTipoDocumento();
+        String folder;
+        if (idTipoDocumento != null && idTipoDocumento == 1) {
+            folder = Constante.RUTA_REPOSITORIO_CV_TALENTO;
+        } else if (idTipoDocumento != null && idTipoDocumento == 5) {
+            folder = Constante.RUTA_REPOSITORIO_CV_ES_TALENTO;
+        } else if (idTipoDocumento != null && idTipoDocumento == 6) {
+            folder = Constante.RUTA_REPOSITORIO_CV_EN_TALENTO;
+        } else {
+            folder = Constante.RUTA_REPOSITORIO_TALENTO_ARCHIVOS;
+        }
         folder = folder.replace("[ID]", request.getIdTalento().toString());
 
         // Nombre único en S3 para evitar colisiones.
@@ -245,7 +254,9 @@ public class TalentsService implements ITalentsService {
         }
 
         String path = fileResponse.getArchivo();
-        String url = S3Utils.getSignedUrl(path, 5);
+        String url = request.isInline()
+                ? S3Utils.getSignedUrlInline(path, 5)
+                : S3Utils.getSignedUrl(path, 5);
         if (url == null || url.isEmpty()) {
             return new TalentPresignedUrlResponse(new BaseResponse(3, "Error generando URL de descarga"), null, null, null);
         }
@@ -263,37 +274,6 @@ public class TalentsService implements ITalentsService {
     @Override
     public void migrateCV() {
         talentsRepository.migrateCV();
-    }
-
-    @Override
-    public BaseResponse uploadCVLang(String token, UploadTalentFileRequest uploadRequest) {
-        UserDTO user = jwt.decodeToken(token);
-        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
-        return talentsRepository.uploadTalentCVLang(baseRequest, uploadRequest);
-    }
-
-    @Override
-    public BaseResponse updateCVLang(String token, UpdateTalentFileRequest request) {
-
-        String basePath = null;
-
-        switch (request.getIdTipoDocumento()) {
-            case 5: // CV ES
-                basePath = Constante.RUTA_REPOSITORIO_CV_ES_TALENTO;
-                break;
-
-            case 6: // CV EN
-                basePath = Constante.RUTA_REPOSITORIO_CV_EN_TALENTO;
-                break;
-
-            default:
-                return new BaseResponse(3, "Tipo de documento desconocido");
-        }
-
-        UserDTO user = jwt.decodeToken(token);
-        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
-        return talentsRepository.updateTalentFile(baseRequest, request,
-                basePath);
     }
 
     @Override
