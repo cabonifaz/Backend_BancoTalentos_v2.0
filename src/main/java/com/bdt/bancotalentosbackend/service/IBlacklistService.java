@@ -6,6 +6,7 @@ import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.request.BlacklistRemoveRequest;
 import com.bdt.bancotalentosbackend.model.response.BlacklistHistoryResponse;
 import com.bdt.bancotalentosbackend.model.response.BlacklistListResponse;
+import com.bdt.bancotalentosbackend.model.response.BlacklistStatusResponse;
 import com.bdt.bancotalentosbackend.model.response.BlacklistValidateResponse;
 
 public interface IBlacklistService {
@@ -20,4 +21,6 @@ public interface IBlacklistService {
     BlacklistHistoryResponse listBlacklistHistory(String token, Integer idTalento, Integer idCliente, Integer pagina);
 
     BlacklistValidateResponse validateBlacklist(String token, Integer idTalento, Integer idRequerimiento);
+
+    BlacklistStatusResponse getTalentBlacklistStatus(String token, Integer idTalento);
 }
