@@ -1,5 +1,6 @@
 package com.bdt.bancotalentosbackend.repository;
 
+import com.bdt.bancotalentosbackend.model.dto.BlacklistClientDTO;
 import com.bdt.bancotalentosbackend.model.dto.BlacklistHistoryDTO;
 import com.bdt.bancotalentosbackend.model.dto.BlacklistItemDTO;
 import com.bdt.bancotalentosbackend.model.dto.BlacklistValidationDTO;
@@ -164,9 +165,9 @@ public class BlacklistRepository {
 
     /**
      * Estado de un talento en la lista negra. SP_BT_LISTA_NEGRA_TALENTO_STATUS.
-     * result-set-1 = mensaje, result-set-2 = una fila con BLOQUEADO (1/0), true
-     * si tiene restricción activa para cualquier cliente. Ante permiso denegado
-     * o error el estado queda en false.
+     * result-set-1 = mensaje, result-set-2 = un cliente por restricción activa
+     * (0 filas = no bloqueado; global viene como "TODOS LOS CLIENTES"). Ante
+     * permiso denegado o error el estado queda en no bloqueado.
      */
     public BlacklistStatusResponse getTalentBlacklistStatus(BaseRequest baseRequest, Integer idTalento) {
         BlacklistStatusResponse response = new BlacklistStatusResponse();
@@ -192,9 +193,16 @@ public class BlacklistRepository {
 
             if (response.getBaseResponse().getIdMensaje() == 2) {
                 List<Map<String, Object>> rows = (List<Map<String, Object>>) result.get("#result-set-2");
-                if (rows != null && !rows.isEmpty()) {
-                    response.setBloqueado(Boolean.TRUE.equals(rows.get(0).get("BLOQUEADO")));
+                List<BlacklistClientDTO> clientes = new ArrayList<>();
+                if (rows != null) {
+                    for (Map<String, Object> row : rows) {
+                        clientes.add(new BlacklistClientDTO(
+                                (Integer) row.get("ID_CLIENTE"),
+                                (String) row.get("CLIENTE")));
+                    }
                 }
+                response.setClientes(clientes);
+                response.setBloqueado(!clientes.isEmpty());
             }
             return response;
         } catch (Exception e) {
