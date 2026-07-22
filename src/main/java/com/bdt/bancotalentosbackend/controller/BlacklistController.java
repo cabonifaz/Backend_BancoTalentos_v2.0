@@ -6,6 +6,7 @@ import com.bdt.bancotalentosbackend.model.request.BlacklistUpdateRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.BlacklistHistoryResponse;
 import com.bdt.bancotalentosbackend.model.response.BlacklistListResponse;
+import com.bdt.bancotalentosbackend.model.response.BlacklistStatusResponse;
 import com.bdt.bancotalentosbackend.model.response.BlacklistValidateResponse;
 import com.bdt.bancotalentosbackend.service.IBlacklistService;
 import com.bdt.bancotalentosbackend.util.JWTHelper;
@@ -124,6 +125,24 @@ public class BlacklistController {
         try {
             String token = JWTHelper.extractToken(httpServletRequest);
             return ResponseEntity.ok(blacklistService.validateBlacklist(token, idTalento, idRequerimiento));
+        } catch (Exception e) {
+            response.setBaseResponse(new BaseResponse(3, e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    /**
+     * Indica si un talento tiene alguna restricción activa en la lista negra,
+     * sin importar el cliente. Para pintar el icono en el detalle del talento.
+     */
+    @GetMapping("/status")
+    public ResponseEntity<BlacklistStatusResponse> getTalentBlacklistStatus(
+            @RequestParam Integer idTalento,
+            HttpServletRequest httpServletRequest) {
+        BlacklistStatusResponse response = new BlacklistStatusResponse();
+        try {
+            String token = JWTHelper.extractToken(httpServletRequest);
+            return ResponseEntity.ok(blacklistService.getTalentBlacklistStatus(token, idTalento));
         } catch (Exception e) {
             response.setBaseResponse(new BaseResponse(3, e.getMessage()));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);

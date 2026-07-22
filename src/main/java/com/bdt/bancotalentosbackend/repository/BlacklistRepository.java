@@ -1,5 +1,6 @@
 package com.bdt.bancotalentosbackend.repository;
 
+import com.bdt.bancotalentosbackend.model.dto.BlacklistClientDTO;
 import com.bdt.bancotalentosbackend.model.dto.BlacklistHistoryDTO;
 import com.bdt.bancotalentosbackend.model.dto.BlacklistItemDTO;
 import com.bdt.bancotalentosbackend.model.dto.BlacklistValidationDTO;
@@ -10,6 +11,7 @@ import com.bdt.bancotalentosbackend.model.request.BlacklistUpdateRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.BlacklistHistoryResponse;
 import com.bdt.bancotalentosbackend.model.response.BlacklistListResponse;
+import com.bdt.bancotalentosbackend.model.response.BlacklistStatusResponse;
 import com.bdt.bancotalentosbackend.model.response.BlacklistValidateResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -156,6 +158,55 @@ public class BlacklistRepository {
             return response;
         } catch (Exception e) {
             System.err.println("Error en REPOSITORY validateBlacklist: " + e.getMessage());
+            response.setBaseResponse(new BaseResponse(3, e.getMessage()));
+            return response;
+        }
+    }
+
+    /**
+     * Estado de un talento en la lista negra. SP_BT_LISTA_NEGRA_TALENTO_STATUS.
+     * result-set-1 = mensaje, result-set-2 = un cliente por restricción activa
+     * (0 filas = no bloqueado; global viene como "TODOS LOS CLIENTES"). Ante
+     * permiso denegado o error el estado queda en no bloqueado.
+     */
+    public BlacklistStatusResponse getTalentBlacklistStatus(BaseRequest baseRequest, Integer idTalento) {
+        BlacklistStatusResponse response = new BlacklistStatusResponse();
+        try {
+            SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                    .withProcedureName("SP_BT_LISTA_NEGRA_TALENTO_STATUS");
+
+            SqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("ID_TALENTO", idTalento)
+                    .addValue("ID_ROL", baseRequest.getIdRol())
+                    .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                    .addValue("ID_USUARIO", baseRequest.getIdUsuario());
+
+            Map<String, Object> result = jdbcCall.execute(params);
+            List<Map<String, Object>> messageSet = (List<Map<String, Object>>) result.get("#result-set-1");
+
+            if (messageSet == null || messageSet.isEmpty()) {
+                response.setBaseResponse(new BaseResponse(3, "No hubo respuesta de la base de datos"));
+                return response;
+            }
+
+            response.setBaseResponse(getBaseResponse(messageSet));
+
+            if (response.getBaseResponse().getIdMensaje() == 2) {
+                List<Map<String, Object>> rows = (List<Map<String, Object>>) result.get("#result-set-2");
+                List<BlacklistClientDTO> clientes = new ArrayList<>();
+                if (rows != null) {
+                    for (Map<String, Object> row : rows) {
+                        clientes.add(new BlacklistClientDTO(
+                                (Integer) row.get("ID_CLIENTE"),
+                                (String) row.get("CLIENTE")));
+                    }
+                }
+                response.setClientes(clientes);
+                response.setBloqueado(!clientes.isEmpty());
+            }
+            return response;
+        } catch (Exception e) {
+            System.err.println("Error en REPOSITORY getTalentBlacklistStatus: " + e.getMessage());
             response.setBaseResponse(new BaseResponse(3, e.getMessage()));
             return response;
         }
