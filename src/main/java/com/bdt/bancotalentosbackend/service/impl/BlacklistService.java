@@ -8,6 +8,7 @@ import com.bdt.bancotalentosbackend.model.request.BlacklistUpdateRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.BlacklistHistoryResponse;
 import com.bdt.bancotalentosbackend.model.response.BlacklistListResponse;
+import com.bdt.bancotalentosbackend.model.response.BlacklistStatusResponse;
 import com.bdt.bancotalentosbackend.model.response.BlacklistValidateResponse;
 import com.bdt.bancotalentosbackend.repository.BlacklistRepository;
 import com.bdt.bancotalentosbackend.service.IBlacklistService;
@@ -64,5 +65,12 @@ public class BlacklistService implements IBlacklistService {
         UserDTO user = jwt.decodeToken(token);
         BaseRequest baseRequest = Common.createBaseRequest(user, Constante.LISTA_NEGRA);
         return blacklistRepository.validateBlacklist(baseRequest, idTalento, idRequerimiento);
+    }
+
+    @Override
+    public BlacklistStatusResponse getTalentBlacklistStatus(String token, Integer idTalento) {
+        UserDTO user = jwt.decodeToken(token);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.LISTA_NEGRA);
+        return blacklistRepository.getTalentBlacklistStatus(baseRequest, idTalento);
     }
 }
