@@ -19,4 +19,10 @@ public class TalentPresignedUrlResponse {
     private String url;
     private String path;
     private String fileName;
+    /**
+     * On upload: whether the client must call confirm-upload afterwards to register
+     * the path in the DB. False for an in-place replacement (same key), where a
+     * 200 from the pre-signed PUT is enough.
+     */
+    private boolean requiresConfirm;
 }

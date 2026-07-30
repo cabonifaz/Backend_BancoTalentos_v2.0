@@ -380,7 +380,7 @@ public class TalentsController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new TalentPresignedUrlResponse(new BaseResponse(3, e.getMessage()), null, null, null));
+                    .body(new TalentPresignedUrlResponse(new BaseResponse(3, e.getMessage()), null, null, null, false));
         }
     }
 
@@ -411,7 +411,7 @@ public class TalentsController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new TalentPresignedUrlResponse(new BaseResponse(3, e.getMessage()), null, null, null));
+                    .body(new TalentPresignedUrlResponse(new BaseResponse(3, e.getMessage()), null, null, null, false));
         }
     }
 
