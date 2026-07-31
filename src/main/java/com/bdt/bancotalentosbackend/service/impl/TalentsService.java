@@ -174,14 +174,13 @@ public class TalentsService implements ITalentsService {
     @Override
     public TalentPresignedUrlResponse generateTalentUploadUrl(String token, TalentUploadUrlRequest request) {
         UserDTO user = jwt.decodeToken(token);
-        // Se decodifica el token para validar la sesión (autorización consistente).
-        Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+        BaseRequest baseRequest = Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
 
         if (request.getIdTalento() == null) {
-            return new TalentPresignedUrlResponse(new BaseResponse(3, "Talento inválido"), null, null, null);
+            return new TalentPresignedUrlResponse(new BaseResponse(3, "Talento inválido"), null, null, null, false);
         }
         if (request.getFileName() == null || request.getFileName().trim().isEmpty()) {
-            return new TalentPresignedUrlResponse(new BaseResponse(3, "Nombre de archivo inválido"), null, null, null);
+            return new TalentPresignedUrlResponse(new BaseResponse(3, "Nombre de archivo inválido"), null, null, null, false);
         }
 
         String originalFilename = request.getFileName();
@@ -189,37 +188,69 @@ public class TalentsService implements ITalentsService {
                 ? originalFilename.substring(originalFilename.lastIndexOf("."))
                 : "";
 
-        String cleanName = originalFilename;
-        if (cleanName.length() > 100) {
-            cleanName = cleanName.substring(0, 95) + extension;
-        }
+        String s3Path;
+        String cleanName;
+        // requiresConfirm indica si el frontend debe registrar/actualizar la ruta en
+        // BD tras subir. En un reemplazo in-place (misma key) NO hace falta confirm:
+        // basta con que el PUT a la URL pre-firmada devuelva 200.
+        boolean requiresConfirm;
 
-        // Carpeta destino según el tipo de documento:
-        // 1 = CV, 5 = CV Fractal ES, 6 = CV Fractal EN, resto = archivos.
-        Integer idTipoDocumento = request.getIdTipoDocumento();
-        String folder;
-        if (idTipoDocumento != null && idTipoDocumento == 1) {
-            folder = Constante.RUTA_REPOSITORIO_CV_TALENTO;
-        } else if (idTipoDocumento != null && idTipoDocumento == 5) {
-            folder = Constante.RUTA_REPOSITORIO_CV_ES_TALENTO;
-        } else if (idTipoDocumento != null && idTipoDocumento == 6) {
-            folder = Constante.RUTA_REPOSITORIO_CV_EN_TALENTO;
+        // Content-type con el que se firma la URL. En el reemplazo del CV se fuerza a
+        // PDF para que la URL pre-firmada SOLO admita PDF (ya no se aceptan Word).
+        String signContentType = request.getContentType();
+
+        Integer idArchivo = request.getIdArchivo();
+        if (idArchivo != null && idArchivo > 0) {
+            // Reemplazo del CV: SOLO PDF. Se sobrescribe la MISMA key (in-place), por
+            // lo que la ruta en BD no cambia y basta el 200 del PUT (sin confirm).
+            boolean isPdf = "application/pdf".equalsIgnoreCase(request.getContentType())
+                    || ".pdf".equalsIgnoreCase(extension);
+            if (!isPdf) {
+                return new TalentPresignedUrlResponse(
+                        new BaseResponse(3, "Solo se permiten archivos PDF"), null, null, null, false);
+            }
+            FileResponse existing = talentsRepository.getTalentFile(baseRequest, idArchivo);
+            if (existing == null || existing.getArchivo() == null || existing.getArchivo().isEmpty()) {
+                return new TalentPresignedUrlResponse(
+                        new BaseResponse(3, "Archivo a reemplazar no encontrado"), null, null, null, false);
+            }
+            s3Path = existing.getArchivo();
+            cleanName = s3Path.contains("/") ? s3Path.substring(s3Path.lastIndexOf("/") + 1) : s3Path;
+            requiresConfirm = false;
+            signContentType = "application/pdf";
         } else {
-            folder = Constante.RUTA_REPOSITORIO_TALENTO_ARCHIVOS;
+            // Archivo nuevo: carpeta según el tipo de documento y key única.
+            // 1 = CV, 5 = CV Fractal ES, 6 = CV Fractal EN, resto = archivos.
+            Integer idTipoDocumento = request.getIdTipoDocumento();
+            String folder;
+            if (idTipoDocumento != null && idTipoDocumento == 1) {
+                folder = Constante.RUTA_REPOSITORIO_CV_TALENTO;
+            } else if (idTipoDocumento != null && idTipoDocumento == 5) {
+                folder = Constante.RUTA_REPOSITORIO_CV_ES_TALENTO;
+            } else if (idTipoDocumento != null && idTipoDocumento == 6) {
+                folder = Constante.RUTA_REPOSITORIO_CV_EN_TALENTO;
+            } else {
+                folder = Constante.RUTA_REPOSITORIO_TALENTO_ARCHIVOS;
+            }
+            folder = folder.replace("[ID]", request.getIdTalento().toString());
+
+            cleanName = originalFilename;
+            if (cleanName.length() > 100) {
+                cleanName = cleanName.substring(0, 95) + extension;
+            }
+            // Nombre único en S3 para evitar colisiones.
+            String generatedFileName = System.currentTimeMillis() + "_" + cleanName.replaceAll("\\s+", "_");
+            s3Path = folder + generatedFileName;
+            requiresConfirm = true;
         }
-        folder = folder.replace("[ID]", request.getIdTalento().toString());
 
-        // Nombre único en S3 para evitar colisiones.
-        String generatedFileName = System.currentTimeMillis() + "_" + cleanName.replaceAll("\\s+", "_");
-        String s3Path = folder + generatedFileName;
-
-        String uploadUrl = S3Utils.getUploadSignedUrl(s3Path, request.getContentType(), 5);
+        String uploadUrl = S3Utils.getUploadSignedUrl(s3Path, signContentType, 5);
         if (uploadUrl == null || uploadUrl.isEmpty()) {
-            return new TalentPresignedUrlResponse(new BaseResponse(3, "Error generando URL"), null, null, null);
+            return new TalentPresignedUrlResponse(new BaseResponse(3, "Error generando URL"), null, null, null, false);
         }
 
         return new TalentPresignedUrlResponse(
-                new BaseResponse(2, "URL generada correctamente"), uploadUrl, s3Path, cleanName);
+                new BaseResponse(2, "URL generada correctamente"), uploadUrl, s3Path, cleanName, requiresConfirm);
     }
 
     @Override
@@ -250,7 +281,7 @@ public class TalentsService implements ITalentsService {
         if (fileResponse == null || fileResponse.getBaseResponse() == null
                 || fileResponse.getBaseResponse().getIdMensaje() != 2
                 || fileResponse.getArchivo() == null || fileResponse.getArchivo().isEmpty()) {
-            return new TalentPresignedUrlResponse(new BaseResponse(3, "Archivo no encontrado"), null, null, null);
+            return new TalentPresignedUrlResponse(new BaseResponse(3, "Archivo no encontrado"), null, null, null, false);
         }
 
         String path = fileResponse.getArchivo();
@@ -258,11 +289,11 @@ public class TalentsService implements ITalentsService {
                 ? S3Utils.getSignedUrlInline(path, 5)
                 : S3Utils.getSignedUrl(path, 5);
         if (url == null || url.isEmpty()) {
-            return new TalentPresignedUrlResponse(new BaseResponse(3, "Error generando URL de descarga"), null, null, null);
+            return new TalentPresignedUrlResponse(new BaseResponse(3, "Error generando URL de descarga"), null, null, null, false);
         }
 
         String fileName = path.contains("/") ? path.substring(path.lastIndexOf("/") + 1) : path;
-        return new TalentPresignedUrlResponse(new BaseResponse(2, "URL generada correctamente"), url, null, fileName);
+        return new TalentPresignedUrlResponse(new BaseResponse(2, "URL generada correctamente"), url, null, fileName, false);
     }
 
     // Espacio solo para migración de archivos
