@@ -29,6 +29,16 @@ public class ClientOpenIA {
 
   public String sendPrompt(String prompt, String model, String instructions)
       throws IOException, InterruptedException {
+    return sendPrompt(prompt, model, instructions, null);
+  }
+
+  /**
+   * Envía un prompt a OpenAI (Responses API). Si se provee {@code schema}, la salida
+   * se fuerza con structured outputs estrictos (json_schema), garantizando la forma
+   * exacta del JSON; en caso contrario se usa json_object (JSON válido genérico).
+   */
+  public String sendPrompt(String prompt, String model, String instructions, JsonNode schema)
+      throws IOException, InterruptedException {
 
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put("model", model);
@@ -36,9 +46,16 @@ public class ClientOpenIA {
     requestMap.put("input", prompt);
     requestMap.put("instructions", instructions);
 
-    // Forzar respuesta JSON estructurada
+    // Forzar respuesta JSON: schema estricto si se proporciona, si no json_object.
     Map<String, Object> format = new HashMap<>();
-    format.put("type", "json_object");
+    if (schema != null && !schema.isNull() && !schema.isMissingNode()) {
+      format.put("type", "json_schema");
+      format.put("name", "structured_response");
+      format.put("strict", true);
+      format.put("schema", schema);
+    } else {
+      format.put("type", "json_object");
+    }
     Map<String, Object> textFormat = new HashMap<>();
     textFormat.put("format", format);
     requestMap.put("text", textFormat);
