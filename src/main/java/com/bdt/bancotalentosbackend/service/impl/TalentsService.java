@@ -195,25 +195,29 @@ public class TalentsService implements ITalentsService {
         // basta con que el PUT a la URL pre-firmada devuelva 200.
         boolean requiresConfirm;
 
+        // Content-type con el que se firma la URL. En el reemplazo del CV se fuerza a
+        // PDF para que la URL pre-firmada SOLO admita PDF (ya no se aceptan Word).
+        String signContentType = request.getContentType();
+
         Integer idArchivo = request.getIdArchivo();
         if (idArchivo != null && idArchivo > 0) {
-            // Reemplazo de un archivo existente: se reutiliza su key para sobrescribir
-            // el objeto en S3 (así la ruta en BD no cambia).
+            // Reemplazo del CV: SOLO PDF. Se sobrescribe la MISMA key (in-place), por
+            // lo que la ruta en BD no cambia y basta el 200 del PUT (sin confirm).
+            boolean isPdf = "application/pdf".equalsIgnoreCase(request.getContentType())
+                    || ".pdf".equalsIgnoreCase(extension);
+            if (!isPdf) {
+                return new TalentPresignedUrlResponse(
+                        new BaseResponse(3, "Solo se permiten archivos PDF"), null, null, null, false);
+            }
             FileResponse existing = talentsRepository.getTalentFile(baseRequest, idArchivo);
             if (existing == null || existing.getArchivo() == null || existing.getArchivo().isEmpty()) {
                 return new TalentPresignedUrlResponse(
                         new BaseResponse(3, "Archivo a reemplazar no encontrado"), null, null, null, false);
             }
-            String existingPath = existing.getArchivo();
-            // Se normaliza la extensión a la del archivo entrante para que la descarga
-            // sea coherente (p. ej. un CV heredado en .pdf pasa a .docx).
-            String basePath = existingPath.contains(".")
-                    ? existingPath.substring(0, existingPath.lastIndexOf("."))
-                    : existingPath;
-            s3Path = basePath + extension;
+            s3Path = existing.getArchivo();
             cleanName = s3Path.contains("/") ? s3Path.substring(s3Path.lastIndexOf("/") + 1) : s3Path;
-            // Solo se necesita confirm si la ruta cambió (cambio de extensión heredado).
-            requiresConfirm = !s3Path.equals(existingPath);
+            requiresConfirm = false;
+            signContentType = "application/pdf";
         } else {
             // Archivo nuevo: carpeta según el tipo de documento y key única.
             // 1 = CV, 5 = CV Fractal ES, 6 = CV Fractal EN, resto = archivos.
@@ -240,7 +244,7 @@ public class TalentsService implements ITalentsService {
             requiresConfirm = true;
         }
 
-        String uploadUrl = S3Utils.getUploadSignedUrl(s3Path, request.getContentType(), 5);
+        String uploadUrl = S3Utils.getUploadSignedUrl(s3Path, signContentType, 5);
         if (uploadUrl == null || uploadUrl.isEmpty()) {
             return new TalentPresignedUrlResponse(new BaseResponse(3, "Error generando URL"), null, null, null, false);
         }
@@ -263,24 +267,7 @@ public class TalentsService implements ITalentsService {
             return new BaseResponse(3, "El archivo no existe en S3");
         }
 
-        // En un reemplazo, se recuerda la key anterior para limpiarla si cambió
-        // (p. ej. un CV que pasa de .pdf a .docx deja huérfano el objeto previo).
-        String oldPath = null;
-        if (request.getIdArchivo() != null && request.getIdArchivo() > 0) {
-            FileResponse existing = talentsRepository.getTalentFile(baseRequest, request.getIdArchivo());
-            if (existing != null) {
-                oldPath = existing.getArchivo();
-            }
-        }
-
-        BaseResponse response = talentsRepository.confirmTalentFile(baseRequest, request);
-
-        if (response != null && response.getIdMensaje() != null && response.getIdMensaje() == 2
-                && oldPath != null && !oldPath.isEmpty() && !oldPath.equals(request.getPath())) {
-            S3Utils.delete(oldPath);
-        }
-
-        return response;
+        return talentsRepository.confirmTalentFile(baseRequest, request);
     }
 
     @Override
