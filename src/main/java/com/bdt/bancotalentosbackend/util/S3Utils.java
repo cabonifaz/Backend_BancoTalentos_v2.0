@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.Duration;
 
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
@@ -185,6 +186,32 @@ public class S3Utils {
     } catch (Exception e) {
       logger.error("Error al generar URL firmada de carga: {}", e.getMessage());
       return "";
+    }
+  }
+
+  /**
+   * Deletes an object from the bucket. Used to remove the previous CV file when
+   * it is replaced by a new one stored under a different key.
+   *
+   * @param fileUrl The S3 object key.
+   * @return true on success (or if empty), false on error.
+   */
+  public static boolean delete(String fileUrl) {
+    if (fileUrl == null || fileUrl.isEmpty())
+      return true;
+
+    try {
+      DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+          .bucket(BUCKET_NAME)
+          .key(fileUrl)
+          .build();
+      ClientS3V2.getInstance().deleteObject(deleteObjectRequest);
+      logger.info("Objeto eliminado de S3: {}", fileUrl);
+      return true;
+
+    } catch (Exception e) {
+      logger.error("Error al eliminar objeto de S3: {}", e.getMessage());
+      return false;
     }
   }
 

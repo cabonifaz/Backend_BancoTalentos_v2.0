@@ -40,10 +40,18 @@ public class IAService {
     this.logger.info("Service IA started ");
     this.logger.info("Client was created");
     this.logger.info("Prompt generated");
+
+    // Instrucciones de sistema del request (o default), y schema opcional para
+    // structured outputs estrictos.
+    String instructions = (request.getInstructions() != null && !request.getInstructions().isBlank())
+        ? request.getInstructions()
+        : "Responde únicamente con un JSON válido";
+
     String response = this.clientOpenIA.sendPrompt(
         request.getPrompt(),
         "gpt-4.1-mini",
-        "Response solo con un JSON válido");
+        instructions,
+        request.getSchema());
 
     this.logger.info("Response received");
 
