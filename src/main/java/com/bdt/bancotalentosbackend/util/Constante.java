@@ -6,6 +6,7 @@ public class Constante {
     public static final String LISTAR_TALENTOS = "13";
     public static final String ACTUALIZAR_USUARIO = "1040";
     public static final String LISTA_NEGRA = "1041";
+    public static final String MANEJO_PARAMETROS = "2042";
 
     public static final String TXT_SEPARADOR = "=========================================";
 
