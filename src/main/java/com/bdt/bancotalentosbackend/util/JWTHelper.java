@@ -45,6 +45,7 @@ public class JWTHelper {
         claims.put("fullname", user.getNombres() + " " + user.getApellidos());
         claims.put("roles", user.getRoles());
         claims.put("id_roles", user.getIdRoles());
+        claims.put("routes", user.getRoutes());
         claims.put("id_usuario", user.getIdUsuario());
         claims.put("id_empresa", user.getIdEmpresa());
 

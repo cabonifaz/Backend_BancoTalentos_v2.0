@@ -16,4 +16,5 @@ public class UserDTO {
     private String apellidos;
     private List<Integer> idRoles;
     private List<String> roles;
+    private List<String> routes;
 }
