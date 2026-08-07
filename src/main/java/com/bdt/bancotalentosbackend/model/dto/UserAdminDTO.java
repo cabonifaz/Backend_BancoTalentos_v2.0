@@ -3,18 +3,21 @@ package com.bdt.bancotalentosbackend.model.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDTO {
+public class UserAdminDTO {
     private Integer idUsuario;
     private Integer idEmpresa;
-    private String usuario;
     private String nombres;
     private String apellidos;
-    private List<Integer> idRoles;
-    private List<String> roles;
-    private List<String> routes;
+    private String usuario;
+    private String email;
+    private String cargo;
+    private String telefono;
+    private String firma;
+    private Integer idEstadoRegistro;
+    private Integer idRol;
+    private String rol;
 }

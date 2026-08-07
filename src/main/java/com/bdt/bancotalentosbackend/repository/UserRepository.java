@@ -1,10 +1,13 @@
 package com.bdt.bancotalentosbackend.repository;
 
+import com.bdt.bancotalentosbackend.model.dto.UserAdminDTO;
 import com.bdt.bancotalentosbackend.model.dto.UserFavDTO;
 import com.bdt.bancotalentosbackend.model.request.FavCollectionRequest;
 import com.bdt.bancotalentosbackend.model.request.UpdateUserRequest;
+import com.bdt.bancotalentosbackend.model.request.UserAdminRequest;
 import com.bdt.bancotalentosbackend.model.request.BaseRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
+import com.bdt.bancotalentosbackend.model.response.UserAdminListResponse;
 import com.bdt.bancotalentosbackend.model.response.UserFavListResponse;
 import com.bdt.bancotalentosbackend.model.response.UserInfoResponse;
 
@@ -116,5 +119,134 @@ public class UserRepository {
             }
         }
         return userFavListResponse;
+    }
+
+    /* ==================== Administración de usuarios (SUPERADMIN) ==================== */
+
+    /** Listado SUPERADMIN paginado con rol y estado. SP_USUARIOS_LST. */
+    public UserAdminListResponse listUsuariosAdmin(BaseRequest baseRequest, String filtro, Integer idEstado, Integer pagina) {
+        UserAdminListResponse response = new UserAdminListResponse();
+        try {
+            SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                    .withProcedureName("SP_USUARIOS_LST");
+
+            SqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("FILTRO", filtro)
+                    .addValue("ID_ESTADO", idEstado)
+                    .addValue("ID_EMPRESA", baseRequest.getIdEmpresa())
+                    .addValue("N_PAG", pagina)
+                    .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                    .addValue("ID_ROL", baseRequest.getIdRol())
+                    .addValue("USUARIO", baseRequest.getUsername())
+                    .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades());
+
+            Map<String, Object> result = jdbcCall.execute(params);
+            List<Map<String, Object>> messageSet = (List<Map<String, Object>>) result.get("#result-set-1");
+
+            if (messageSet == null || messageSet.isEmpty()) {
+                response.setBaseResponse(new BaseResponse(3, "No hubo respuesta de la base de datos"));
+                return response;
+            }
+
+            response.setBaseResponse(getBaseResponse(messageSet));
+            response.setTotal((Integer) messageSet.get(0).get("TOTAL_LISTA"));
+
+            if (response.getBaseResponse().getIdMensaje() == 2) {
+                List<Map<String, Object>> rows = (List<Map<String, Object>>) result.get("#result-set-2");
+                List<UserAdminDTO> registros = new ArrayList<>();
+                if (rows != null) {
+                    for (Map<String, Object> row : rows) {
+                        registros.add(new UserAdminDTO(
+                                (Integer) row.get("ID_USUARIO"),
+                                (Integer) row.get("ID_EMPRESA"),
+                                (String) row.get("NOMBRES"),
+                                (String) row.get("APELLIDOS"),
+                                (String) row.get("USUARIO"),
+                                (String) row.get("EMAIL"),
+                                (String) row.get("CARGO"),
+                                (String) row.get("TELEFONO"),
+                                (String) row.get("FIRMA"),
+                                (Integer) row.get("ID_ESTADO_REGISTRO"),
+                                (Integer) row.get("ID_ROL"),
+                                (String) row.get("ROL")));
+                    }
+                }
+                response.setRegistros(registros);
+            }
+            return response;
+        } catch (Exception e) {
+            System.err.println("Error en REPOSITORY list usuarios: " + e.getMessage());
+            response.setBaseResponse(new BaseResponse(3, e.getMessage()));
+            return response;
+        }
+    }
+
+    /** Edición de datos + cambio de rol. SP_USUARIOS_SADMIN_UPD. */
+    public BaseResponse updateUsuarioAdmin(BaseRequest baseRequest, UserAdminRequest request) {
+        try {
+            SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                    .withProcedureName("SP_USUARIOS_SADMIN_UPD");
+
+            SqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("ID_USUARIO_EDITAR", request.getIdUsuario())
+                    .addValue("NOMBRES", request.getNombres())
+                    .addValue("APELLIDOS", request.getApellidos())
+                    .addValue("EMAIL", request.getEmail())
+                    .addValue("CARGO", request.getCargo())
+                    .addValue("TELEFONO", request.getTelefono())
+                    .addValue("FIRMA", request.getFirma())
+                    .addValue("ID_TIPO_ROL", request.getIdTipoRol())
+                    .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                    .addValue("ID_ROL", baseRequest.getIdRol())
+                    .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                    .addValue("USERNAME", baseRequest.getUsername());
+
+            return callAndMapUsuarioAdmin(jdbcCall, params);
+        } catch (Exception e) {
+            System.err.println("Error en REPOSITORY update usuario: " + e.getMessage());
+            return new BaseResponse(3, e.getMessage());
+        }
+    }
+
+    /** Baja lógica. SP_USUARIOS_DEL. */
+    public BaseResponse deleteUsuarioAdmin(BaseRequest baseRequest, Integer idUsuarioEditar) {
+        try {
+            SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                    .withProcedureName("SP_USUARIOS_DEL");
+            return callAndMapUsuarioAdmin(jdbcCall, estadoParamsUsuarioAdmin(baseRequest, idUsuarioEditar));
+        } catch (Exception e) {
+            System.err.println("Error en REPOSITORY delete usuario: " + e.getMessage());
+            return new BaseResponse(3, e.getMessage());
+        }
+    }
+
+    /** Reactivación. SP_USUARIOS_ACT. */
+    public BaseResponse reactivateUsuarioAdmin(BaseRequest baseRequest, Integer idUsuarioEditar) {
+        try {
+            SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                    .withProcedureName("SP_USUARIOS_ACT");
+            return callAndMapUsuarioAdmin(jdbcCall, estadoParamsUsuarioAdmin(baseRequest, idUsuarioEditar));
+        } catch (Exception e) {
+            System.err.println("Error en REPOSITORY reactivate usuario: " + e.getMessage());
+            return new BaseResponse(3, e.getMessage());
+        }
+    }
+
+    private SqlParameterSource estadoParamsUsuarioAdmin(BaseRequest baseRequest, Integer idUsuarioEditar) {
+        return new MapSqlParameterSource()
+                .addValue("ID_USUARIO_EDITAR", idUsuarioEditar)
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("USERNAME", baseRequest.getUsername());
+    }
+
+    private BaseResponse callAndMapUsuarioAdmin(SimpleJdbcCall jdbcCall, SqlParameterSource params) {
+        Map<String, Object> result = jdbcCall.execute(params);
+        List<Map<String, Object>> messageSet = (List<Map<String, Object>>) result.get("#result-set-1");
+        if (messageSet == null || messageSet.isEmpty()) {
+            return new BaseResponse(3, "No hubo respuesta de la base de datos");
+        }
+        return getBaseResponse(messageSet);
     }
 }

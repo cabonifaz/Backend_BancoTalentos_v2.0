@@ -51,15 +51,15 @@ public class PromptBuilder {
         Para las funciones laborales, trata de no resumirlas, sino de mantener la mayor similitud posible con el texto original, corrigiendo solo errores evidentes de ortografía y gramática. Puedes resumir apartir de la 10ma experiencia laboral, pero siempre manteniendo la esencia de las funciones descritas.
 
         LÍMITE OBLIGATORIO (tiene PRIORIDAD sobre las reglas anteriores y posteriores):
-        El campo `funciones` NUNCA debe superar los 100 caracteres. Si el texto original supera los 100 caracteres,
-        DEBES resumirlo SÍ O SÍ a un máximo de 100 caracteres, conservando la esencia y sin omitir las tecnologías
+        El campo `funciones` NUNCA debe superar los 300 caracteres. Si el texto original supera los 300 caracteres,
+        DEBES resumirlo SÍ O SÍ a un máximo de 300 caracteres, conservando la esencia y sin omitir las tecnologías
         o herramientas técnicas mencionadas. Esta regla se aplica a TODAS las experiencias, no solo a partir de la 10ma.
-        No devuelvas jamás un `funciones` de más de 100 caracteres.
+        No devuelvas jamás un `funciones` de más de 300 caracteres.
 
-        Para las funciones laborales, cuando NO se supere el límite de 100 caracteres, incluye TANTO el párrafo
+        Para las funciones laborales, cuando NO se supere el límite de 300 caracteres, incluye TANTO el párrafo
         descriptivo inicial COMO todos los puntos o bullets que aparezcan bajo la experiencia, concatenados en un
-        solo string separados por salto de línea (\n). Si al incluir todo se superan los 100 caracteres, entonces
-        aplica el LÍMITE OBLIGATORIO y resume a un máximo de 100 caracteres (el límite manda sobre incluir todos los bullets).
+        solo string separados por salto de línea (\n). Si al incluir todo se superan los 300 caracteres, entonces
+        aplica el LÍMITE OBLIGATORIO y resume a un máximo de 300 caracteres (el límite manda sobre incluir todos los bullets).
 
         No elimines las habilidades técnicas que se mencionen en las funcionaes laborales.
 
@@ -151,10 +151,10 @@ public class PromptBuilder {
         - En langs.idIdioma retorna el número 1, 2, 3, 4, 5 para ESPAÑOL, INGLES FRANCES, ALEMAN, CHINO respectivamente
         - Para educación: devolver únicamente `grado` como string un número(ej. Bachiller es 1, Título es 2, Curso es 3, Técnico es 4, Egresado es 5, Estudiante es 6).
           Si no es posible identificarlo, poner `null`.
-        - El campo `presentacion` debe ser como aparece en el CV, sin traducir, MIENTRAS no supere los 100 caracteres.
-          LÍMITE OBLIGATORIO: `presentacion` NUNCA debe superar los 100 caracteres. Si el texto del CV supera los 100
-          caracteres, DEBES resumirlo SÍ O SÍ a un máximo de 100 caracteres conservando su esencia. No devuelvas jamás
-          una `presentacion` de más de 100 caracteres.
+        - El campo `presentacion` debe ser como aparece en el CV, sin traducir, MIENTRAS no supere los 300 caracteres.
+          LÍMITE OBLIGATORIO: `presentacion` NUNCA debe superar los 300 caracteres. Si el texto del CV supera los 300
+          caracteres, DEBES resumirlo SÍ O SÍ a un máximo de 300 caracteres conservando su esencia. No devuelvas jamás
+          una `presentacion` de más de 300 caracteres.
         - Si algún dato no puede determinarse, asignar `null`.
         - No devuelvas texto adicional fuera del JSON.
         - En el codigo del celular no debes incluir +
