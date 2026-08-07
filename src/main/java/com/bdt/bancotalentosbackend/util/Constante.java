@@ -9,6 +9,8 @@ public class Constante {
     public static final String MANEJO_PARAMETROS = "2042";
     public static final String MANEJO_CLIENTES = "2043";
     public static final String MANEJO_USUARIOS = "2044";
+    public static final String MANEJO_GESTORES = "2045";
+    public static final String MANEJO_TARIFARIO = "2047";
 
     public static final String TXT_SEPARADOR = "=========================================";
 

@@ -1,10 +1,13 @@
 package com.bdt.bancotalentosbackend.repository;
 
 import com.bdt.bancotalentosbackend.model.dto.ClientAdminDTO;
+import com.bdt.bancotalentosbackend.model.dto.ClientGestorDTO;
 import com.bdt.bancotalentosbackend.model.request.BaseRequest;
 import com.bdt.bancotalentosbackend.model.request.ClientAdminRequest;
+import com.bdt.bancotalentosbackend.model.request.ClientGestorRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.ClientAdminListResponse;
+import com.bdt.bancotalentosbackend.model.response.ClientGestorListResponse;
 import com.bdt.bancotalentosbackend.model.response.InsertUpdateResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,7 +25,7 @@ import static com.bdt.bancotalentosbackend.util.Common.getInsertUpdateResponse;
 
 @Repository
 @RequiredArgsConstructor
-public class ClientAdminRepository {
+public class ClientRepository {
     private final JdbcTemplate jdbcTemplate;
 
     /**
@@ -180,6 +183,142 @@ public class ClientAdminRepository {
             System.err.println("Error en REPOSITORY reactivate cliente: " + e.getMessage());
             return new BaseResponse(3, e.getMessage());
         }
+    }
+
+    /* ==================== Gestores por cliente (CLIENTE_GESTOR) ==================== */
+
+    /** Gestores activos de un cliente (0-2). SP_CLIENTE_GESTOR_LST. */
+    public ClientGestorListResponse listGestores(BaseRequest baseRequest, Integer idCliente) {
+        ClientGestorListResponse response = new ClientGestorListResponse();
+        try {
+            SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                    .withProcedureName("SP_CLIENTE_GESTOR_LST");
+
+            SqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("ID_CLIENTE", idCliente)
+                    .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                    .addValue("ID_ROL", baseRequest.getIdRol())
+                    .addValue("USUARIO", baseRequest.getUsername())
+                    .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades());
+
+            Map<String, Object> result = jdbcCall.execute(params);
+            List<Map<String, Object>> messageSet = (List<Map<String, Object>>) result.get("#result-set-1");
+
+            if (messageSet == null || messageSet.isEmpty()) {
+                response.setBaseResponse(new BaseResponse(3, "No hubo respuesta de la base de datos"));
+                return response;
+            }
+
+            response.setBaseResponse(getBaseResponse(messageSet));
+
+            if (response.getBaseResponse().getIdMensaje() == 2) {
+                List<Map<String, Object>> rows = (List<Map<String, Object>>) result.get("#result-set-2");
+                List<ClientGestorDTO> registros = new ArrayList<>();
+                if (rows != null) {
+                    for (Map<String, Object> row : rows) {
+                        registros.add(new ClientGestorDTO(
+                                (Integer) row.get("ID_CLIENTE_GESTOR"),
+                                (Integer) row.get("ID_CLIENTE"),
+                                (Integer) row.get("ID_USUARIO"),
+                                (Integer) row.get("PRIORIDAD"),
+                                (String) row.get("USUARIO"),
+                                (String) row.get("NOMBRES"),
+                                (String) row.get("APELLIDOS")));
+                    }
+                }
+                response.setRegistros(registros);
+            }
+            return response;
+        } catch (Exception e) {
+            System.err.println("Error en REPOSITORY list gestores: " + e.getMessage());
+            response.setBaseResponse(new BaseResponse(3, e.getMessage()));
+            return response;
+        }
+    }
+
+    /** Asigna un gestor a un cliente. SP_CLIENTE_GESTOR_INS. */
+    public BaseResponse assignGestor(BaseRequest baseRequest, ClientGestorRequest request) {
+        try {
+            SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                    .withProcedureName("SP_CLIENTE_GESTOR_INS");
+
+            SqlParameterSource params = validationParams(baseRequest)
+                    .addValue("ID_CLIENTE", request.getIdCliente())
+                    .addValue("ID_USUARIO_GESTOR", request.getIdUsuario())
+                    .addValue("PRIORIDAD", request.getPrioridad());
+
+            return callGestor(jdbcCall, params);
+        } catch (Exception e) {
+            System.err.println("Error en REPOSITORY assign gestor: " + e.getMessage());
+            return new BaseResponse(3, e.getMessage());
+        }
+    }
+
+    /** Cambia el usuario asignado a un slot. SP_CLIENTE_GESTOR_UPD. */
+    public BaseResponse changeGestor(BaseRequest baseRequest, ClientGestorRequest request) {
+        try {
+            SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                    .withProcedureName("SP_CLIENTE_GESTOR_UPD");
+
+            SqlParameterSource params = validationParams(baseRequest)
+                    .addValue("ID_CLIENTE_GESTOR", request.getIdClienteGestor())
+                    .addValue("ID_USUARIO_GESTOR", request.getIdUsuario());
+
+            return callGestor(jdbcCall, params);
+        } catch (Exception e) {
+            System.err.println("Error en REPOSITORY change gestor: " + e.getMessage());
+            return new BaseResponse(3, e.getMessage());
+        }
+    }
+
+    /** Baja lógica de un gestor. SP_CLIENTE_GESTOR_DEL. */
+    public BaseResponse removeGestor(BaseRequest baseRequest, Integer idClienteGestor) {
+        try {
+            SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                    .withProcedureName("SP_CLIENTE_GESTOR_DEL");
+
+            SqlParameterSource params = validationParams(baseRequest)
+                    .addValue("ID_CLIENTE_GESTOR", idClienteGestor);
+
+            return callGestor(jdbcCall, params);
+        } catch (Exception e) {
+            System.err.println("Error en REPOSITORY remove gestor: " + e.getMessage());
+            return new BaseResponse(3, e.getMessage());
+        }
+    }
+
+    /** Intercambia las prioridades de los dos gestores. SP_CLIENTE_GESTOR_SWAP. */
+    public BaseResponse swapGestores(BaseRequest baseRequest, Integer idCliente) {
+        try {
+            SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                    .withProcedureName("SP_CLIENTE_GESTOR_SWAP");
+
+            SqlParameterSource params = validationParams(baseRequest)
+                    .addValue("ID_CLIENTE", idCliente);
+
+            return callGestor(jdbcCall, params);
+        } catch (Exception e) {
+            System.err.println("Error en REPOSITORY swap gestores: " + e.getMessage());
+            return new BaseResponse(3, e.getMessage());
+        }
+    }
+
+    /** Parámetros de validación/auditoría comunes a los write SP de gestor (@USERNAME). */
+    private MapSqlParameterSource validationParams(BaseRequest baseRequest) {
+        return new MapSqlParameterSource()
+                .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                .addValue("ID_ROL", baseRequest.getIdRol())
+                .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                .addValue("USERNAME", baseRequest.getUsername());
+    }
+
+    private BaseResponse callGestor(SimpleJdbcCall jdbcCall, SqlParameterSource params) {
+        Map<String, Object> result = jdbcCall.execute(params);
+        List<Map<String, Object>> messageSet = (List<Map<String, Object>>) result.get("#result-set-1");
+        if (messageSet == null || messageSet.isEmpty()) {
+            return new BaseResponse(3, "No hubo respuesta de la base de datos");
+        }
+        return getBaseResponse(messageSet);
     }
 
     /** Campos de negocio comunes a INS/UPD + empresa + auditoría/permiso. */
