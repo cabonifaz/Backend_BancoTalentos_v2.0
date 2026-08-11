@@ -38,15 +38,16 @@ public class ParamAdminController {
         }
     }
 
-    /** Modo 2: todos los parámetros de un maestro (sin paginar). */
+    /** Modo 2: parámetros de un maestro, paginados. {@code pagina} nulo devuelve todo. */
     @GetMapping("/list")
     public ResponseEntity<ParamItemListResponse> listByMaster(
             @RequestParam Integer idMaestro,
+            @RequestParam @Nullable Integer pagina,
             HttpServletRequest httpServletRequest) {
         ParamItemListResponse response = new ParamItemListResponse();
         try {
             String token = JWTHelper.extractToken(httpServletRequest);
-            return ResponseEntity.ok(paramAdminService.listByMaster(token, idMaestro));
+            return ResponseEntity.ok(paramAdminService.listByMaster(token, idMaestro, pagina));
         } catch (Exception e) {
             response.setBaseResponse(new BaseResponse(3, e.getMessage()));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);

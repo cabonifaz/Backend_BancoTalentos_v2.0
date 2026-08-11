@@ -1,8 +1,10 @@
 package com.bdt.bancotalentosbackend.controller;
 
 import com.bdt.bancotalentosbackend.model.request.UserAdminRequest;
+import com.bdt.bancotalentosbackend.model.request.UserAdminCreateRequest;
 import com.bdt.bancotalentosbackend.model.request.UserSignatureUrlRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
+import com.bdt.bancotalentosbackend.model.response.InsertUpdateResponse;
 import com.bdt.bancotalentosbackend.model.response.UserAdminListResponse;
 import com.bdt.bancotalentosbackend.model.response.UserSignatureUrlResponse;
 import com.bdt.bancotalentosbackend.service.IUserService;
@@ -36,6 +38,20 @@ public class UserAdminController {
         } catch (Exception e) {
             response.setBaseResponse(new BaseResponse(3, e.getMessage()));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    /** Alta de usuario. La clave se cifra en el SP; el rol SUPERADMIN no es asignable. */
+    @PostMapping("/create")
+    public ResponseEntity<InsertUpdateResponse> create(
+            @RequestBody UserAdminCreateRequest request,
+            HttpServletRequest httpServletRequest) {
+        try {
+            String token = JWTHelper.extractToken(httpServletRequest);
+            return ResponseEntity.ok(userService.createUsuarioAdmin(token, request));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new InsertUpdateResponse(3, e.getMessage(), null));
         }
     }
 

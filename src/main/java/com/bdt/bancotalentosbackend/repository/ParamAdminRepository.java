@@ -83,10 +83,10 @@ public class ParamAdminRepository {
     }
 
     /**
-     * Modo 2: todos los parámetros de un maestro (sin paginar).
-     * SP_PARAMETROS_SADMIN_LST con @ID_MAESTRO informado.
+     * Modo 2: parámetros de un maestro, paginados por parámetro.
+     * SP_PARAMETROS_SADMIN_LST con @ID_MAESTRO informado. {@code pagina} nulo devuelve todo.
      */
-    public ParamItemListResponse listByMaster(BaseRequest baseRequest, Integer idMaestro) {
+    public ParamItemListResponse listByMaster(BaseRequest baseRequest, Integer idMaestro, Integer pagina) {
         ParamItemListResponse response = new ParamItemListResponse();
         try {
             SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
@@ -96,7 +96,7 @@ public class ParamAdminRepository {
                     .addValue("ID_MAESTRO", idMaestro)
                     .addValue("FILTRO", null)
                     .addValue("ID_EMPRESA", baseRequest.getIdEmpresa())
-                    .addValue("N_PAG", null)
+                    .addValue("N_PAG", pagina)
                     .addValue("ID_USUARIO", baseRequest.getIdUsuario())
                     .addValue("ID_ROL", baseRequest.getIdRol())
                     .addValue("USUARIO", baseRequest.getUsername())

@@ -9,7 +9,7 @@ import com.bdt.bancotalentosbackend.model.response.ParamMasterListResponse;
 public interface IParamAdminService {
     ParamMasterListResponse listMasters(String token, String filtro, Integer pagina);
 
-    ParamItemListResponse listByMaster(String token, Integer idMaestro);
+    ParamItemListResponse listByMaster(String token, Integer idMaestro, Integer pagina);
 
     InsertUpdateResponse create(String token, ParamAdminRequest request);
 
