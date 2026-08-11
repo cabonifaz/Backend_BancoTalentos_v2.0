@@ -5,8 +5,10 @@ import com.bdt.bancotalentosbackend.model.dto.UserFavDTO;
 import com.bdt.bancotalentosbackend.model.request.FavCollectionRequest;
 import com.bdt.bancotalentosbackend.model.request.UpdateUserRequest;
 import com.bdt.bancotalentosbackend.model.request.UserAdminRequest;
+import com.bdt.bancotalentosbackend.model.request.UserAdminCreateRequest;
 import com.bdt.bancotalentosbackend.model.request.BaseRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
+import com.bdt.bancotalentosbackend.model.response.InsertUpdateResponse;
 import com.bdt.bancotalentosbackend.model.response.UserAdminListResponse;
 import com.bdt.bancotalentosbackend.model.response.UserFavListResponse;
 import com.bdt.bancotalentosbackend.model.response.UserInfoResponse;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import static com.bdt.bancotalentosbackend.util.Common.getBaseResponse;
+import static com.bdt.bancotalentosbackend.util.Common.getInsertUpdateResponse;
 import static com.bdt.bancotalentosbackend.util.Common.simpleSPCall;
 
 @Repository
@@ -205,6 +208,40 @@ public class UserRepository {
         } catch (Exception e) {
             System.err.println("Error en REPOSITORY update usuario: " + e.getMessage());
             return new BaseResponse(3, e.getMessage());
+        }
+    }
+
+    /** Alta de usuario. SP_USUARIOS_INS. Clave cifrada en el SP (SHA2_256). Devuelve el ID nuevo. */
+    public InsertUpdateResponse createUsuarioAdmin(BaseRequest baseRequest, UserAdminCreateRequest request) {
+        try {
+            SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                    .withProcedureName("SP_USUARIOS_INS");
+
+            SqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("NOMBRES", request.getNombres())
+                    .addValue("APELLIDOS", request.getApellidos())
+                    .addValue("USUARIO", request.getUsuario())
+                    .addValue("CLAVE", request.getClave())
+                    .addValue("EMAIL", request.getEmail())
+                    .addValue("TELEFONO", request.getTelefono())
+                    .addValue("CARGO", request.getCargo())
+                    .addValue("ID_TIPO_ROL", request.getIdTipoRol())
+                    .addValue("ID_EMPRESA", baseRequest.getIdEmpresa())
+                    .addValue("ID_USUARIO", baseRequest.getIdUsuario())
+                    .addValue("ID_ROL", baseRequest.getIdRol())
+                    .addValue("ID_FUNCIONALIDADES", baseRequest.getFuncionalidades())
+                    .addValue("USERNAME", baseRequest.getUsername());
+
+            Map<String, Object> result = jdbcCall.execute(params);
+            List<Map<String, Object>> messageSet = (List<Map<String, Object>>) result.get("#result-set-1");
+
+            if (messageSet == null || messageSet.isEmpty()) {
+                return new InsertUpdateResponse(3, "No hubo respuesta de la base de datos", null);
+            }
+            return getInsertUpdateResponse(messageSet);
+        } catch (Exception e) {
+            System.err.println("Error en REPOSITORY create usuario: " + e.getMessage());
+            return new InsertUpdateResponse(3, e.getMessage(), null);
         }
     }
 

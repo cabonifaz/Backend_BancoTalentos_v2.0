@@ -5,8 +5,10 @@ import com.bdt.bancotalentosbackend.model.request.FavCollectionRequest;
 import com.bdt.bancotalentosbackend.model.request.UpdateUserRequest;
 import com.bdt.bancotalentosbackend.model.request.BaseRequest;
 import com.bdt.bancotalentosbackend.model.request.UserAdminRequest;
+import com.bdt.bancotalentosbackend.model.request.UserAdminCreateRequest;
 import com.bdt.bancotalentosbackend.model.request.UserSignatureUrlRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
+import com.bdt.bancotalentosbackend.model.response.InsertUpdateResponse;
 import com.bdt.bancotalentosbackend.model.response.UserAdminListResponse;
 import com.bdt.bancotalentosbackend.model.response.UserFavListResponse;
 import com.bdt.bancotalentosbackend.model.response.UserInfoResponse;
@@ -63,6 +65,11 @@ public class UserService implements IUserService {
     @Override
     public UserAdminListResponse listUsuariosAdmin(String token, String filtro, Integer idEstado, Integer pagina) {
         return userRepository.listUsuariosAdmin(buildAdminBaseRequest(token), filtro, idEstado, pagina);
+    }
+
+    @Override
+    public InsertUpdateResponse createUsuarioAdmin(String token, UserAdminCreateRequest request) {
+        return userRepository.createUsuarioAdmin(buildAdminBaseRequest(token), request);
     }
 
     @Override

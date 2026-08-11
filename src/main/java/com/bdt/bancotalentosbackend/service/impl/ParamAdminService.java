@@ -28,9 +28,9 @@ public class ParamAdminService implements IParamAdminService {
     }
 
     @Override
-    public ParamItemListResponse listByMaster(String token, Integer idMaestro) {
+    public ParamItemListResponse listByMaster(String token, Integer idMaestro, Integer pagina) {
         BaseRequest baseRequest = buildBaseRequest(token);
-        return paramAdminRepository.listByMaster(baseRequest, idMaestro);
+        return paramAdminRepository.listByMaster(baseRequest, idMaestro, pagina);
     }
 
     @Override
