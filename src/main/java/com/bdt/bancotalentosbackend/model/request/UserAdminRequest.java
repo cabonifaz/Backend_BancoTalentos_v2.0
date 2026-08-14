@@ -5,8 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Edición de un usuario por el SUPERADMIN. No incluye USUARIO ni CLAVE (no editables).
+ * Edición de un usuario por el SUPERADMIN. No incluye USUARIO (no editable).
  * {@code firma} es la ruta S3 ya subida; si viaja nula, la firma actual se conserva.
+ * {@code clave} opcional en texto plano (el SP la cifra SHA2_256); nula = no cambia.
  */
 @Data
 @AllArgsConstructor
@@ -19,5 +20,6 @@ public class UserAdminRequest {
     private String cargo;
     private String telefono;
     private String firma;
+    private String clave;
     private Integer idTipoRol;
 }

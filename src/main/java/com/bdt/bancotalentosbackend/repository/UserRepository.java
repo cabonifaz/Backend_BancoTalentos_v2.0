@@ -198,6 +198,7 @@ public class UserRepository {
                     .addValue("CARGO", request.getCargo())
                     .addValue("TELEFONO", request.getTelefono())
                     .addValue("FIRMA", request.getFirma())
+                    .addValue("CLAVE", request.getClave())
                     .addValue("ID_TIPO_ROL", request.getIdTipoRol())
                     .addValue("ID_USUARIO", baseRequest.getIdUsuario())
                     .addValue("ID_ROL", baseRequest.getIdRol())
