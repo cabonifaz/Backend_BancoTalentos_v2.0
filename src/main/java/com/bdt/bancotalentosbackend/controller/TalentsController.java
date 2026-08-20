@@ -3,6 +3,7 @@ package com.bdt.bancotalentosbackend.controller;
 import com.bdt.bancotalentosbackend.model.request.*;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.FileResponse;
+import com.bdt.bancotalentosbackend.model.response.TalentPhotoUrlResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentPresignedUrlResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
@@ -412,6 +413,26 @@ public class TalentsController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new TalentPresignedUrlResponse(new BaseResponse(3, e.getMessage()), null, null, null, false));
+        }
+    }
+
+    /**
+     * URL PUT pre-firmada para la foto de perfil.
+     *
+     * No tiene confirm-upload: la foto es la columna TALENTO.RUTA_IMAGEN, no una
+     * fila de TALENTO_ARCHIVOS. El frontend sube a S3 y luego manda la ruta en el
+     * addOrUpdateTalent de siempre, igual que la firma de usuario.
+     */
+    @PostMapping("/photo/upload-url")
+    public ResponseEntity<TalentPhotoUrlResponse> generatePhotoUploadUrl(
+            @RequestBody TalentPhotoUrlRequest request,
+            HttpServletRequest httpServletRequest) {
+        try {
+            String token = JWTHelper.extractToken(httpServletRequest);
+            return ResponseEntity.ok(talentsService.generateTalentPhotoUploadUrl(token, request));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new TalentPhotoUrlResponse(new BaseResponse(3, e.getMessage()), null, null, null));
         }
     }
 

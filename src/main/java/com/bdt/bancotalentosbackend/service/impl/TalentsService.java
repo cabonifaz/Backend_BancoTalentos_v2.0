@@ -4,6 +4,7 @@ import com.bdt.bancotalentosbackend.model.dto.UserDTO;
 import com.bdt.bancotalentosbackend.model.request.*;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.FileResponse;
+import com.bdt.bancotalentosbackend.model.response.TalentPhotoUrlResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentPresignedUrlResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
@@ -294,6 +295,73 @@ public class TalentsService implements ITalentsService {
 
         String fileName = path.contains("/") ? path.substring(path.lastIndexOf("/") + 1) : path;
         return new TalentPresignedUrlResponse(new BaseResponse(2, "URL generada correctamente"), url, null, fileName, false);
+    }
+
+    /**
+     * URL PUT pre-firmada para la foto de perfil.
+     *
+     * A diferencia del CV y los certificados, la foto NO se registra con
+     * confirm-upload: la ruta viaja como {@code rutaArchivo} dentro del
+     * addOrUpdateTalent que el frontend ya hace después de subir. Aquí sólo se
+     * genera la key y se firma, igual que en la firma de usuario.
+     *
+     * La URL se firma con el content-type recibido, así que S3 rechaza el PUT si
+     * el navegador manda otra cosa. Se admite únicamente PNG y JPEG, que es lo
+     * que valida el frontend.
+     */
+    @Override
+    public TalentPhotoUrlResponse generateTalentPhotoUploadUrl(String token, TalentPhotoUrlRequest request) {
+        UserDTO user = jwt.decodeToken(token);
+        // Se decodifica el token para exigir sesión válida y dejar trazabilidad,
+        // con la misma funcionalidad que usa la actualización del talento.
+        Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+
+        TalentPhotoUrlResponse response = new TalentPhotoUrlResponse();
+
+        if (request.getIdTalento() == null || request.getIdTalento() <= 0) {
+            response.setBaseResponse(new BaseResponse(3, "Talento inválido"));
+            return response;
+        }
+        if (request.getFileName() == null || request.getFileName().trim().isEmpty()) {
+            response.setBaseResponse(new BaseResponse(3, "Nombre de archivo inválido"));
+            return response;
+        }
+
+        String contentType = request.getContentType() == null ? "" : request.getContentType().trim();
+        if (!"image/png".equalsIgnoreCase(contentType) && !"image/jpeg".equalsIgnoreCase(contentType)) {
+            response.setBaseResponse(new BaseResponse(3, "Solo se permiten imágenes PNG o JPEG"));
+            return response;
+        }
+
+        String originalFilename = request.getFileName().trim();
+        String extension = originalFilename.contains(".")
+                ? originalFilename.substring(originalFilename.lastIndexOf("."))
+                : "";
+
+        String cleanName = originalFilename;
+        if (cleanName.length() > 100) {
+            cleanName = cleanName.substring(0, 95) + extension;
+        }
+        cleanName = cleanName.replaceAll("\\s+", "_");
+
+        // OJO: la constante trae el marcador [ID], hay que sustituirlo.
+        String folder = Constante.RUTA_REPOSITORIO_FOTO_TALENTO
+                .replace("[ID]", request.getIdTalento().toString());
+        // Key única: si el usuario cancela tras pedir la URL, la foto anterior
+        // sigue intacta porque no se sobrescribe nada.
+        String s3Path = folder + System.currentTimeMillis() + "_" + cleanName;
+
+        String uploadUrl = S3Utils.getUploadSignedUrl(s3Path, contentType, 5);
+        if (uploadUrl == null || uploadUrl.isEmpty()) {
+            response.setBaseResponse(new BaseResponse(3, "No se pudo generar la URL de carga"));
+            return response;
+        }
+
+        response.setBaseResponse(new BaseResponse(2, "URL generada correctamente"));
+        response.setUrl(uploadUrl);
+        response.setPath(s3Path);
+        response.setFileName(cleanName);
+        return response;
     }
 
     // Espacio solo para migración de archivos
