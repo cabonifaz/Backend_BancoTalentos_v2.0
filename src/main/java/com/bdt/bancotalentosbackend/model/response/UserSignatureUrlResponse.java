@@ -15,4 +15,9 @@ public class UserSignatureUrlResponse {
     private String url;
     /** Ruta (key) S3 destino; se envía como FIRMA al actualizar el usuario. */
     private String path;
+    /**
+     * Content-type con el que se firmó la URL. El cliente DEBE mandar exactamente
+     * este valor en el PUT; cualquier otro produce SignatureDoesNotMatch.
+     */
+    private String contentType;
 }

@@ -18,4 +18,14 @@ public class TalentPhotoUrlResponse {
     private String path;
     /** Nombre limpio del archivo, para guardarlo junto a la ruta. */
     private String fileName;
+    /**
+     * Content-type con el que se firmó la URL. El cliente DEBE mandar exactamente
+     * este valor en el PUT; cualquier otro produce SignatureDoesNotMatch.
+     */
+    private String contentType;
+
+    /** Se conserva para las rutas de error, que no llevan content-type. */
+    public TalentPhotoUrlResponse(BaseResponse baseResponse, String url, String path, String fileName) {
+        this(baseResponse, url, path, fileName, null);
+    }
 }

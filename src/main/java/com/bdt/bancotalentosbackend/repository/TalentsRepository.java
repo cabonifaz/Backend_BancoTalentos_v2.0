@@ -185,6 +185,28 @@ public class TalentsRepository {
     return fileResponse;
   }
 
+  /**
+   * Sustituye el marcador {@code [ID]} de las constantes de carpeta por el id del
+   * talento.
+   *
+   * <p>
+   * Las constantes {@code RUTA_REPOSITORIO_*} llevan el marcador y aquí se
+   * concatenaban SIN reemplazarlo, así que al SP le llegaba una ruta literal
+   * {@code repositorio/talento/[ID]/foto.png}. Hoy no se nota porque el SP
+   * devuelve {@code NUEVA_RUTA_IMAGEN} y esa es la que se guarda, pero deja una
+   * ruta rota lista para colarse en cuanto el SP respete la que recibe.
+   *
+   * <p>
+   * En el alta el id todavía no existe, así que ahí el marcador se mantiene y es
+   * el SP quien debe construir la ruta.
+   */
+  private String sustituirMarcadorId(String ruta, Integer idTalento) {
+    if (ruta == null || idTalento == null || idTalento <= 0) {
+      return ruta;
+    }
+    return ruta.replace("[ID]", idTalento.toString());
+  }
+
   public BaseResponse addOrUpdateTalent(BaseRequest baseRequest, TalentRequest talentRequest)
       throws JsonProcessingException {
     try {
@@ -204,16 +226,20 @@ public class TalentsRepository {
       if (fotoYaEnS3) {
         rutaFoto = fotoRequest.getRutaArchivo().trim();
       } else if (fotoRequest != null) {
-        rutaFoto = Constante.RUTA_REPOSITORIO_FOTO_TALENTO + fotoRequest.getNombreArchivo() + "."
-            + fotoRequest.getExtensionArchivo();
+        rutaFoto = sustituirMarcadorId(
+            Constante.RUTA_REPOSITORIO_FOTO_TALENTO + fotoRequest.getNombreArchivo() + "."
+                + fotoRequest.getExtensionArchivo(),
+            talentRequest.getIdTalento());
       } else {
         rutaFoto = null;
       }
 
       FileRequest cvRequest = talentRequest.getCvArchivo();
       String rutaCV = cvRequest != null
-          ? Constante.RUTA_REPOSITORIO_CV_TALENTO + cvRequest.getNombreArchivo() + "."
-              + cvRequest.getExtensionArchivo()
+          ? sustituirMarcadorId(
+              Constante.RUTA_REPOSITORIO_CV_TALENTO + cvRequest.getNombreArchivo() + "."
+                  + cvRequest.getExtensionArchivo(),
+              talentRequest.getIdTalento())
           : null;
 
       MapSqlParameterSource params = new MapSqlParameterSource()

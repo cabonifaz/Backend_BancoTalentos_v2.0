@@ -25,4 +25,19 @@ public class TalentPresignedUrlResponse {
      * 200 from the pre-signed PUT is enough.
      */
     private boolean requiresConfirm;
+    /**
+     * Content-type the URL was actually signed with. The client MUST send exactly
+     * this value in the PUT: if it sends anything else (typically its own
+     * {@code File.type}, which browsers leave empty for unknown extensions), S3
+     * rejects the request with SignatureDoesNotMatch.
+     */
+    private String contentType;
+
+    /**
+     * Kept for the download/error paths, which carry no content-type.
+     */
+    public TalentPresignedUrlResponse(BaseResponse baseResponse, String url, String path, String fileName,
+            boolean requiresConfirm) {
+        this(baseResponse, url, path, fileName, requiresConfirm, null);
+    }
 }

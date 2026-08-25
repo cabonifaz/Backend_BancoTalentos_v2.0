@@ -7,6 +7,7 @@ import java.time.Duration;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
@@ -26,8 +27,60 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
  */
 
 public class S3Utils {
-  private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
+  private static final Logger logger = LoggerFactory.getLogger(S3Utils.class);
   private static final String BUCKET_NAME = System.getenv("AWS_BUCKET");
+
+  /**
+   * Validates that a key can actually be signed, and returns it trimmed.
+   *
+   * <p>
+   * Las rutas no siempre las construye este backend: en el reemplazo de CV y en
+   * las descargas vienen de la BD, donde conviven filas heredadas de la época
+   * base64. Lo que se rechaza aquí:
+   *
+   * <ul>
+   * <li>El marcador {@code [ID]} sin sustituir. Es el fallo real de
+   * {@code addOrUpdateTalent}: concatena la constante de carpeta sin reemplazar
+   * el marcador, así que la key puede acabar como
+   * {@code repositorio/talento/[ID]/foto.png}. La URL firmada sale bien formada
+   * (el SDK codifica los corchetes) pero apunta a un objeto que no existe.</li>
+   * <li>Rutas de sistema de archivos o URLs completas ({@code C:\...},
+   * {@code https://...}), que no son keys de S3.</li>
+   * <li>Saltos de línea y caracteres de control, que sí romperían la petición.</li>
+   * <li>La barra inicial, que en S3 crea un nivel de carpeta con nombre vacío.</li>
+   * </ul>
+   *
+   * @param fileUrl The candidate S3 object key.
+   * @return The trimmed key, or {@code null} if it cannot be signed.
+   */
+  private static String validateKey(String fileUrl) {
+    if (fileUrl == null) {
+      return null;
+    }
+    String key = fileUrl.trim();
+    if (key.isEmpty()) {
+      return null;
+    }
+    if (BUCKET_NAME == null || BUCKET_NAME.trim().isEmpty()) {
+      logger.error("AWS_BUCKET no está configurada: no se puede firmar la ruta {}", key);
+      return null;
+    }
+    if (key.contains("[ID]")) {
+      logger.error("Ruta S3 con el marcador [ID] sin sustituir: {}", key);
+      return null;
+    }
+    if (key.startsWith("/") || key.contains("://") || key.contains("\\")) {
+      logger.error("Ruta S3 inválida (no es una key relativa del bucket): {}", key);
+      return null;
+    }
+    for (int i = 0; i < key.length(); i++) {
+      if (key.charAt(i) < 0x20 || key.charAt(i) == 0x7F) {
+        logger.error("Ruta S3 con caracteres de control en la posición {}: {}", i, key);
+        return null;
+      }
+    }
+    return key;
+  }
 
   /**
    * Generates a pre-signed URL for accessing (GET) an S3 object.
@@ -36,18 +89,19 @@ public class S3Utils {
    * @return URL as a String.
    */
   public static String getSignedUrl(String fileUrl) {
-    if (fileUrl == null || fileUrl.isEmpty())
+    String key = validateKey(fileUrl);
+    if (key == null)
       return "";
 
     try {
       GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
           .signatureDuration(Duration.ofMinutes(1440)) // 24 hours
-          .getObjectRequest(builder -> builder.bucket(BUCKET_NAME).key(fileUrl).build())
+          .getObjectRequest(builder -> builder.bucket(BUCKET_NAME).key(key))
           .build();
 
       PresignedGetObjectRequest presignedRequest = ClientS3V2.getPresignerInstance().presignGetObject(presignRequest);
 
-      logger.info("URL firmada generada exitosamente para: {}", fileUrl);
+      logger.info("URL firmada generada exitosamente para: {}", key);
       return presignedRequest.url().toString();
 
     } catch (Exception e) {
@@ -65,13 +119,14 @@ public class S3Utils {
    * @return URL as a String.
    */
   public static String getSignedUrl(String fileUrl, int minutes) {
-    if (fileUrl == null || fileUrl.isEmpty())
+    String key = validateKey(fileUrl);
+    if (key == null)
       return "";
 
     try {
       GetObjectRequest getObjectRequest = GetObjectRequest.builder()
           .bucket(BUCKET_NAME)
-          .key(fileUrl)
+          .key(key)
           .build();
 
       GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
@@ -104,16 +159,17 @@ public class S3Utils {
    * @return URL as a String, or empty string on error.
    */
   public static String getSignedUrlInline(String fileUrl, int minutes) {
-    if (fileUrl == null || fileUrl.isEmpty())
+    String key = validateKey(fileUrl);
+    if (key == null)
       return "";
 
     try {
-      String fileName = fileUrl.contains("/") ? fileUrl.substring(fileUrl.lastIndexOf("/") + 1) : fileUrl;
+      String fileName = key.contains("/") ? key.substring(key.lastIndexOf("/") + 1) : key;
       String contentType = resolveContentType(fileName);
 
       GetObjectRequest getObjectRequest = GetObjectRequest.builder()
           .bucket(BUCKET_NAME)
-          .key(fileUrl)
+          .key(key)
           .responseContentType(contentType)
           .responseContentDisposition("inline; filename=\"" + fileName + "\"")
           .build();
@@ -133,12 +189,19 @@ public class S3Utils {
   }
 
   /**
-   * Resolves the MIME type from a file name extension for inline viewing.
+   * Resolves the MIME type from a file name extension.
+   *
+   * <p>
+   * Used both for inline viewing (GET) and to decide the content-type an upload
+   * URL is signed with. The browser leaves {@code File.type} empty for
+   * extensions it does not know, and signing with an empty content-type produces
+   * a signature the PUT can never match, so the server always resolves a
+   * concrete value here.
    *
    * @param fileName The file name (may include extension).
    * @return The MIME type, or {@code application/octet-stream} if unknown.
    */
-  private static String resolveContentType(String fileName) {
+  public static String resolveContentType(String fileName) {
     String lower = fileName == null ? "" : fileName.toLowerCase();
     if (lower.endsWith(".pdf"))
       return "application/pdf";
@@ -150,7 +213,71 @@ public class S3Utils {
       return "image/gif";
     if (lower.endsWith(".webp"))
       return "image/webp";
+    if (lower.endsWith(".doc"))
+      return "application/msword";
+    if (lower.endsWith(".docx"))
+      return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    if (lower.endsWith(".xls"))
+      return "application/vnd.ms-excel";
+    if (lower.endsWith(".xlsx"))
+      return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    if (lower.endsWith(".zip"))
+      return "application/zip";
     return "application/octet-stream";
+  }
+
+  /**
+   * Extracts the extension, lowercased and WITHOUT the dot, discarding any path
+   * embedded in the name first.
+   *
+   * <p>
+   * Ported from {@code RequirementService} in FMI, where it guards the postulant
+   * file uploads.
+   *
+   * @param name The file name, possibly with a path.
+   * @return The extension without the dot, or an empty string if there is none.
+   */
+  public static String extractExtension(String name) {
+    if (name == null) {
+      return "";
+    }
+    int slash = Math.max(name.lastIndexOf('/'), name.lastIndexOf('\\'));
+    String base = slash >= 0 ? name.substring(slash + 1) : name;
+    int dot = base.lastIndexOf('.');
+    return dot >= 0 ? base.substring(dot + 1).toLowerCase() : "";
+  }
+
+  /**
+   * Sanitizes a file name: discards any path, restricts it to safe characters
+   * [A-Za-z0-9._-], caps the length and keeps the extension.
+   *
+   * <p>
+   * Without this, a name carrying accents, spaces, parentheses or {@code ../}
+   * ended up verbatim in the S3 key: the signed URL carried those characters
+   * percent-encoded, and the object could be written outside its own folder.
+   *
+   * @param originalFilename The name as the client sent it.
+   * @param extension        The extension without the dot (see
+   *                         {@link #extractExtension(String)}).
+   * @return A safe file name.
+   */
+  public static String sanitizeFileName(String originalFilename, String extension) {
+    if (originalFilename == null) {
+      return extension == null || extension.isEmpty() ? "archivo" : "archivo." + extension;
+    }
+    int slash = Math.max(originalFilename.lastIndexOf('/'), originalFilename.lastIndexOf('\\'));
+    String base = slash >= 0 ? originalFilename.substring(slash + 1) : originalFilename;
+    int dot = base.lastIndexOf('.');
+    String namePart = dot >= 0 ? base.substring(0, dot) : base;
+
+    namePart = namePart.replaceAll("[^A-Za-z0-9._-]", "_");
+    if (namePart.isEmpty()) {
+      namePart = "archivo";
+    }
+    if (namePart.length() > 80) {
+      namePart = namePart.substring(0, 80);
+    }
+    return extension == null || extension.isEmpty() ? namePart : namePart + "." + extension;
   }
 
   /**
@@ -163,13 +290,18 @@ public class S3Utils {
    * @return Pre-signed PUT URL as a String, or empty string on error.
    */
   public static String getUploadSignedUrl(String fileUrl, String contentType, int minutes) {
-    if (fileUrl == null || fileUrl.isEmpty())
+    String key = validateKey(fileUrl);
+    if (key == null)
       return "";
 
     try {
       PutObjectRequest putObjectRequest = PutObjectRequest.builder()
           .bucket(BUCKET_NAME)
-          .key(fileUrl)
+          .key(key)
+          // OJO: el content-type entra en X-Amz-SignedHeaders (la lista de
+          // cabeceras que el firmante ignora es sólo connection, x-amzn-trace-id,
+          // user-agent, expect y transfer-encoding). El cliente debe mandar
+          // exactamente este valor o S3 responde SignatureDoesNotMatch.
           .contentType(contentType)
           .build();
 
@@ -180,7 +312,7 @@ public class S3Utils {
 
       PresignedPutObjectRequest presignedRequest = ClientS3V2.getPresignerInstance().presignPutObject(presignRequest);
 
-      logger.info("URL firmada de carga generada exitosamente para: {}", fileUrl);
+      logger.info("URL firmada de carga generada exitosamente para: {}", key);
       return presignedRequest.url().toString();
 
     } catch (Exception e) {
@@ -197,16 +329,17 @@ public class S3Utils {
    * @return true on success (or if empty), false on error.
    */
   public static boolean delete(String fileUrl) {
-    if (fileUrl == null || fileUrl.isEmpty())
+    String key = fileUrl == null ? null : fileUrl.trim();
+    if (key == null || key.isEmpty())
       return true;
 
     try {
       DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
           .bucket(BUCKET_NAME)
-          .key(fileUrl)
+          .key(key)
           .build();
       ClientS3V2.getInstance().deleteObject(deleteObjectRequest);
-      logger.info("Objeto eliminado de S3: {}", fileUrl);
+      logger.info("Objeto eliminado de S3: {}", key);
       return true;
 
     } catch (Exception e) {
@@ -222,21 +355,40 @@ public class S3Utils {
    * @return true if it exists, false otherwise.
    */
   public static boolean exists(String fileUrl) {
-    if (fileUrl == null || fileUrl.isEmpty())
-      return false;
+    return headObject(fileUrl) != null;
+  }
+
+  /**
+   * Returns an object's metadata (HEAD), or {@code null} if it does not exist.
+   *
+   * <p>
+   * Same call {@link #exists(String)} makes, but keeping the response: existence
+   * and size are checked in a single round trip instead of two.
+   *
+   * @param fileUrl The S3 object key.
+   * @return The metadata, or {@code null} if missing/unreadable.
+   */
+  public static HeadObjectResponse headObject(String fileUrl) {
+    // Se recorta igual que en validateKey: si no, una ruta con espacio final se
+    // firmaría con una key y se comprobaría con otra.
+    String key = fileUrl == null ? null : fileUrl.trim();
+    if (key == null || key.isEmpty())
+      return null;
 
     try {
       HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
           .bucket(BUCKET_NAME)
-          .key(fileUrl)
+          .key(key)
           .build();
-      ClientS3V2.getInstance().headObject(headObjectRequest);
-      return true;
+      return ClientS3V2.getInstance().headObject(headObjectRequest);
     } catch (NoSuchKeyException e) {
-      return false;
+      return null;
     } catch (S3Exception e) {
-      logger.error("Error al verificar existencia en S3: {}", e.awsErrorDetails().errorMessage());
-      return false;
+      // Un 403 aquí NO significa que el objeto falte: es que el rol IAM no tiene
+      // s3:GetObject sobre esa key. Se registra el código para poder distinguirlo.
+      logger.error("Error al obtener metadata en S3 (status {}): {}",
+          e.statusCode(), e.awsErrorDetails().errorMessage());
+      return null;
     }
   }
 }

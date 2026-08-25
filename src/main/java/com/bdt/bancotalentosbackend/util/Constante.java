@@ -1,5 +1,7 @@
 package com.bdt.bancotalentosbackend.util;
 
+import java.util.Set;
+
 public class Constante {
     // FUNCIONALIDADES
     public static final String ACTUALIZAR_TALENTO = "12";
@@ -21,6 +23,15 @@ public class Constante {
     public static final String RUTA_REPOSITORIO_CV_EN_TALENTO = "repositorio/talento/[ID]/CV/EN/";
     public static final String RUTA_REPOSITORIO_CV_ES_TALENTO = "repositorio/talento/[ID]/CV/ES/";
     public static final String RUTA_REPOSITORIO_FIRMA_USUARIO = "repositorio/usuario/[ID]/firma/";
+
+    // VALIDACIÓN DE ARCHIVOS DE TALENTO
+    // Misma whitelist que EXT_ARCHIVO_POSTULANTE en FMI, sin zip (el talento no
+    // admite comprimidos). Debe coincidir con TALENT_ALLOWED_EXTENSIONS del front.
+    public static final Set<String> EXT_ARCHIVO_TALENTO = Set.of(
+            "pdf", "doc", "docx", "xls", "xlsx", "png", "jpg", "jpeg", "webp");
+    // La foto de perfil es sólo imagen.
+    public static final Set<String> EXT_FOTO_TALENTO = Set.of("png", "jpg", "jpeg");
+    public static final long MAX_TAMANIO_ARCHIVO_TALENTO = 10L * 1024 * 1024; // 10 MB
 
     // CONFIG LINK TOKEN JWT
     public static final long TIEMPO_EXPIRACION = 172800000L;
