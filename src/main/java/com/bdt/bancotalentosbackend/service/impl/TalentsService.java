@@ -4,6 +4,7 @@ import com.bdt.bancotalentosbackend.model.dto.UserDTO;
 import com.bdt.bancotalentosbackend.model.request.*;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.FileResponse;
+import com.bdt.bancotalentosbackend.model.response.TalentPhotoUrlResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentPresignedUrlResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
@@ -17,6 +18,7 @@ import com.bdt.bancotalentosbackend.util.S3Utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -183,29 +185,35 @@ public class TalentsService implements ITalentsService {
             return new TalentPresignedUrlResponse(new BaseResponse(3, "Nombre de archivo inválido"), null, null, null, false);
         }
 
-        String originalFilename = request.getFileName();
-        String extension = originalFilename.contains(".")
-                ? originalFilename.substring(originalFilename.lastIndexOf("."))
-                : "";
+        // Extensión y nombre saneados igual que en FMI (sanitizeFileName de
+        // RequirementService): se descarta cualquier ruta incrustada en el nombre y
+        // se restringe a [A-Za-z0-9._-]. Así la key no puede salirse de la carpeta
+        // del talento ni arrastrar caracteres que rompan la URL firmada.
+        String extension = extractExtension(request.getFileName());
+        if (!Constante.EXT_ARCHIVO_TALENTO.contains(extension)) {
+            return new TalentPresignedUrlResponse(
+                    new BaseResponse(3, "Tipo de archivo no permitido"), null, null, null, false);
+        }
 
         String s3Path;
-        String cleanName;
+        String cleanName = sanitizeFileName(request.getFileName(), extension);
         // requiresConfirm indica si el frontend debe registrar/actualizar la ruta en
         // BD tras subir. En un reemplazo in-place (misma key) NO hace falta confirm:
         // basta con que el PUT a la URL pre-firmada devuelva 200.
         boolean requiresConfirm;
 
-        // Content-type con el que se firma la URL. En el reemplazo del CV se fuerza a
-        // PDF para que la URL pre-firmada SOLO admita PDF (ya no se aceptan Word).
-        String signContentType = request.getContentType();
+        // Content-type con el que se firma la URL. NO se usa el que manda el
+        // navegador: para extensiones que el sistema operativo no reconoce, File.type
+        // llega vacío, la URL se firmaría con un content-type vacío y el PUT jamás
+        // podría reproducir esa firma (403 SignatureDoesNotMatch). Se resuelve desde
+        // la extensión y se devuelve al cliente para que mande exactamente ese valor.
+        String signContentType = S3Utils.resolveContentType(cleanName);
 
         Integer idArchivo = request.getIdArchivo();
         if (idArchivo != null && idArchivo > 0) {
             // Reemplazo del CV: SOLO PDF. Se sobrescribe la MISMA key (in-place), por
             // lo que la ruta en BD no cambia y basta el 200 del PUT (sin confirm).
-            boolean isPdf = "application/pdf".equalsIgnoreCase(request.getContentType())
-                    || ".pdf".equalsIgnoreCase(extension);
-            if (!isPdf) {
+            if (!"pdf".equals(extension)) {
                 return new TalentPresignedUrlResponse(
                         new BaseResponse(3, "Solo se permiten archivos PDF"), null, null, null, false);
             }
@@ -234,12 +242,8 @@ public class TalentsService implements ITalentsService {
             }
             folder = folder.replace("[ID]", request.getIdTalento().toString());
 
-            cleanName = originalFilename;
-            if (cleanName.length() > 100) {
-                cleanName = cleanName.substring(0, 95) + extension;
-            }
-            // Nombre único en S3 para evitar colisiones.
-            String generatedFileName = System.currentTimeMillis() + "_" + cleanName.replaceAll("\\s+", "_");
+            // Nombre único en S3 para evitar colisiones. cleanName ya viene saneado.
+            String generatedFileName = System.currentTimeMillis() + "_" + cleanName;
             s3Path = folder + generatedFileName;
             requiresConfirm = true;
         }
@@ -250,7 +254,8 @@ public class TalentsService implements ITalentsService {
         }
 
         return new TalentPresignedUrlResponse(
-                new BaseResponse(2, "URL generada correctamente"), uploadUrl, s3Path, cleanName, requiresConfirm);
+                new BaseResponse(2, "URL generada correctamente"), uploadUrl, s3Path, cleanName, requiresConfirm,
+                signContentType);
     }
 
     @Override
@@ -261,10 +266,23 @@ public class TalentsService implements ITalentsService {
         if (request.getPath() == null || request.getPath().trim().isEmpty()) {
             return new BaseResponse(3, "Ruta de archivo inválida");
         }
+        // Misma whitelist que al firmar: la ruta llega del cliente y podría no ser
+        // la que se firmó.
+        if (!Constante.EXT_ARCHIVO_TALENTO.contains(extractExtension(request.getPath()))) {
+            return new BaseResponse(3, "Tipo de archivo no permitido");
+        }
 
-        // Se valida que el archivo exista físicamente en S3 antes de registrarlo en BD.
-        if (!S3Utils.exists(request.getPath())) {
+        // Existencia y tamaño real del objeto en un solo HEAD (patrón de FMI en los
+        // archivos de postulante). Antes se hacía con exists(), que descartaba la
+        // metadata y obligaba a una segunda llamada para poder mirar el tamaño.
+        HeadObjectResponse head = S3Utils.headObject(request.getPath());
+        if (head == null) {
             return new BaseResponse(3, "El archivo no existe en S3");
+        }
+        if (head.contentLength() != null
+                && head.contentLength() > Constante.MAX_TAMANIO_ARCHIVO_TALENTO) {
+            S3Utils.delete(request.getPath()); // limpiar el objeto que excede el límite
+            return new BaseResponse(3, "El archivo supera el tamaño máximo permitido (10 MB)");
         }
 
         return talentsRepository.confirmTalentFile(baseRequest, request);
@@ -294,6 +312,80 @@ public class TalentsService implements ITalentsService {
 
         String fileName = path.contains("/") ? path.substring(path.lastIndexOf("/") + 1) : path;
         return new TalentPresignedUrlResponse(new BaseResponse(2, "URL generada correctamente"), url, null, fileName, false);
+    }
+
+    /**
+     * URL PUT pre-firmada para la foto de perfil.
+     *
+     * A diferencia del CV y los certificados, la foto NO se registra con
+     * confirm-upload: la ruta viaja como {@code rutaArchivo} dentro del
+     * addOrUpdateTalent que el frontend ya hace después de subir. Aquí sólo se
+     * genera la key y se firma, igual que en la firma de usuario.
+     *
+     * La URL se firma con el content-type recibido, así que S3 rechaza el PUT si
+     * el navegador manda otra cosa. Se admite únicamente PNG y JPEG, que es lo
+     * que valida el frontend.
+     */
+    @Override
+    public TalentPhotoUrlResponse generateTalentPhotoUploadUrl(String token, TalentPhotoUrlRequest request) {
+        UserDTO user = jwt.decodeToken(token);
+        // Se decodifica el token para exigir sesión válida y dejar trazabilidad,
+        // con la misma funcionalidad que usa la actualización del talento.
+        Common.createBaseRequest(user, Constante.ACTUALIZAR_TALENTO);
+
+        TalentPhotoUrlResponse response = new TalentPhotoUrlResponse();
+
+        if (request.getIdTalento() == null || request.getIdTalento() <= 0) {
+            response.setBaseResponse(new BaseResponse(3, "Talento inválido"));
+            return response;
+        }
+        if (request.getFileName() == null || request.getFileName().trim().isEmpty()) {
+            response.setBaseResponse(new BaseResponse(3, "Nombre de archivo inválido"));
+            return response;
+        }
+
+        // La restricción a imagen se hace por EXTENSIÓN, no por el content-type que
+        // manda el navegador: éste puede llegar vacío o con variantes según el SO
+        // (image/pjpeg, por ejemplo) y entonces la URL se firmaba con un valor que el
+        // PUT no reproducía.
+        String extension = extractExtension(request.getFileName());
+        if (!Constante.EXT_FOTO_TALENTO.contains(extension)) {
+            response.setBaseResponse(new BaseResponse(3, "Solo se permiten imágenes PNG o JPEG"));
+            return response;
+        }
+
+        String cleanName = sanitizeFileName(request.getFileName(), extension);
+        // Content-type derivado de la extensión: es el que se firma y el que el
+        // cliente debe mandar en el PUT.
+        String contentType = S3Utils.resolveContentType(cleanName);
+
+        // OJO: la constante trae el marcador [ID], hay que sustituirlo.
+        String folder = Constante.RUTA_REPOSITORIO_FOTO_TALENTO
+                .replace("[ID]", request.getIdTalento().toString());
+        // Key única: si el usuario cancela tras pedir la URL, la foto anterior
+        // sigue intacta porque no se sobrescribe nada.
+        String s3Path = folder + System.currentTimeMillis() + "_" + cleanName;
+
+        String uploadUrl = S3Utils.getUploadSignedUrl(s3Path, contentType, 5);
+        if (uploadUrl == null || uploadUrl.isEmpty()) {
+            response.setBaseResponse(new BaseResponse(3, "No se pudo generar la URL de carga"));
+            return response;
+        }
+
+        response.setBaseResponse(new BaseResponse(2, "URL generada correctamente"));
+        response.setUrl(uploadUrl);
+        response.setPath(s3Path);
+        response.setFileName(cleanName);
+        response.setContentType(contentType);
+        return response;
+    }
+
+    private String extractExtension(String name) {
+        return S3Utils.extractExtension(name);
+    }
+
+    private String sanitizeFileName(String originalFilename, String extension) {
+        return S3Utils.sanitizeFileName(originalFilename, extension);
     }
 
     // Espacio solo para migración de archivos

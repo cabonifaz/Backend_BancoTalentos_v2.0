@@ -3,6 +3,7 @@ package com.bdt.bancotalentosbackend.service;
 import com.bdt.bancotalentosbackend.model.request.*;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.FileResponse;
+import com.bdt.bancotalentosbackend.model.response.TalentPhotoUrlResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentPresignedUrlResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentsListResponse;
@@ -50,6 +51,8 @@ public interface ITalentsService {
     BaseResponse confirmTalentUpload(String token, TalentConfirmUploadRequest request);
 
     TalentPresignedUrlResponse generateTalentDownloadUrl(String token, TalentDownloadUrlRequest request);
+
+    TalentPhotoUrlResponse generateTalentPhotoUploadUrl(String token, TalentPhotoUrlRequest request);
 
     BaseResponse removeTechnicalSkill(String token, Integer targetId);
 

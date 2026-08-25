@@ -185,6 +185,28 @@ public class TalentsRepository {
     return fileResponse;
   }
 
+  /**
+   * Sustituye el marcador {@code [ID]} de las constantes de carpeta por el id del
+   * talento.
+   *
+   * <p>
+   * Las constantes {@code RUTA_REPOSITORIO_*} llevan el marcador y aquí se
+   * concatenaban SIN reemplazarlo, así que al SP le llegaba una ruta literal
+   * {@code repositorio/talento/[ID]/foto.png}. Hoy no se nota porque el SP
+   * devuelve {@code NUEVA_RUTA_IMAGEN} y esa es la que se guarda, pero deja una
+   * ruta rota lista para colarse en cuanto el SP respete la que recibe.
+   *
+   * <p>
+   * En el alta el id todavía no existe, así que ahí el marcador se mantiene y es
+   * el SP quien debe construir la ruta.
+   */
+  private String sustituirMarcadorId(String ruta, Integer idTalento) {
+    if (ruta == null || idTalento == null || idTalento <= 0) {
+      return ruta;
+    }
+    return ruta.replace("[ID]", idTalento.toString());
+  }
+
   public BaseResponse addOrUpdateTalent(BaseRequest baseRequest, TalentRequest talentRequest)
       throws JsonProcessingException {
     try {
@@ -194,15 +216,30 @@ public class TalentsRepository {
       BaseResponse baseResponse = new BaseResponse();
 
       FileRequest fotoRequest = talentRequest.getFotoArchivo();
-      String rutaFoto = fotoRequest != null
-          ? Constante.RUTA_REPOSITORIO_FOTO_TALENTO + fotoRequest.getNombreArchivo() + "."
-              + fotoRequest.getExtensionArchivo()
-          : null;
+      // La foto ya subida a S3 con URL pre-firmada llega con rutaArchivo. En ese
+      // caso la key es la definitiva: no se recalcula, no se sube nada y el SP
+      // debe guardarla tal cual.
+      boolean fotoYaEnS3 = fotoRequest != null
+          && fotoRequest.getRutaArchivo() != null
+          && !fotoRequest.getRutaArchivo().trim().isEmpty();
+      String rutaFoto;
+      if (fotoYaEnS3) {
+        rutaFoto = fotoRequest.getRutaArchivo().trim();
+      } else if (fotoRequest != null) {
+        rutaFoto = sustituirMarcadorId(
+            Constante.RUTA_REPOSITORIO_FOTO_TALENTO + fotoRequest.getNombreArchivo() + "."
+                + fotoRequest.getExtensionArchivo(),
+            talentRequest.getIdTalento());
+      } else {
+        rutaFoto = null;
+      }
 
       FileRequest cvRequest = talentRequest.getCvArchivo();
       String rutaCV = cvRequest != null
-          ? Constante.RUTA_REPOSITORIO_CV_TALENTO + cvRequest.getNombreArchivo() + "."
-              + cvRequest.getExtensionArchivo()
+          ? sustituirMarcadorId(
+              Constante.RUTA_REPOSITORIO_CV_TALENTO + cvRequest.getNombreArchivo() + "."
+                  + cvRequest.getExtensionArchivo(),
+              talentRequest.getIdTalento())
           : null;
 
       MapSqlParameterSource params = new MapSqlParameterSource()
@@ -268,14 +305,18 @@ public class TalentsRepository {
         baseResponse = getInsertUpdateResponse(resultSet);
         Map<String, Object> row = resultSet.get(0);
 
-        rutaFoto = (String) row.get("NUEVA_RUTA_IMAGEN");
+        // Con la foto ya en S3 la key la manda el frontend, así que NO se pisa con
+        // la que devuelve el SP: hacerlo apuntaría la BD a un objeto inexistente.
+        if (!fotoYaEnS3) {
+          rutaFoto = (String) row.get("NUEVA_RUTA_IMAGEN");
+        }
 
         if (cvRequest != null) {
           rutaCV = (String) row.get("NUEVA_RUTA_CV");
         }
       }
 
-      if (baseResponse.getIdMensaje() == 2 && fotoRequest != null) {
+      if (baseResponse.getIdMensaje() == 2 && fotoRequest != null && !fotoYaEnS3) {
         boolean imagenGuardada = guardarArchivoAws(fotoRequest.getStringB64(),
             fotoRequest.getExtensionArchivo(), rutaFoto, true);
 

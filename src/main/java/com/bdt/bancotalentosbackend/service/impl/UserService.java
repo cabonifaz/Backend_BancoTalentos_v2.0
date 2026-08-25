@@ -105,13 +105,19 @@ public class UserService implements IUserService {
             return response;
         }
 
-        String cleanName = request.getFileName().trim().replaceAll("\\s+", "_");
+        // Nombre saneado igual que en FMI: sin rutas incrustadas ni caracteres que
+        // acaben percent-encoded dentro de la key.
+        String extension = S3Utils.extractExtension(request.getFileName());
+        String cleanName = S3Utils.sanitizeFileName(request.getFileName(), extension);
         String folder = Constante.RUTA_REPOSITORIO_FIRMA_USUARIO.replace("[ID]", request.getIdUsuario().toString());
         String s3Path = folder + System.currentTimeMillis() + "_" + cleanName;
 
-        String contentType = request.getContentType() != null && !request.getContentType().isEmpty()
-                ? request.getContentType()
-                : "application/octet-stream";
+        // El content-type se deriva de la extensión, NO del que manda el cliente.
+        // Antes el front pedía la URL con `file.type || "application/octet-stream"`
+        // pero hacía el PUT con `file.type` a secas: cuando el navegador no conocía
+        // la extensión, se firmaba octet-stream y se enviaba vacío, y S3 devolvía
+        // SignatureDoesNotMatch. Devolviendo el valor firmado se elimina el desajuste.
+        String contentType = S3Utils.resolveContentType(cleanName);
 
         String url = S3Utils.getUploadSignedUrl(s3Path, contentType, 15);
         if (url == null || url.isEmpty()) {
@@ -122,6 +128,7 @@ public class UserService implements IUserService {
         response.setBaseResponse(new BaseResponse(2, "URL generada"));
         response.setUrl(url);
         response.setPath(s3Path);
+        response.setContentType(contentType);
         return response;
     }
 
