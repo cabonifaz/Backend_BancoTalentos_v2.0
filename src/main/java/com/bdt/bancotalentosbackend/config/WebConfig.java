@@ -11,6 +11,23 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
+    /**
+     * CORS de la API.
+     *
+     * <p>
+     * La lista es DELIBERADAMENTE la misma en los dos backends (BDT y AutFMI):
+     * los frontends se llaman en cruz — el front de BDT pega al backend de FMI
+     * (`axiosInstanceFMI`: requerimientos, postulantes, entrevistas) y el front de
+     * FMI pega al backend de BDT (`axiosInstanceBDT`) — asi que cada backend tiene
+     * que admitir el origen de AMBOS frontends en cada entorno. Si se añade un
+     * entorno, hay que añadirlo en los dos ficheros o ese entorno se cae con un
+     * fallo de preflight.
+     *
+     * <p>
+     * OJO: esto NO tiene nada que ver con la subida de archivos a S3. El PUT
+     * pre-firmado va del navegador a S3 directamente, sin pasar por este backend:
+     * ese lo gobierna la politica CORS del bucket, no esta configuracion.
+     */
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
