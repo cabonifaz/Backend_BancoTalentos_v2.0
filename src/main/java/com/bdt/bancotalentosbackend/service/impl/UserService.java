@@ -18,7 +18,7 @@ import com.bdt.bancotalentosbackend.service.IUserService;
 import com.bdt.bancotalentosbackend.util.Common;
 import com.bdt.bancotalentosbackend.util.Constante;
 import com.bdt.bancotalentosbackend.util.JWTHelper;
-import com.bdt.bancotalentosbackend.util.S3Utils;
+import com.bdt.bancotalentosbackend.util.ClientS3V2;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 public class UserService implements IUserService {
     private final UserRepository userRepository;
     private final JWTHelper jwt;
+    private final ClientS3V2 clientS3;
 
     @Override
     public BaseResponse addFavouriteCollection(String token, FavCollectionRequest favCollectionRequest) {
@@ -107,8 +108,8 @@ public class UserService implements IUserService {
 
         // Nombre saneado igual que en FMI: sin rutas incrustadas ni caracteres que
         // acaben percent-encoded dentro de la key.
-        String extension = S3Utils.extractExtension(request.getFileName());
-        String cleanName = S3Utils.sanitizeFileName(request.getFileName(), extension);
+        String extension = ClientS3V2.extractExtension(request.getFileName());
+        String cleanName = ClientS3V2.sanitizeFileName(request.getFileName(), extension);
         String folder = Constante.RUTA_REPOSITORIO_FIRMA_USUARIO.replace("[ID]", request.getIdUsuario().toString());
         String s3Path = folder + System.currentTimeMillis() + "_" + cleanName;
 
@@ -117,9 +118,9 @@ public class UserService implements IUserService {
         // pero hacía el PUT con `file.type` a secas: cuando el navegador no conocía
         // la extensión, se firmaba octet-stream y se enviaba vacío, y S3 devolvía
         // SignatureDoesNotMatch. Devolviendo el valor firmado se elimina el desajuste.
-        String contentType = S3Utils.resolveContentType(cleanName);
+        String contentType = ClientS3V2.resolveContentType(cleanName);
 
-        String url = S3Utils.getUploadSignedUrl(s3Path, contentType, 15);
+        String url = clientS3.generatePresignedUploadUrl(s3Path, contentType, 15);
         if (url == null || url.isEmpty()) {
             response.setBaseResponse(new BaseResponse(3, "No se pudo generar la URL de carga"));
             return response;

@@ -14,7 +14,7 @@ import com.bdt.bancotalentosbackend.util.Common;
 import com.bdt.bancotalentosbackend.util.Constante;
 import com.bdt.bancotalentosbackend.util.FileUtils;
 import com.bdt.bancotalentosbackend.util.JWTHelper;
-import com.bdt.bancotalentosbackend.util.S3Utils;
+import com.bdt.bancotalentosbackend.util.ClientS3V2;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +25,7 @@ import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 public class TalentsService implements ITalentsService {
     private final TalentsRepository talentsRepository;
     private final JWTHelper jwt;
+    private final ClientS3V2 clientS3;
 
     @Override
     public TalentsListResponse getTalents(String token, SearchRequest searchRequest) {
@@ -40,7 +41,7 @@ public class TalentsService implements ITalentsService {
         var talentDetails = talentsRepository.getTalentById(baseRequest, talentId, loadExtraInfo);
 
         // Load Image from AWS S3
-        var photoUrl = S3Utils.getSignedUrl(talentDetails.getPhotoUrl());
+        var photoUrl = clientS3.generatePresignedUrl(talentDetails.getPhotoUrl(), 1440);
         talentDetails.setPhotoUrl(photoUrl);
 
         return talentDetails;
@@ -207,7 +208,7 @@ public class TalentsService implements ITalentsService {
         // llega vacío, la URL se firmaría con un content-type vacío y el PUT jamás
         // podría reproducir esa firma (403 SignatureDoesNotMatch). Se resuelve desde
         // la extensión y se devuelve al cliente para que mande exactamente ese valor.
-        String signContentType = S3Utils.resolveContentType(cleanName);
+        String signContentType = ClientS3V2.resolveContentType(cleanName);
 
         Integer idArchivo = request.getIdArchivo();
         if (idArchivo != null && idArchivo > 0) {
@@ -248,7 +249,7 @@ public class TalentsService implements ITalentsService {
             requiresConfirm = true;
         }
 
-        String uploadUrl = S3Utils.getUploadSignedUrl(s3Path, signContentType, 5);
+        String uploadUrl = clientS3.generatePresignedUploadUrl(s3Path, signContentType, 5);
         if (uploadUrl == null || uploadUrl.isEmpty()) {
             return new TalentPresignedUrlResponse(new BaseResponse(3, "Error generando URL"), null, null, null, false);
         }
@@ -275,13 +276,13 @@ public class TalentsService implements ITalentsService {
         // Existencia y tamaño real del objeto en un solo HEAD (patrón de FMI en los
         // archivos de postulante). Antes se hacía con exists(), que descartaba la
         // metadata y obligaba a una segunda llamada para poder mirar el tamaño.
-        HeadObjectResponse head = S3Utils.headObject(request.getPath());
+        HeadObjectResponse head = clientS3.headObject(request.getPath());
         if (head == null) {
             return new BaseResponse(3, "El archivo no existe en S3");
         }
         if (head.contentLength() != null
                 && head.contentLength() > Constante.MAX_TAMANIO_ARCHIVO_TALENTO) {
-            S3Utils.delete(request.getPath()); // limpiar el objeto que excede el límite
+            clientS3.delete(request.getPath()); // limpiar el objeto que excede el límite
             return new BaseResponse(3, "El archivo supera el tamaño máximo permitido (10 MB)");
         }
 
@@ -304,8 +305,8 @@ public class TalentsService implements ITalentsService {
 
         String path = fileResponse.getArchivo();
         String url = request.isInline()
-                ? S3Utils.getSignedUrlInline(path, 5)
-                : S3Utils.getSignedUrl(path, 5);
+                ? clientS3.generatePresignedInlineUrl(path, 5)
+                : clientS3.generatePresignedUrl(path, 5);
         if (url == null || url.isEmpty()) {
             return new TalentPresignedUrlResponse(new BaseResponse(3, "Error generando URL de descarga"), null, null, null, false);
         }
@@ -357,7 +358,7 @@ public class TalentsService implements ITalentsService {
         String cleanName = sanitizeFileName(request.getFileName(), extension);
         // Content-type derivado de la extensión: es el que se firma y el que el
         // cliente debe mandar en el PUT.
-        String contentType = S3Utils.resolveContentType(cleanName);
+        String contentType = ClientS3V2.resolveContentType(cleanName);
 
         // OJO: la constante trae el marcador [ID], hay que sustituirlo.
         String folder = Constante.RUTA_REPOSITORIO_FOTO_TALENTO
@@ -366,7 +367,7 @@ public class TalentsService implements ITalentsService {
         // sigue intacta porque no se sobrescribe nada.
         String s3Path = folder + System.currentTimeMillis() + "_" + cleanName;
 
-        String uploadUrl = S3Utils.getUploadSignedUrl(s3Path, contentType, 5);
+        String uploadUrl = clientS3.generatePresignedUploadUrl(s3Path, contentType, 5);
         if (uploadUrl == null || uploadUrl.isEmpty()) {
             response.setBaseResponse(new BaseResponse(3, "No se pudo generar la URL de carga"));
             return response;
@@ -381,11 +382,11 @@ public class TalentsService implements ITalentsService {
     }
 
     private String extractExtension(String name) {
-        return S3Utils.extractExtension(name);
+        return ClientS3V2.extractExtension(name);
     }
 
     private String sanitizeFileName(String originalFilename, String extension) {
-        return S3Utils.sanitizeFileName(originalFilename, extension);
+        return ClientS3V2.sanitizeFileName(originalFilename, extension);
     }
 
     // Espacio solo para migración de archivos
