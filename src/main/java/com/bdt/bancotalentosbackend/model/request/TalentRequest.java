@@ -49,6 +49,10 @@ public class TalentRequest {
     private Integer idPais;
     @JsonProperty()
     private Integer idCiudad;
+    /**
+     * Maestro 3 (NUM1). El alta de talento ya no la pide: sólo llega desde el
+     * modal de expectativas salariales, que actualiza un talento existente.
+     */
     @JsonProperty()
     private Integer idModalidadFacturacion;
     @JsonProperty()
