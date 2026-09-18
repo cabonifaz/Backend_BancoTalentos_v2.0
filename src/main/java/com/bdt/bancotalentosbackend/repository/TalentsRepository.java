@@ -258,7 +258,10 @@ public class TalentsRepository {
           .addValue("PUESTO", "")
           .addValue("ID_PAIS", talentRequest.getIdPais())
           .addValue("ID_CIUDAD", talentRequest.getIdCiudad())
-          .addValue("ID_MODALIDAD_FACTURACION", talentRequest.getIdModalidadFacturacion())
+          // El alta ya no pide modalidad de facturación: en el INS siempre va NULL y
+          // sólo el modal de expectativas salariales (UPD) puede fijarla después.
+          .addValue("ID_MODALIDAD_FACTURACION",
+              isUpdate ? talentRequest.getIdModalidadFacturacion() : null)
 
           .addValue("MONTO_INICIAL_PLANILLA", talentRequest.getMontoInicialPlanilla())
           .addValue("MONTO_FINAL_PLANILLA", talentRequest.getMontoFinalPlanilla())
