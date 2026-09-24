@@ -281,7 +281,10 @@ public class TalentsRepository {
       if (isUpdate) {
         params.addValue("ID_TALENTO", talentRequest.getIdTalento());
       } else {
-        params.addValue("TIENE_EQUIPO", talentRequest.getTieneEquipo() ? 1 : 0);
+        // Boolean, no boolean: el alta rápida (sólo nombres, contacto y CV) no
+        // manda este campo, y desempaquetar un null aquí reventaba el alta.
+        params.addValue("TIENE_EQUIPO",
+            Boolean.TRUE.equals(talentRequest.getTieneEquipo()) ? 1 : 0);
         SQLServerDataTable tvpHabilidadesTecnicas = loadTvpHabilidadesTec(
             talentRequest.getHabilidadesTecnicas());
         SQLServerDataTable tvpHabilidadesBlandas = loadTvpHabilidadesBlan(
