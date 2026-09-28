@@ -15,6 +15,7 @@ import com.bdt.bancotalentosbackend.model.dto.SocialLinkDTO;
 import com.bdt.bancotalentosbackend.model.request.AIPromptRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.GeneralResponse;
+import com.bdt.bancotalentosbackend.model.response.IACVQuickResponse;
 import com.bdt.bancotalentosbackend.model.response.IACVResponse;
 import com.bdt.bancotalentosbackend.model.response.PromptResponse;
 import com.bdt.bancotalentosbackend.model.response.SummarizeResponse;
@@ -90,6 +91,43 @@ public class IAService {
       return GeneralResponse.ok(iacvResponse);
     } catch (Exception e) {
       this.logger.error("Error procesando el CV", e);
+      return GeneralResponse.error("Hubo un error al analizar el CV: " + e.getMessage());
+    }
+  }
+
+  /**
+   * CARGA RÁPIDA: del CV sólo salen nombres, apellidos, celular y correo.
+   *
+   * Comparte con {@link #analyzeCv(MultipartFile)} la extracción del PDF, pero
+   * usa un prompt mínimo ({@link PromptBuilder#buildQuickCVPrompt(String)}): la
+   * llamada es corta, y eso es lo que permite dar de alta un talento en
+   * segundos en vez de esperar el análisis completo del CV.
+   *
+   * @param cvFile CV en PDF.
+   * @return identidad y contacto detectados; los campos que el CV no tenga vienen
+   *         en null, para que el frontend los pida a mano.
+   */
+  public GeneralResponse<IACVQuickResponse> analyzeCvQuick(MultipartFile cvFile) {
+    try {
+      String extractedText = extractCvText(cvFile);
+
+      long t2 = System.currentTimeMillis();
+      this.logger.info("Starting OpenAI API call (quick)");
+      String prompt = PromptBuilder.buildQuickCVPrompt(extractedText);
+
+      String structuredJson = this.clientOpenIA.sendPromptResponses(
+          prompt,
+          "gpt-4.1-mini");
+
+      logger.info("OpenAI call (quick): {}ms", System.currentTimeMillis() - t2);
+
+      JsonNode structuredNode = objectMapper.readTree(structuredJson);
+      IACVQuickResponse response = objectMapper.treeToValue(structuredNode,
+          IACVQuickResponse.class);
+
+      return GeneralResponse.ok(response);
+    } catch (Exception e) {
+      this.logger.error("Error procesando el CV (carga rápida)", e);
       return GeneralResponse.error("Hubo un error al analizar el CV: " + e.getMessage());
     }
   }

@@ -15,6 +15,7 @@ import com.bdt.bancotalentosbackend.model.request.AIPromptRequest;
 import com.bdt.bancotalentosbackend.model.request.SummarizeRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
 import com.bdt.bancotalentosbackend.model.response.GeneralResponse;
+import com.bdt.bancotalentosbackend.model.response.IACVQuickResponse;
 import com.bdt.bancotalentosbackend.model.response.IACVResponse;
 import com.bdt.bancotalentosbackend.model.response.PromptResponse;
 import com.bdt.bancotalentosbackend.model.response.SummarizeResponse;
@@ -38,6 +39,18 @@ public class IAController {
       @RequestPart("file") MultipartFile file,
       HttpServletRequest httpServletRequest) {
     var response = iAService.analyzeCv(file);
+    return ResponseEntity.ok().body(response);
+  }
+
+  /**
+   * Carga rápida: del CV sólo devuelve nombres, apellidos, celular y correo, que
+   * es lo mínimo para crear un talento sin llenar la ficha completa.
+   */
+  @PostMapping(value = "/analyze-cv-quick", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<BaseResponse> analyzeCvQuick(
+      @RequestPart("file") MultipartFile file,
+      HttpServletRequest httpServletRequest) {
+    GeneralResponse<IACVQuickResponse> response = iAService.analyzeCvQuick(file);
     return ResponseEntity.ok().body(response);
   }
 

@@ -31,6 +31,56 @@ public class PromptBuilder {
         activities, instructions.isBlank() ? "Resumen general profesional" : instructions);
   }
 
+  /**
+   * Prompt de la CARGA RÁPIDA: identidad y contacto, nada más.
+   *
+   * No es {@link #buildCVPrompt(String)} recortado. Ahí está el punto: pedirle a
+   * la IA sólo cuatro campos hace la llamada corta y barata, que es lo que
+   * justifica la palabra "rápida". Si se le pidiera todo el CV para usar cuatro
+   * datos, el alta tardaría lo mismo que el análisis completo.
+   */
+  public String buildQuickCVPrompt(String extractedText) {
+    return """
+        Eres un extractor de datos de contacto de currículums (CV).
+
+        Tu ÚNICA tarea es devolver la identidad y el contacto de la persona del CV.
+        NO extraigas experiencia, educación, habilidades, idiomas, ubicación ni
+        presentación: aunque estén en el texto, se ignoran.
+
+        Responde ÚNICAMENTE con un JSON con EXACTAMENTE estas claves:
+
+        {
+          "nombres": string|null,
+          "apellidoPaterno": string|null,
+          "apellidoMaterno": string|null,
+          "celular": string|null,
+          "email": string|null
+        }
+
+        REGLAS:
+        - `nombres`: sólo los nombres de pila, en el orden en que aparecen.
+        - Apellidos: el nombre completo en Perú lleva DOS apellidos. El primero es
+          `apellidoPaterno` y el segundo `apellidoMaterno`. Si sólo hay uno,
+          `apellidoMaterno` va en null. Si el CV escribe "Apellidos, Nombres"
+          (apellidos primero, separados por coma), respeta ese orden al separar.
+        - No traduzcas, no corrijas ni cambies mayúsculas de los nombres propios:
+          devuélvelos como están en el CV, salvo que estén en MAYÚSCULAS COMPLETAS,
+          en cuyo caso pásalos a Tipo Título (ej. "JUAN PEREZ" -> "Juan Perez").
+        - `celular`: un solo número, el personal o de contacto. Devuelve sólo
+          dígitos, con el prefijo internacional delante si el CV lo trae
+          (ej. "51987654321"). Sin "+", sin espacios, sin guiones, sin paréntesis.
+          Si el CV trae varios, elige el móvil; si no se distingue, el primero.
+        - `email`: el correo personal, en minúsculas. Si hay varios, el primero
+          que no sea corporativo de un empleador.
+        - Si un dato no aparece en el CV, devuélvelo como null. NUNCA lo inventes
+          ni lo deduzcas de otro campo.
+        - No devuelvas texto adicional fuera del JSON.
+
+        ### Texto del CV a procesar:
+        """
+        + extractedText;
+  }
+
   public String buildCVPrompt(String extractedText) {
     return """
         Eres un asistente especializado en análisis de currículums (CV).
