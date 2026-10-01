@@ -14,6 +14,7 @@ import com.bdt.bancotalentosbackend.model.dto.ContactDTO;
 import com.bdt.bancotalentosbackend.model.dto.SocialLinkDTO;
 import com.bdt.bancotalentosbackend.model.request.AIPromptRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
+import com.bdt.bancotalentosbackend.model.response.FMIExtractionDTO;
 import com.bdt.bancotalentosbackend.model.response.GeneralResponse;
 import com.bdt.bancotalentosbackend.model.response.IACVQuickResponse;
 import com.bdt.bancotalentosbackend.model.response.IACVResponse;
@@ -21,6 +22,7 @@ import com.bdt.bancotalentosbackend.model.response.PromptResponse;
 import com.bdt.bancotalentosbackend.model.response.SummarizeResponse;
 import com.bdt.bancotalentosbackend.model.response.TalentResponse;
 import com.bdt.bancotalentosbackend.util.ClientOpenIA;
+import com.bdt.bancotalentosbackend.util.FmiTextParser;
 import com.bdt.bancotalentosbackend.util.PromptBuilder;
 import com.bdt.bancotalentosbackend.util.TextUtils;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -187,25 +189,185 @@ public class IAService {
   }
 
   /**
+   * Lee un FMI (FT-GTH-12, Formulario de Ingreso) para la carga de
+   * colaboradores desde AutFMI.
+   *
+   * Primero lo intenta el parser por etiquetas, que acierta con los formularios
+   * que genera el propio sistema y no gasta ni una llamada a OpenAI. La IA sólo
+   * entra cuando el parser se queda corto, que es el caso de los FMI redactados
+   * fuera con el mismo formato.
+   *
+   * @param fmiFile formulario en PDF.
+   * @return lo leído del formulario; si el PDF no es un FMI de ingreso, viene
+   *         con `esFormularioIngreso` en false y el motivo, no como error.
+   */
+  public GeneralResponse<FMIExtractionDTO> analyzeFmi(MultipartFile fmiFile) {
+    try {
+      // Sin limpiar: el parser necesita las líneas tal como las ordenó PDFBox.
+      String extractedText = extractPdfText(fmiFile, false);
+
+      if (extractedText == null || extractedText.isBlank()) {
+        return GeneralResponse.ok(descartado(
+            "No se pudo extraer texto del PDF. Si es un documento escaneado, no se puede leer."));
+      }
+
+      if (!FmiTextParser.pareceFormulario(extractedText)) {
+        return GeneralResponse.ok(descartado(
+            "El PDF no corresponde al formato FT-GTH-12 (Formulario de Movimiento)."));
+      }
+
+      FMIExtractionDTO extraccion = FmiTextParser.parse(extractedText,
+          fmiFile.getOriginalFilename());
+
+      // El parser ya decidió que no es un ingreso: no hay nada que la IA pueda
+      // aportar, y preguntarle costaría una llamada para el mismo "no".
+      if (!extraccion.isEsFormularioIngreso())
+        return GeneralResponse.ok(extraccion);
+
+      if (parserSuficiente(extraccion))
+        return GeneralResponse.ok(extraccion);
+
+      this.logger.info("Parser incompleto, se consulta a la IA");
+      completarConIa(extraccion, TextUtils.cleanCvText(extractedText));
+
+      return GeneralResponse.ok(extraccion);
+    } catch (Exception e) {
+      this.logger.error("Error procesando el FMI", e);
+      return GeneralResponse.error("Hubo un error al leer el formulario: " + e.getMessage());
+    }
+  }
+
+  /**
+   * Con el nombre, el monto base y tres campos más, el formulario ya es
+   * utilizable.
+   *
+   * El monto base se exige aparte porque es el que peor se lee: no tiene rótulo
+   * propio en la plantilla, vive en una fila de celdas numéricas bajo los checks
+   * de la estructura salarial. Si el parser no lo saca, conviene que lo intente
+   * la IA antes de dar el formulario por leído.
+   */
+  private boolean parserSuficiente(FMIExtractionDTO extraccion) {
+    if (extraccion.getNombreCompleto() == null || extraccion.getMontoBase() == null)
+      return false;
+
+    int leidos = 0;
+    for (String campo : new String[] { extraccion.getEquipoOCliente(), extraccion.getModalidad(),
+        extraccion.getMotivoIngreso(), extraccion.getCargo(), extraccion.getHorario(),
+        extraccion.getFechaInicioContrato(), extraccion.getObjetoContrato() }) {
+      if (campo != null && !campo.isBlank())
+        leidos++;
+    }
+    return leidos >= 3;
+  }
+
+  /**
+   * Pasa el formulario por la IA y rellena SÓLO los huecos que dejó el parser:
+   * lo que se leyó de la tabla es más fiable que lo que deduzca el modelo.
+   */
+  private void completarConIa(FMIExtractionDTO extraccion, String textoLimpio) throws IOException, InterruptedException {
+    long t0 = System.currentTimeMillis();
+    String structuredJson = this.clientOpenIA.sendPromptResponses(
+        PromptBuilder.buildFmiPrompt(textoLimpio),
+        "gpt-4.1-mini");
+    logger.info("OpenAI call (FMI): {}ms", System.currentTimeMillis() - t0);
+
+    FMIExtractionDTO deIa = objectMapper.treeToValue(
+        objectMapper.readTree(structuredJson), FMIExtractionDTO.class);
+
+    if (!deIa.isEsFormularioIngreso() && deIa.getMotivoDescarte() != null) {
+      extraccion.setEsFormularioIngreso(false);
+      extraccion.setMotivoDescarte(deIa.getMotivoDescarte());
+      extraccion.setOrigen("IA");
+      return;
+    }
+
+    boolean parserAporto = extraccion.getNombreCompleto() != null;
+    extraccion.setOrigen(parserAporto ? "MIXTO" : "IA");
+    extraccion.setConfianza(parserAporto ? "MEDIA" : "BAJA");
+
+    if (extraccion.getNombreCompleto() == null) {
+      extraccion.setNombreCompleto(deIa.getNombreCompleto());
+      extraccion.setNombres(deIa.getNombres());
+      extraccion.setApellidoPaterno(deIa.getApellidoPaterno());
+      extraccion.setApellidoMaterno(deIa.getApellidoMaterno());
+    }
+    if (extraccion.getEquipoOCliente() == null) {
+      extraccion.setEquipoOCliente(deIa.getEquipoOCliente());
+      extraccion.setEtiquetaEquipo(deIa.getEtiquetaEquipo());
+      extraccion.setEsOutsourcing(deIa.isEsOutsourcing());
+    }
+    if (extraccion.getModalidad() == null)
+      extraccion.setModalidad(deIa.getModalidad());
+    if (extraccion.getMotivoIngreso() == null)
+      extraccion.setMotivoIngreso(deIa.getMotivoIngreso());
+    if (extraccion.getCargo() == null)
+      extraccion.setCargo(deIa.getCargo());
+    if (extraccion.getHorario() == null)
+      extraccion.setHorario(deIa.getHorario());
+    if (extraccion.getMontoBase() == null)
+      extraccion.setMontoBase(deIa.getMontoBase());
+    if (extraccion.getMontoMovilidad() == null)
+      extraccion.setMontoMovilidad(deIa.getMontoMovilidad());
+    if (extraccion.getFechaInicioContrato() == null)
+      extraccion.setFechaInicioContrato(deIa.getFechaInicioContrato());
+    if (extraccion.getFechaFinContrato() == null)
+      extraccion.setFechaFinContrato(deIa.getFechaFinContrato());
+    if (extraccion.getProyectoServicio() == null)
+      extraccion.setProyectoServicio(deIa.getProyectoServicio());
+    if (extraccion.getObjetoContrato() == null)
+      extraccion.setObjetoContrato(deIa.getObjetoContrato());
+    if (extraccion.getDeclaraSunat() == null)
+      extraccion.setDeclaraSunat(deIa.getDeclaraSunat());
+    if (extraccion.getSedeDeclarar() == null)
+      extraccion.setSedeDeclarar(deIa.getSedeDeclarar());
+    if (extraccion.getGestor() == null)
+      extraccion.setGestor(deIa.getGestor());
+    if (extraccion.getFechaEmision() == null)
+      extraccion.setFechaEmision(deIa.getFechaEmision());
+  }
+
+  /** PDF que no sirve: se responde OK con el motivo, no como error técnico. */
+  private FMIExtractionDTO descartado(String motivo) {
+    FMIExtractionDTO extraccion = new FMIExtractionDTO();
+    extraccion.setEsFormularioIngreso(false);
+    extraccion.setMotivoDescarte(motivo);
+    extraccion.setConfianza("ALTA");
+    extraccion.setOrigen("PARSER");
+    return extraccion;
+  }
+
+  /**
    * Valida el archivo, extrae el texto del PDF y lo limpia.
    * Lógica compartida entre {@link #analyzeCv(MultipartFile)} y
    * {@link #analyzeCvDiff(MultipartFile, Integer, String)}.
    */
   private String extractCvText(MultipartFile cvFile) throws IOException {
-    if (cvFile == null || cvFile.isEmpty())
+    return extractPdfText(cvFile, true);
+  }
+
+  /**
+   * Extrae el texto de un PDF.
+   *
+   * @param limpiar true para los CV, donde {@link TextUtils#cleanCvText} quita
+   *                ruido de maquetación; false para el FMI, porque ahí los
+   *                saltos de línea y los espacios SON la estructura de la tabla
+   *                y es de donde el parser saca cada campo.
+   */
+  private String extractPdfText(MultipartFile file, boolean limpiar) throws IOException {
+    if (file == null || file.isEmpty())
       throw new IllegalArgumentException("El archivo está vacío");
 
-    String contentType = cvFile.getContentType();
+    String contentType = file.getContentType();
     if (contentType == null || !contentType.equalsIgnoreCase("application/pdf"))
       throw new IllegalArgumentException("El archivo debe ser un PDF");
 
-    this.logger.info("Processing file: {}", cvFile.getOriginalFilename());
+    this.logger.info("Processing file: {}", file.getOriginalFilename());
 
     String extractedText;
     int rawLength;
     long t0 = System.currentTimeMillis();
 
-    try (PDDocument document = Loader.loadPDF(cvFile.getBytes())) {
+    try (PDDocument document = Loader.loadPDF(file.getBytes())) {
       PDFTextStripper pdfStripper = new PDFTextStripper();
       pdfStripper.setSortByPosition(true);
       extractedText = pdfStripper.getText(document);
@@ -213,6 +375,9 @@ public class IAService {
       this.logger.info("Text extracted successfully. Length: {}", rawLength);
     }
     logger.info("PDF extraction: {}ms", System.currentTimeMillis() - t0);
+
+    if (!limpiar)
+      return extractedText;
 
     long t1 = System.currentTimeMillis();
     this.logger.info("Starting text cleaning");
