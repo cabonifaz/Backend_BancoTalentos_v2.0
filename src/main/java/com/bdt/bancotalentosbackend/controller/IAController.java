@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.bdt.bancotalentosbackend.model.request.AIPromptRequest;
 import com.bdt.bancotalentosbackend.model.request.SummarizeRequest;
 import com.bdt.bancotalentosbackend.model.response.BaseResponse;
+import com.bdt.bancotalentosbackend.model.response.FMIExtractionDTO;
 import com.bdt.bancotalentosbackend.model.response.GeneralResponse;
 import com.bdt.bancotalentosbackend.model.response.IACVQuickResponse;
 import com.bdt.bancotalentosbackend.model.response.IACVResponse;
@@ -51,6 +52,23 @@ public class IAController {
       @RequestPart("file") MultipartFile file,
       HttpServletRequest httpServletRequest) {
     GeneralResponse<IACVQuickResponse> response = iAService.analyzeCvQuick(file);
+    return ResponseEntity.ok().body(response);
+  }
+
+  /**
+   * Lee un FMI (FT-GTH-12, Formulario de Ingreso) para la carga de
+   * colaboradores desde AutFMI: devuelve los campos del formulario y si
+   * realmente es un formulario de ingreso.
+   *
+   * Lo consume el frontend de FMI a través de su `axiosInstanceBDT`. Nada de lo
+   * que devuelve se persiste: sirve para identificar a la persona y dar
+   * contexto en pantalla.
+   */
+  @PostMapping(value = "/analyze-fmi", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<BaseResponse> analyzeFmi(
+      @RequestPart("file") MultipartFile file,
+      HttpServletRequest httpServletRequest) {
+    GeneralResponse<FMIExtractionDTO> response = iAService.analyzeFmi(file);
     return ResponseEntity.ok().body(response);
   }
 

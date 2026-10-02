@@ -359,4 +359,85 @@ public class PromptBuilder {
         + extractedText;
   }
 
+  /**
+   * Respaldo para leer un FMI (FT-GTH-12) cuando el parser por etiquetas no
+   * logra sacarlo, que es el caso de los formularios redactados fuera del
+   * sistema.
+   *
+   * La trampa del documento está explicada dentro del prompt: la plantilla es
+   * la misma para ingreso, movimiento y cese, así que el PDF trae SIEMPRE las
+   * tres secciones y el título dice SIEMPRE "FORMULARIO DE MOVIMIENTO". Lo que
+   * decide el tipo es qué sección tiene valores.
+   */
+  public String buildFmiPrompt(String extractedText) {
+    return """
+        Eres un extractor de datos de un formulario peruano de recursos humanos
+        llamado FMI (código FT-GTH-12, "Formulario de Movimiento").
+
+        Ese formulario tiene tres secciones fijas —INGRESO, MOVIMIENTO y CESE—
+        y SIEMPRE aparecen las tres, aunque sólo una de ellas tenga datos. El
+        encabezado dice "FORMULARIO DE MOVIMIENTO" en todos los casos, así que
+        NO sirve para saber de qué tipo es.
+
+        Responde ÚNICAMENTE con un JSON con EXACTAMENTE estas claves:
+
+        {
+          "esFormularioIngreso": boolean,
+          "motivoDescarte": string|null,
+          "nombreCompleto": string|null,
+          "nombres": string|null,
+          "apellidoPaterno": string|null,
+          "apellidoMaterno": string|null,
+          "etiquetaEquipo": string|null,
+          "equipoOCliente": string|null,
+          "esOutsourcing": boolean,
+          "modalidad": string|null,
+          "motivoIngreso": string|null,
+          "cargo": string|null,
+          "horario": string|null,
+          "montoBase": number|null,
+          "montoMovilidad": number|null,
+          "fechaInicioContrato": string|null,
+          "fechaFinContrato": string|null,
+          "proyectoServicio": string|null,
+          "objetoContrato": string|null,
+          "declaraSunat": string|null,
+          "sedeDeclarar": string|null,
+          "gestor": string|null,
+          "fechaEmision": string|null
+        }
+
+        REGLAS:
+        - `esFormularioIngreso`: true SÓLO si la sección INGRESO tiene al menos un
+          campo con valor (Modalidad, Motivo de Ingreso, Cargo, Horario de Trabajo
+          o F. Inicio contrato). Si los datos están en MOVIMIENTO o en CESE,
+          devuelve false y explica en `motivoDescarte` de qué formulario se trata.
+          Si el texto no es un FT-GTH-12, también false, diciéndolo.
+        - `nombreCompleto`: el contenido de la celda "Nombres y Apellidos", tal
+          cual, sin reordenar.
+        - `nombres`, `apellidoPaterno`, `apellidoMaterno`: la separación del
+          nombre completo. En Perú son DOS apellidos y el formulario los escribe
+          después de los nombres. Las partículas ("de", "de la", "del", "van")
+          pertenecen al apellido que les sigue. Si no puedes separarlo con
+          seguridad, deja los tres en null y devuelve sólo `nombreCompleto`.
+        - `etiquetaEquipo`: "Cliente" si el formulario rotula esa fila como
+          Cliente (servicios de outsourcing), "Equipo" en caso contrario.
+          `esOutsourcing` va en true sólo en el primer caso.
+        - Montos: devuelve el número, sin símbolo de moneda ni separador de
+          miles (ej. "S/ 3,500.00" -> 3500.00). Celda vacía -> null. NUNCA 0
+          para decir "no hay". El bono NO se pide: no lo devuelvas aunque la
+          estructura salarial tenga esa celda.
+        - Fechas de contrato: formato yyyy-MM-dd. En el PDF vienen como
+          dd/MM/yyyy. `fechaEmision` déjala tal cual está escrita.
+        - `gestor`: el nombre que firma como Gestor de Servicios, al pie.
+        - Si un dato no aparece, devuélvelo como null. No inventes, no deduzcas
+          y no rellenes con textos de ejemplo de la plantilla ("Escoja una
+          fecha.", "Escribir el cargo.", "Monto").
+        - No devuelvas texto adicional fuera del JSON.
+
+        ### Texto del formulario a procesar:
+        """
+        + extractedText;
+  }
+
 }
