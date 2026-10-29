@@ -31,11 +31,31 @@ spring:
       max-file-size: 50MB
       max-request-size: 50MB
 
+  # Servidor MCP: Streamable HTTP en /bdt/mcp. El endpoint lo fija McpConfig.
+  ai:
+    mcp:
+      server:
+        name: bdt
+        version: 1.0.0
+        type: SYNC
+        protocol: STREAMABLE
+        instructions: "Consultas de solo lectura del Banco de Talentos: busqueda y detalle de talentos y lista negra."
+
 jwt:
   expiration: ${JWT_EXPIRATION_MILLISECONDS} # 48 hours in milliseconds
   secret: ${JWT_SECRET}
 urlConfig:
   urlFrontBDT: ${URL_BDT}
+# API key del servidor MCP (header X-API-Key) y usuario de servicio con el que
+# consulta. Sin MCP_API_KEY la API key queda deshabilitada (solo JWT por Bearer).
+# Los IDs dependen de la BD de cada entorno.
+mcp:
+  api-key: ${MCP_API_KEY:}
+  service-user:
+    id-usuario: ${MCP_SERVICE_USER_ID:6017}
+    id-empresa: ${MCP_SERVICE_EMPRESA_ID:1}
+    id-rol: ${MCP_SERVICE_ROL_ID:6}
+    username: ${MCP_SERVICE_USERNAME:mcp_fractal}
 springdoc:
   swagger-ui:
     path: /bdt-backend.html
