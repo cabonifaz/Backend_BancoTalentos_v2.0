@@ -39,13 +39,25 @@ spring:
         version: 1.0.0
         type: SYNC
         protocol: STREAMABLE
-        instructions: "Consultas de solo lectura del Banco de Talentos: busqueda y detalle de talentos y lista negra."
+        instructions: "Consultas de solo lectura del Banco de Talentos: talentos, lista negra, entrevistas e indicadores de seleccion."
 
 jwt:
   expiration: ${JWT_EXPIRATION_MILLISECONDS} # 48 hours in milliseconds
   secret: ${JWT_SECRET}
 urlConfig:
   urlFrontBDT: ${URL_BDT}
+# Envío de correo (entrevistas): "smtp" (spring.mail.*, por defecto) o "graph"
+# (Microsoft 365 vía Microsoft Graph, misma app de Entra ID que AutFMI, con
+# Mail.Send de aplicación). Con graph, el remitente es MAIL_USERNAME.
+mail:
+  provider: ${MAIL_PROVIDER:smtp}
+microsoft:
+  graph:
+    tenant-id: ${MS_TENANT_ID:}
+    client-id: ${MS_CLIENT_ID:}
+    client-secret: ${MS_CLIENT_SECRET:}
+    # Opcional: UPN o Id. de objeto del buzón si su UPN no es MAIL_USERNAME.
+    sender: ${MS_SENDER:}
 # API key del servidor MCP (header X-API-Key) y usuario de servicio con el que
 # consulta. Sin MCP_API_KEY la API key queda deshabilitada (solo JWT por Bearer).
 # Los IDs dependen de la BD de cada entorno.

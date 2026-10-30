@@ -64,6 +64,19 @@ public class ClientS3V2 {
   }
 
   /**
+   * Copia que opera sobre otro bucket, con los mismos clientes (región y
+   * credenciales). No es un bean: la crea quien la necesita, p. ej. Entrevistas,
+   * cuyos archivos viven en el bucket de AutFMI (AWS_BUCKET_ENTREVISTAS).
+   */
+  public ClientS3V2 forBucket(String bucket) {
+    ClientS3V2 copy = new ClientS3V2();
+    copy.s3Client = this.s3Client;
+    copy.presigner = this.presigner;
+    copy.bucketName = bucket;
+    return copy;
+  }
+
+  /**
    * Resuelve la región avisando en voz alta cuando la variable falta, en vez de
    * caer al valor por defecto en silencio.
    *
