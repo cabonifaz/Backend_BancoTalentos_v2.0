@@ -51,7 +51,9 @@ public class WebConfig implements WebMvcConfigurer {
                         "https://api-bdt.aplicacion2-team.com",
                         // AWS FMI Staging
                         "https://autfmi.aplicacion2-team.com",
-                        "https://api-fmi.aplicacion2-team.com")
+                        "https://api-fmi.aplicacion2-team.com",
+                        // Backend del RAG de Fractal (consume el MCP de BDT)
+                        "https://api-iafractal.aplicacion2-team.com")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("Authorization", "Content-Type", "Accept")
                 .exposedHeaders("Authorization")

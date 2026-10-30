@@ -109,6 +109,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
+        <!--Marca común de los correos (MailBranding)-->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.17.2</version>
+        </dependency>
 
         <!--Servidor MCP (herramientas de lectura para asistentes de IA)-->
         <dependency>
