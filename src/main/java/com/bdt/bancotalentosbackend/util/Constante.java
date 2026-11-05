@@ -15,6 +15,32 @@ public class Constante {
     public static final String MANEJO_GESTORES = "2045";
     public static final String MANEJO_TARIFARIO = "2047";
 
+    // Entrevistas (migradas de AutFMI)
+    public static final String CREATE_INTERVIEW = "1030";
+    public static final String UPDATE_INTERVIEW = "1031";
+    public static final String VIEW_INTERVIEW = "1032";
+    public static final String LIST_INTERVIEW = "1033";
+    public static final String UPLOAD_DOWNLOAD_INTERVIEW_FILE = "1034";
+
+    // Módulo Selección (migrado de AutFMI): estadísticas de entrevistas/ingresos
+    public static final String SELECCION_ESTADISTICAS = "2049";
+    // Búsqueda de usuarios de selección (desglose por-usuario). Solo Admin (rol 1).
+    public static final String SELECCION_USUARIOS = "2050";
+
+    // ID_MAESTROS
+    public static final String TIPO_ENTREVISTA = "47";
+    // Fila por evento de correo: STRING1 = clave del evento, NUM1 = 1 envía / 0 no.
+    public static final String MAESTRO_NOTIFICACION_CORREO = "56";
+
+    // TIPO DE ENTREVISTA (valores string1 del maestro 47)
+    public static final String TIPO_ENTREVISTA_PRESENCIAL = "PRESENCIAL";
+    // Sin tilde a propósito: la comparación normaliza el texto del maestro, que
+    // puede venir como "TELEFÓNICA".
+    public static final String TIPO_ENTREVISTA_TELEFONICA = "TELEFONICA";
+
+    // TIPO DE ARCHIVO DE ENTREVISTA (maestro 45). El ICS es generado por el sistema.
+    public static final int TIPO_ARCHIVO_ENTREVISTA_ICS = 4;
+
     public static final String TXT_SEPARADOR = "=========================================";
 
     // RUTAS BASE DE REPOSITORIO
@@ -24,6 +50,9 @@ public class Constante {
     public static final String RUTA_REPOSITORIO_CV_EN_TALENTO = "repositorio/talento/[ID]/CV/EN/";
     public static final String RUTA_REPOSITORIO_CV_ES_TALENTO = "repositorio/talento/[ID]/CV/ES/";
     public static final String RUTA_REPOSITORIO_FIRMA_USUARIO = "repositorio/usuario/[ID]/firma/";
+    // Entrevistas: RUTA_REPOSITORIO + idEmpresa + RUTA_INTERVIEW (misma ruta que usaba AutFMI)
+    public static final String RUTA_REPOSITORIO = "repositorio/";
+    public static final String RUTA_INTERVIEW = "/interviews/[ID_INTERVIEW]/archivos/";
 
     // VALIDACIÓN DE ARCHIVOS DE TALENTO
     // Misma whitelist que EXT_ARCHIVO_POSTULANTE en FMI, sin zip (el talento no
